@@ -1,0 +1,124 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import api from "@/lib/api";
+import { Copy, Check } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+
+interface Banner {
+  _id: string;
+  message: string;
+  couponCode?: string;
+  visibility: "ALL" | "LOGGED_IN" | "LOGGED_OUT";
+}
+
+export default function TopBanner() {
+  const { isLoggedIn } = useAuth();
+  const [banners, setBanners] = useState<Banner[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  /* ================= FETCH ================= */
+
+  useEffect(() => {
+    api.get("/customer/top-banner/banner").then((res) => {
+      setBanners(res.data);
+    });
+  }, []);
+
+  /* ================= FILTER BY VISIBILITY ================= */
+
+  const visibleBanners = banners.filter((banner) => {
+    if (banner.visibility === "ALL") return true;
+    if (banner.visibility === "LOGGED_IN") return isLoggedIn;
+    if (banner.visibility === "LOGGED_OUT") return !isLoggedIn;
+    return false;
+  });
+
+  /* ================= ROTATION ================= */
+
+  useEffect(() => {
+    if (visibleBanners.length <= 1 || paused) return;
+
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) =>
+        prev === visibleBanners.length - 1 ? 0 : prev + 1
+      );
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [visibleBanners.length, paused]);
+
+  /* ================= COPY ================= */
+
+  const handleCopy = async (banner: Banner) => {
+    if (!banner.couponCode) return;
+
+    await navigator.clipboard.writeText(banner.couponCode);
+    setCopiedId(banner._id);
+
+    setTimeout(() => {
+      setCopiedId(null);
+    }, 2000);
+  };
+
+  if (!visibleBanners.length) return null;
+
+  return (
+    <div
+      className="relative bg-text-heading text-text-inverse text-xs overflow-hidden"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
+      {/* OUTER FIXED HEIGHT */}
+      <div className="relative h-10 overflow-hidden">
+        <div
+          className="absolute inset-0 transition-transform duration-700 ease-in-out"
+          style={{
+            transform: `translateY(-${currentIndex * 100}%)`,
+          }}
+        >
+          {visibleBanners.map((banner) => (
+            <div
+              key={banner._id}
+              className="h-10 w-full flex items-center justify-center gap-3 px-4"
+            >
+              <span className="text-center whitespace-nowrap">
+                {banner.message}
+              </span>
+
+              {banner.couponCode && (
+                <button
+                  onClick={() => handleCopy(banner)}
+                  className="flex items-center gap-1 underline font-medium hover:opacity-80 cursor-pointer transition"
+                >
+                  {copiedId === banner._id ? (
+                    <>
+                      Copied <Check size={14} />
+                    </>
+                  ) : (
+                    <>
+                      {banner.couponCode}
+                      <Copy size={14} />
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* PROGRESS BAR */}
+      {visibleBanners.length > 1 && !paused && (
+        <div className="absolute bottom-0 left-0 w-full h-0.5 bg-white/20">
+          <div
+            key={currentIndex}
+            className="h-full bg-white animate-progress"
+          />
+        </div>
+      )}
+    </div>
+  );
+}
