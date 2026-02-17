@@ -4,7 +4,7 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
 
     console.log(process.env.API_URL);
-    console.log("Hitting backend:", `${process.env.API_URL}/api/customer/products`);
+    console.log("Hitting backend:", `${process.env.API_URL}/customer/products`);
     console.log("==============");
 
     const res = await fetch(
