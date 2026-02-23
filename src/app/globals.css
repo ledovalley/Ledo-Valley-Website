@@ -78,3 +78,7 @@
 .animate-progress {
   animation: progress 4s linear forwards;
 }
+
+html, body {
+  overflow-x: hidden;
+}

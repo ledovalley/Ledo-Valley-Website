@@ -28,10 +28,9 @@ export default function ProductImages({
 
     const images = variant?.images || [];
 
-    // 👇 key-based reset trick
     return (
         <ImageGallery
-            key={selectedVariantId} // forces clean reset
+            key={selectedVariantId} // this already resets state
             images={images}
         />
     );
@@ -49,87 +48,177 @@ function ImageGallery({
 
     if (!images.length) return null;
 
-    const thumbnailCount = Math.max(images.length, 3);
-    const isManyImages = images.length > 3;
-
-    const visibleThumbnails = images.slice(0, 3);
-    const remainingCount = images.length - 3;
+    const visibleThumbnails = images.slice(0, 4);
+    const remainingCount = images.length - 4;
 
     return (
         <>
-            <div className="flex gap-6 items-start">
-                {/* Thumbnails */}
-                <div className="flex flex-col gap-4">
-                    {visibleThumbnails.map((img, i) => (
-                        <button
-                            key={i}
-                            onClick={() => setSelectedIndex(i)}
-                            className={`
-                relative 
-                ${isManyImages ? "w-20 h-20" : "w-28 h-28"}
-                rounded-xl overflow-hidden border transition
-                ${selectedIndex === i
-                                    ? "border-bg-dark"
-                                    : "border-border-muted"
-                                }
-              `}
-                        >
-                            <Image
-                                src={img.url}
-                                alt="Thumbnail"
-                                fill
-                                className="object-contain"
-                            />
-                        </button>
-                    ))}
-
-                    {/* Show +X only if more than 3 */}
-                    {remainingCount > 0 && (
-                        <button
-                            onClick={() => setShowModal(true)}
-                            className="w-20 h-20 rounded-xl border border-border-muted text-sm flex items-center justify-center"
-                        >
-                            +{remainingCount}
-                        </button>
-                    )}
+            <div
+                className="
+                    flex flex-col-reverse
+                    lg:flex-row
+                    gap-4 lg:gap-6
+                    items-start
+                    min-w-0
+                "
+            >
+                {/* ================= THUMBNAILS ================= */}
+                <div className="w-full min-w-0 lg:w-auto">
+                    <div
+                        className="
+                            flex lg:flex-col
+                            gap-3
+                            pb-2 lg:pb-0
+                            w-full
+                            min-w-0
+                        "
+                    >
+                        {visibleThumbnails.map((img, i) => (
+                            <button
+                                key={i}
+                                onClick={() => setSelectedIndex(i)}
+                                className={`
+                                    relative
+                                    w-20 h-20
+                                    sm:w-24 sm:h-24
+                                    shrink-0
+                                    rounded-xl overflow-hidden border transition
+                                    ${selectedIndex === i
+                                        ? "border-bg-dark"
+                                        : "border-border-muted hover:border-bg-dark/40"
+                                    }
+                                `}
+                            >
+                                <Image
+                                    src={img.url}
+                                    alt="Thumbnail"
+                                    fill
+                                    sizes="96px"
+                                    className="object-contain p-2"
+                                />
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
-                {/* Main Image */}
-                <div className="relative flex-1 aspect-square rounded-2xl overflow-hidden bg-bg-surface">
+                {/* ================= MAIN IMAGE ================= */}
+                <div
+                    onClick={() => setShowModal(true)}
+                    className="
+                        relative w-full
+                        aspect-square
+                        rounded-2xl
+                        overflow-hidden
+                        bg-bg-surface
+                        cursor-zoom-in
+                    "
+                >
                     <Image
-                        src={images[selectedIndex].url}
+                        src={images[selectedIndex]?.url}
                         alt="Product"
                         fill
-                        className="object-contain p-10"
+                        priority
+                        sizes="(max-width: 1024px) 100vw, 50vw"
+                        className="object-contain p-6 sm:p-8 lg:p-10"
                     />
                 </div>
             </div>
-            {/* Modal */}
+
+            {/* ================= MODAL ================= */}
             {showModal && (
-                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded-2xl max-w-4xl w-full relative">
+                <div
+                    className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                    onClick={() => setShowModal(false)}
+                >
+                    <div
+                        onClick={(e) => e.stopPropagation()}
+                        className="
+                            relative
+                            w-full max-w-5xl
+                            bg-bg-page
+                            rounded-2xl
+                            p-4 sm:p-6
+                            max-h-[95vh]
+                            flex flex-col
+                        "
+                    >
+                        {/* CLOSE BUTTON */}
                         <button
                             onClick={() => setShowModal(false)}
-                            className="absolute top-4 right-4"
+                            className="absolute top-4 cursor-pointer right-4 z-10 hover:bg-bg-surface/80 backdrop-blur rounded-full p-2 hover:opacity-70 transition"
                         >
-                            <X />
+                            <X size={20} />
                         </button>
 
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                            {images.map((img, i) => (
-                                <div
-                                    key={i}
-                                    className="relative aspect-square rounded-lg overflow-hidden"
-                                >
-                                    <Image
-                                        src={img.url}
-                                        alt="Gallery"
-                                        fill
-                                        className="object-contain"
-                                    />
-                                </div>
-                            ))}
+                        {/* MAIN IMAGE */}
+                        <div className="relative w-full flex-1 min-h-75 sm:min-h-100">
+                            <Image
+                                src={images[selectedIndex]?.url}
+                                alt="Product Preview"
+                                fill
+                                sizes="100vw"
+                                className="object-contain"
+                            />
                         </div>
+
+                        {/* NAVIGATION ARROWS */}
+                        {images.length > 1 && (
+                            <>
+                                <button
+                                    onClick={() =>
+                                        setSelectedIndex((prev) =>
+                                            prev === 0 ? images.length - 1 : prev - 1
+                                        )
+                                    }
+                                    className="absolute cursor-pointer left-4 top-1/2 -translate-y-1/2 bg-bg-surface/80 backdrop-blur p-2 rounded-full"
+                                >
+                                    ‹
+                                </button>
+
+                                <button
+                                    onClick={() =>
+                                        setSelectedIndex((prev) =>
+                                            prev === images.length - 1 ? 0 : prev + 1
+                                        )
+                                    }
+                                    className="absolute cursor-pointer right-4 top-1/2 -translate-y-1/2 bg-bg-surface/80 backdrop-blur p-2 rounded-full"
+                                >
+                                    ›
+                                </button>
+                            </>
+                        )}
+
+                        {/* THUMBNAILS */}
+                        {images.length > 1 && (
+                            <div className="flex gap-3 mt-6 overflow-x-auto pb-2">
+                                {images.map((img, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => setSelectedIndex(i)}
+                                        className={`
+                                            relative
+                                            w-16 h-16 sm:w-20 sm:h-20
+                                            shrink-0
+                                            rounded-xl
+                                            overflow-hidden
+                                            border
+                                            ${selectedIndex === i
+                                                ? "border-black"
+                                                : "border-gray-200"
+                                            }
+                                        `}
+                                    >
+                                        <Image
+                                            src={img.url}
+                                            alt="Thumbnail"
+                                            fill
+                                            sizes="80px"
+                                            className="object-contain p-1"
+                                        />
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

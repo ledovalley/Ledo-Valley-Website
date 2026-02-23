@@ -104,7 +104,7 @@ export default function CartDrawer({
 
           <button
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-black/5 transition"
+            className="p-2 rounded-full cursor-pointer hover:bg-black/5 transition"
           >
             <X size={18} />
           </button>
@@ -181,7 +181,7 @@ export default function CartDrawer({
                             )
                           }
                           disabled={isUpdating}
-                          className="text-gray-400 hover:text-red-500 transition disabled:opacity-40"
+                          className="text-gray-400 cursor-pointer hover:text-red-500 transition disabled:opacity-40"
                         >
                           <Trash2 size={16} />
                         </button>
@@ -202,7 +202,7 @@ export default function CartDrawer({
                               item.quantity <= 1 ||
                               isUpdating
                             }
-                            className="px-3 py-2 hover:bg-black/5 transition disabled:opacity-40"
+                            className="px-3 py-2 cursor-pointer hover:bg-black/5 transition disabled:opacity-40"
                           >
                             <Minus size={14} />
                           </button>
@@ -220,7 +220,7 @@ export default function CartDrawer({
                               )
                             }
                             disabled={isUpdating}
-                            className="px-3 py-2 hover:bg-black/5 transition disabled:opacity-40"
+                            className="px-3 py-2 cursor-pointer hover:bg-black/5 transition disabled:opacity-40"
                           >
                             <Plus size={14} />
                           </button>

@@ -94,8 +94,11 @@ export default function ProductReviews({
   };
 
   return (
-    <div className="container mx-auto px-6 py-16">
-
+    <div className="
+      max-w-7xl mx-auto 
+      px-4 sm:px-6 lg:px-8 
+      py-12 sm:py-16
+    ">
       {/* ===================== HEADER ===================== */}
 
       <h2 className="text-2xl font-playfair mb-2">

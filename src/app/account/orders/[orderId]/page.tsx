@@ -134,18 +134,17 @@ export default function OrderDetailsPage() {
     };
 
     return (
-        <div className="pt-3 space-y-10">
-
+        <div className="pt-3 space-y-6">
             {/* ================= BACK BUTTON ================= */}
             <button
                 onClick={() => router.push("/account/orders")}
-                className="text-sm text-gray-500 cursor-pointer hover:text-black mb-6 flex items-center gap-2"
+                className="hidden text-sm text-gray-500 cursor-pointer hover:text-black mb-6 md:flex items-center gap-2"
             >
                 ← Back to Orders
             </button>
 
             {/* ================= HEADER ================= */}
-            <div className="flex justify-between items-center border-b pb-6">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 border-b border-border-muted/20 pb-6">
                 <div>
                     <h1 className="text-2xl font-semibold">
                         Order #{order.orderNumber}
@@ -157,15 +156,15 @@ export default function OrderDetailsPage() {
                 </div>
 
                 <span
-                    className={`px-4 py-1 text-sm font-medium rounded-full ${getStatusStyle()}`}
+                    className={`px-4 py-1 w-fit text-sm font-medium rounded-full ${getStatusStyle()}`}
                 >
                     {order.status.replaceAll("_", " ")}
                 </span>
             </div>
 
             {/* ================= MODERN TIMELINE ================= */}
-            <div className="bg-bg-surface/80 border border-border-muted/30 rounded-3xl p-8">
-                <div className="relative flex items-center justify-between">
+            <div className="bg-bg-surface/80 border border-border-muted/30 rounded-3xl p-6 sm:p-8">
+                <div className="relative flex items-center justify-between text-xs sm:text-sm">
 
                     {/* Progress Line */}
                     <div className="absolute top-4 left-0 right-0 h-0.5 bg-gray-200" />
@@ -216,12 +215,12 @@ export default function OrderDetailsPage() {
             </div>
 
             {/* ================= MAIN GRID ================= */}
-            <div className="grid lg:grid-cols-3 gap-10">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
 
                 {/* LEFT SIDE */}
-                <div className="lg:col-span-2 space-y-8">
+                <div className="lg:col-span-2 space-y-6">
                     {/* SHIPPING */}
-                    <div className="bg-bg-surface/80 rounded-3xl p-8 border border-border-muted/30">
+                    <div className="bg-bg-surface/80 rounded-3xl p-6 sm:p-8 border border-border-muted/30">
                         <h2 className="text-lg font-semibold mb-4">
                             Shipping Address
                         </h2>
@@ -245,50 +244,78 @@ export default function OrderDetailsPage() {
                     </div>
 
                     {/* ITEMS */}
-                    <div className="bg-bg-surface/80 rounded-3xl p-8 border border-border-muted/30">
-                        <h2 className="text-lg font-semibold mb-6">
+                    <div className="bg-bg-surface/80 rounded-3xl p-6 sm:p-8 border border-border-muted/30">
+                        <h2 className="text-lg font-semibold">
                             Order Items
                         </h2>
 
                         {order.items.map((item, index) => (
                             <div
                                 key={index}
-                                className="flex gap-6 items-center py-6 border-b last:border-0 border-border-muted/20"
+                                className="
+                                    flex
+                                    gap-4 sm:gap-6
+                                    items-start sm:items-center
+                                    py-6
+                                    border-b last:border-0
+                                    border-border-muted/20
+                                "
                             >
-                                <div className="w-24 h-24 bg-white rounded-2xl overflow-hidden flex items-center justify-center border border-border-muted/20">
+                                {/* IMAGE */}
+                                <div
+                                    className="
+                                        relative
+                                        w-20 h-20 sm:w-24 sm:h-24
+                                        shrink-0
+                                        bg-white
+                                        rounded-2xl
+                                        overflow-hidden
+                                        border border-border-muted/20
+                                        "
+                                >
                                     {item.image ? (
                                         <Image
                                             src={item.image}
                                             alt={item.productName}
-                                            width={80}
-                                            height={80}
-                                            className="object-contain w-full h-full"
+                                            fill
+                                            sizes="96px"
+                                            className="object-contain p-2"
                                         />
                                     ) : (
-                                        <span className="text-xs text-gray-400">
+                                        <div className="flex items-center justify-center w-full h-full text-xs text-gray-400">
                                             No Image
-                                        </span>
+                                        </div>
                                     )}
                                 </div>
 
-                                <div className="flex-1">
-                                    <p className="font-medium">
-                                        {item.productName}
-                                    </p>
+                                {/* CONTENT */}
+                                <div className="flex-1 min-w-0">
 
-                                    {item.weight && (
-                                        <p className="text-sm text-gray-500">
-                                            {item.weight.value} {item.weight.unit}
-                                        </p>
-                                    )}
+                                    <div className="flex justify-between sm:items-start gap-2 sm:gap-4">
 
-                                    <p className="text-sm">
-                                        Qty: {item.quantity}
-                                    </p>
-                                </div>
+                                        {/* LEFT TEXT */}
+                                        <div className="min-w-0">
+                                            <p className="font-medium truncate">
+                                                {item.productName}
+                                            </p>
 
-                                <div className="text-right font-semibold">
-                                    ₹{item.subtotal}
+                                            {item.weight && (
+                                                <p className="text-sm text-gray-500">
+                                                    {item.weight.value} {item.weight.unit}
+                                                </p>
+                                            )}
+
+                                            <p className="text-sm">
+                                                Qty: {item.quantity}
+                                            </p>
+                                        </div>
+
+                                        {/* PRICE */}
+                                        <div className="font-semibold sm:text-right">
+                                            ₹{item.subtotal}
+                                        </div>
+
+                                    </div>
                                 </div>
                             </div>
                         ))}
@@ -296,10 +323,10 @@ export default function OrderDetailsPage() {
                 </div>
 
                 {/* RIGHT SIDE */}
-                <div className="space-y-8">
+                <div className="space-y-6 lg:sticky lg:top-28">
 
                     {/* SUMMARY */}
-                    <div className="bg-bg-surface/80 rounded-3xl p-8 border border-border-muted/30 space-y-4">
+                    <div className="bg-bg-surface/80 rounded-3xl p-6 sm:p-8 border border-border-muted/30 space-y-4">
                         <h2 className="text-lg font-semibold">
                             Payment Summary
                         </h2>

@@ -337,8 +337,8 @@ export default function CheckoutPage() {
 
             {/* MODAL */}
             {showAddressModal && (
-              <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
-                <div className="bg-bg-page rounded-2xl p-6 w-full max-w-2xl relative">
+              <div className="fixed inset-0 p-4 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+                <div className="bg-bg-page rounded-3xl p-6 w-full max-w-2xl relative">
 
                   <button
                     onClick={() => setShowAddressModal(false)}
@@ -612,7 +612,7 @@ export default function CheckoutPage() {
           </div>
 
           {/* Payment Summary */}
-          <div className="border p-6 rounded-xl h-fit space-y-5">
+          <div className="border p-6 rounded-3xl h-fit space-y-5">
             <h3 className="text-lg font-semibold">
               Payment Summary
             </h3>

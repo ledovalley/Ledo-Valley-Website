@@ -67,7 +67,7 @@ export default function TopBanner() {
 
   return (
     <div
-      className="relative bg-text-heading text-text-inverse text-xs overflow-hidden"
+      className="relative bg-bg-dark bg-text-heading text-text-on-dark text-xs overflow-hidden"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -115,7 +115,7 @@ export default function TopBanner() {
         <div className="absolute bottom-0 left-0 w-full h-0.5 bg-white/20">
           <div
             key={currentIndex}
-            className="h-full bg-white animate-progress"
+            className="h-full bg-bg-page/20 animate-progress"
           />
         </div>
       )}

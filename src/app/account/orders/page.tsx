@@ -89,9 +89,9 @@ export default function OrdersPage() {
   }
 
   return (
-    <div className="space-y-8">
-      <h1 className="text-3xl font-semibold mb-8">
-        My Orders
+    <div className="space-y-4">
+      <h1 className="text-3xl font-semibold font-playfair mb-6">
+        My Orders{" "}<span className="text-lg">{"("}{`${orders.length}`}{")"}</span>
       </h1>
 
       {orders.map((order) => (
@@ -100,33 +100,29 @@ export default function OrdersPage() {
           className="bg-bg-surface/80 rounded-3xl p-8 transition-all border border-border-default"
         >
           {/* ================= HEADER ================= */}
-          <div className="flex justify-between items-start mb-6">
-            <div className="">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 text-sm">
+
+            <div className="w-fit">
               <p className="text-xs text-text-secondary">Order Id</p>
-              <p className="text-sm font-semibold">
-                #{order.orderNumber}
-              </p>
+              <p className="font-semibold">#{order.orderNumber}</p>
             </div>
-            <div className="">
-              <p className="text-xs text-text-secondary">Placed On </p>
-              <p className="text-sm font-semibold">
+
+            <div className="text-right lg:text-left">
+              <p className="text-xs text-text-secondary">Placed On</p>
+              <p className="font-semibold">
                 {new Date(order.createdAt).toLocaleDateString()}
               </p>
             </div>
 
-            <div className="">
+            <div>
               <p className="text-xs text-text-secondary">Order Total</p>
-              <p className="text-lg font-semibold">
-                ₹{order.grandTotal}
-              </p>
+              <p className="font-semibold">₹{order.grandTotal}</p>
             </div>
 
-            <div className="">
-              <p className="text-xs text-text-secondary">Order Status</p>
+            <div className="text-right">
+              <p className="text-xs text-text-secondary">Status</p>
               <span
-                className={`px-4 py-1 text-xs font-medium rounded-full ${getStatusColor(
-                  order.status
-                )}`}
+                className={`px-3 py-1 text-xs font-medium rounded-full ${getStatusColor(order.status)}`}
               >
                 {order.status.replaceAll("_", " ")}
               </span>
@@ -134,30 +130,40 @@ export default function OrdersPage() {
           </div>
 
           {/* ================= PRODUCT STRIP ================= */}
-          <div className="flex items-center gap-4 mb-6 overflow-x-auto">
+          <div className="flex items-center gap-4 mb-6 overflow-x-auto pb-2">
             {order.items.slice(0, 4).map((item, index) => (
               <div
                 key={index}
-                className="w-20 h-20 bg-bg-surface border border-border-muted/20 rounded-2xl flex items-center justify-center"
+                className="
+        relative
+        w-20 h-20
+        shrink-0
+        bg-bg-surface
+        border border-border-muted/20
+        rounded-2xl
+        overflow-hidden
+      "
               >
                 {item.image ? (
                   <Image
                     src={item.image}
                     alt={item.productName}
-                    width={60}
-                    height={60}
+                    fill
+                    sizes="80px"
                     className="object-contain"
                   />
                 ) : (
-                  <span className="text-xs text-gray-400">
-                    No Image
-                  </span>
+                  <div className="flex items-center justify-center w-full h-full">
+                    <span className="text-xs text-gray-400">
+                      No Image
+                    </span>
+                  </div>
                 )}
               </div>
             ))}
 
             {order.items.length > 4 && (
-              <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center text-sm font-medium">
+              <div className="w-20 h-20 shrink-0 bg-gray-100 rounded-2xl flex items-center justify-center text-sm font-medium">
                 +{order.items.length - 4}
               </div>
             )}
