@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Facebook, Instagram, Twitter } from "lucide-react";
+import { Facebook, Instagram } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -7,7 +7,7 @@ export default function Footer() {
       {/* CONTAINED CONTENT */}
       <div className="container mx-auto px-6 pt-12">
         <div className="grid grid-cols-1 text-center sm:text-start md:grid-cols-4 gap-12 md:gap-24">
-          
+
           {/* BRAND */}
           <div>
             <h3 className="text-3xl md:text-4xl font-playfair uppercase mb-4">
@@ -22,10 +22,15 @@ export default function Footer() {
 
             {/* SOCIALS */}
             <div className="flex gap-4 mb-6 items-center justify-center sm:justify-start">
-              {[Instagram, Facebook, Twitter].map((Icon, i) => (
+              {[
+                { Icon: Instagram, link: "https://www.instagram.com/ledo_valley_tea/" },
+                { Icon: Facebook, link: "https://www.facebook.com/assamtea.official/" },
+              ].map(({ Icon, link }, i) => (
                 <a
                   key={i}
-                  href="#"
+                  href={link}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="
                     p-2 rounded-full
                     bg-(--color-bg-page)
@@ -82,10 +87,7 @@ export default function Footer() {
           className="
             font-extrabold tracking-tighter leading-none
             text-(--color-text-on-dark)/10
-            text-[0px]
-            sm:text-[120px]
-            md:text-[130px]
-            lg:text-[260px]
+            text-[clamp(60px,15vw,260px)]
           "
         >
           LEDO VALLEY

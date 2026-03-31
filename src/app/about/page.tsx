@@ -2,18 +2,29 @@
 
 import Link from "next/link";
 import { ShieldCheck, Globe, Leaf, Award } from "lucide-react";
+import heroImage from "@/assets/images/hero.jpg";
 
 export default function AboutPage() {
   return (
-    <main className="bg-background text-text-primary pt-32 pb-20">
+    <main className="bg-background text-text-primary pb-20">
 
       {/* ================= HERO ================= */}
-      <section className="bg-linear-to-b from-muted/30 to-background">
-        <div className="container mx-auto px-6 max-w-5xl text-center">
-          <h1 className="text-3xl md:text-5xl font-playfair font-semibold tracking-tight">
+      <section
+        className="relative h-[96vh] flex items-center justify-center bg-cover bg-center"
+        style={{
+          backgroundImage: `url(${heroImage.src})`,
+        }}
+      >
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-black/50" />
+
+        {/* Content */}
+        <div className="relative container mx-auto px-6 max-w-5xl text-center">
+          <h1 className="text-4xl sm:text-4xl md:text-5xl font-playfair font-semibold tracking-tight text-white">
             About Ledo Valley
           </h1>
-          <p className="mt-4 md:mt-6 text-base md:text-lg text-text-muted">
+
+          <p className="mt-4 md:mt-6 text-base md:text-lg text-white/90">
             Delivering quality, safety, and excellence from Assam to the world.
           </p>
         </div>

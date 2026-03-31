@@ -59,7 +59,7 @@ export default function Navbar({ onCartOpen }: NavbarProps) {
           : "absolute top-12 left-0 w-full"
         }`}
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+      <div className="max-w-lg md:max-w-3xl mx-auto px-4 sm:px-6">
         <div className="relative h-16 rounded-full px-6 sm:px-8 backdrop-blur-md bg-white/70 shadow-sm flex items-center justify-between">
 
           {/* LEFT (Desktop Links) */}
