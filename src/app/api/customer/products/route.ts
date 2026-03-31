@@ -3,12 +3,12 @@ import { NextResponse } from "next/server";
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
 
-    console.log(process.env.API_URL);
-    console.log("Hitting backend:", `${process.env.API_URL}/customer/products`);
+    console.log(process.env.NEXT_PUBLIC_API_URL);
+    console.log("Hitting backend:", `${process.env.NEXT_PUBLIC_API_URL}/customer/products`);
     console.log("==============");
 
     const res = await fetch(
-        `${process.env.API_URL}/customer/products?${searchParams.toString()}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/customer/products?${searchParams.toString()}`,
         {
             cache: "no-store",
         }

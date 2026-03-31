@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import api from "@/lib/api";
 import Image from "next/image";
+import { toast } from "sonner";
 
 interface OrderItem {
     productName: string;
@@ -51,6 +52,7 @@ export default function OrderDetailsPage() {
 
     const [order, setOrder] = useState<Order | null>(null);
     const [loading, setLoading] = useState(true);
+    const [retryLoading, setRetryLoading] = useState(false);
 
     useEffect(() => {
         const fetchOrder = async () => {
@@ -75,29 +77,53 @@ export default function OrderDetailsPage() {
         router.refresh();
     };
 
+    const isRetryAllowed = () => {
+        if (
+            order?.status !== "PAYMENT_FAILED" ||
+            order?.payment?.status !== "FAILED"
+        ) return false;
+
+        const createdAt = new Date(order.createdAt).getTime();
+        const now = Date.now();
+
+        const diff = now - createdAt;
+
+        const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
+
+        return diff <= TWENTY_FOUR_HOURS;
+    };
+
     const handleRetry = async () => {
-        if (!order) return;
+        if (!order || retryLoading) return;
 
-        const res = await api.post(
-            `/customer/orders/${order._id}/retry-payment`
-        );
+        try {
+            setRetryLoading(true);
 
-        const data = res.data.payu;
+            const res = await api.post(
+                `/customer/orders/${order._id}/retry-payment`
+            );
 
-        const form = document.createElement("form");
-        form.method = "POST";
-        form.action = "https://test.payu.in/_payment";
+            const data = res.data.payu;
 
-        Object.entries(data).forEach(([key, value]) => {
-            const input = document.createElement("input");
-            input.type = "hidden";
-            input.name = key;
-            input.value = String(value);
-            form.appendChild(input);
-        });
+            const form = document.createElement("form");
+            form.method = "POST";
+            form.action = "https://test.payu.in/_payment";
 
-        document.body.appendChild(form);
-        form.submit();
+            Object.entries(data).forEach(([key, value]) => {
+                const input = document.createElement("input");
+                input.type = "hidden";
+                input.name = key;
+                input.value = String(value);
+                form.appendChild(input);
+            });
+
+            document.body.appendChild(form);
+            form.submit();
+        } catch (error: unknown) {
+            toast.error(error instanceof Error ? error.message : "Failed to retry payment");
+        } finally {
+            setRetryLoading(false);
+        }
     };
 
     if (loading) {
@@ -362,18 +388,24 @@ export default function OrderDetailsPage() {
                     {/* ACTIONS */}
                     <div className="space-y-4">
 
-                        {order.status === "PAYMENT_FAILED" && (
+                        {isRetryAllowed() && (
                             <button
                                 onClick={handleRetry}
-                                className="w-full py-3 bg-bg-dark text-white rounded-full"
+                                disabled={retryLoading}
+                                className="w-full py-3 bg-bg-dark text-white rounded-full hover:bg-bg-dark/90 transition disabled:opacity-50"
                             >
-                                Retry Payment
+                                {retryLoading ? "Processing..." : "Retry Payment"}
                             </button>
                         )}
 
-                        {["PAYMENT_PENDING", "PAYMENT_SUCCESS"].includes(
-                            order.status
-                        ) && (
+                        {order.status === "PAYMENT_FAILED" && !isRetryAllowed() && (
+                            <div className="text-sm text-red-500 text-center">
+                                Retry window expired (24 hours)
+                            </div>
+                        )}
+
+                        {!["SHIPPED", "DELIVERED", "CANCELLED"].includes(order.status)
+                            && (
                                 <button
                                     onClick={handleCancel}
                                     className="w-full py-3 bg-bg-dark text-text-on-dark cursor-pointer rounded-full"

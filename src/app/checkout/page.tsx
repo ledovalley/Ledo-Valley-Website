@@ -65,7 +65,7 @@ export default function CheckoutPage() {
     0
   );
 
-  const GST_PERCENT = 8;
+  const GST_PERCENT = 18;
   const SHIPPING = 60;
 
   const discount = couponPreview?.discountAmount || 0;
@@ -626,13 +626,13 @@ export default function CheckoutPage() {
               {discount > 0 && (
                 <div className="flex justify-between text-green-600">
                   <span>Discount</span>
-                  <span>- ₹{discount.toFixed(0)}</span>
+                  <span>- ₹{discount.toFixed(2)}</span>
                 </div>
               )}
 
               <div className="flex justify-between">
-                <span>GST (8%)</span>
-                <span>₹{gstAmount.toFixed(0)}</span>
+                <span>GST (18%)</span>
+                <span>₹{gstAmount.toFixed(2)}</span>
               </div>
 
               <div className="flex justify-between">
@@ -642,7 +642,7 @@ export default function CheckoutPage() {
 
               <div className="border-t pt-3 flex justify-between font-bold text-lg">
                 <span>Grand Total</span>
-                <span>₹{grandTotal.toFixed(0)}</span>
+                <span>₹{grandTotal.toFixed(2)}</span>
               </div>
             </div>
 

@@ -1,8 +1,11 @@
 import axios from "axios";
 import { getCustomerToken, logoutCustomer } from "./customerAuth";
 
+console.log("API URL:", process.env.NEXT_PUBLIC_API_URL);
+
 const api = axios.create({
-  baseURL: "https://ledo-valley-backend.onrender.com/api",
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  // baseURL: "https://ledo-valley-backend.onrender.com/api",
   headers: {
     "Content-Type": "application/json",
   },
