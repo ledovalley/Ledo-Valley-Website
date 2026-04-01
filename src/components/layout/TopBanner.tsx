@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import api from "@/lib/api";
 import { Copy, Check } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
@@ -14,40 +14,72 @@ interface Banner {
 
 export default function TopBanner() {
   const { isLoggedIn } = useAuth();
+
   const [banners, setBanners] = useState<Banner[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   /* ================= FETCH ================= */
 
   useEffect(() => {
-    api.get("/customer/top-banner/banner").then((res) => {
-      setBanners(res.data);
-    });
+    let isMounted = true;
+
+    (async () => {
+      try {
+        const res = await api.get("/customer/top-banner/banner");
+        if (isMounted) setBanners(res.data || []);
+
+        console.log("Fetched banners:", res.data);
+      } catch (err) {
+        console.error("Banner fetch failed:", err);
+      }
+    })();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  /* ================= FILTER BY VISIBILITY ================= */
+  /* ================= FILTER ================= */
 
-  const visibleBanners = banners.filter((banner) => {
-    if (banner.visibility === "ALL") return true;
-    if (banner.visibility === "LOGGED_IN") return isLoggedIn;
-    if (banner.visibility === "LOGGED_OUT") return !isLoggedIn;
-    return false;
-  });
+  const visibleBanners = useMemo(() => {
+    return banners.filter((banner) => {
+      if (banner.visibility === "ALL") return true;
+      if (banner.visibility === "LOGGED_IN") return isLoggedIn;
+      if (banner.visibility === "LOGGED_OUT") return !isLoggedIn;
+      return false;
+    });
+  }, [banners, isLoggedIn]);
+
+  /* ================= SAFE INDEX ================= */
+
+  const safeIndex =
+    visibleBanners.length > 0
+      ? currentIndex % visibleBanners.length
+      : 0;
 
   /* ================= ROTATION ================= */
 
   useEffect(() => {
-    if (visibleBanners.length <= 1 || paused) return;
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
 
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) =>
-        prev === visibleBanners.length - 1 ? 0 : prev + 1
-      );
+    if (paused || visibleBanners.length < 2) return;
+
+    intervalRef.current = setInterval(() => {
+      setCurrentIndex((prev) => prev + 1); // 🔥 no reset here
     }, 4000);
 
-    return () => clearInterval(interval);
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
   }, [visibleBanners.length, paused]);
 
   /* ================= COPY ================= */
@@ -55,28 +87,36 @@ export default function TopBanner() {
   const handleCopy = async (banner: Banner) => {
     if (!banner.couponCode) return;
 
-    await navigator.clipboard.writeText(banner.couponCode);
-    setCopiedId(banner._id);
+    try {
+      await navigator.clipboard.writeText(banner.couponCode);
+      setCopiedId(banner._id);
 
-    setTimeout(() => {
-      setCopiedId(null);
-    }, 2000);
+      setTimeout(() => {
+        setCopiedId(null);
+      }, 2000);
+    } catch (err) {
+      console.error("Copy failed:", err);
+    }
   };
+
+  /* ================= EMPTY ================= */
 
   if (!visibleBanners.length) return null;
 
+  /* ================= UI ================= */
+
   return (
     <div
-      className="relative bg-bg-dark bg-text-heading text-text-on-dark text-xs overflow-hidden"
+      className="relative bg-bg-dark text-text-on-dark text-xs overflow-hidden"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      {/* OUTER FIXED HEIGHT */}
+      {/* SLIDER */}
       <div className="relative h-10 overflow-hidden">
         <div
           className="absolute inset-0 transition-transform duration-700 ease-in-out"
           style={{
-            transform: `translateY(-${currentIndex * 100}%)`,
+            transform: `translateY(-${safeIndex * 100}%)`,
           }}
         >
           {visibleBanners.map((banner) => (
@@ -114,7 +154,7 @@ export default function TopBanner() {
       {visibleBanners.length > 1 && !paused && (
         <div className="absolute bottom-0 left-0 w-full h-0.5 bg-white/20">
           <div
-            key={currentIndex}
+            key={safeIndex}
             className="h-full bg-bg-page/20 animate-progress"
           />
         </div>

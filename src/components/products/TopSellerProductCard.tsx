@@ -155,7 +155,7 @@ export default function ProductCard({
             alt={name}
             fill
             sizes="(max-width:768px) 100vw, 33vw"
-            className="object-contain p-6 transition-transform duration-300 group-hover:scale-105"
+            className="object-contain transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full items-center justify-center text-sm text-text-secondary">
