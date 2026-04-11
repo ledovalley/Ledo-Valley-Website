@@ -2,7 +2,12 @@
 
 import { X } from "lucide-react";
 
-const TEA_TYPES = ["Green", "Black", "Herbal"];
+const TEA_TYPES = [
+  "Black Tea",
+  "Green Tea",
+  "Organic Tea",
+  "Speciality Tea",
+];
 const WEIGHTS = [
   { label: "100g", value: 100 },
   { label: "250g", value: 250 },

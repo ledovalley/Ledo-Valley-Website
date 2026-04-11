@@ -5,8 +5,8 @@ import { ChevronDown } from "lucide-react";
 
 const FAQS = [
   {
-    question: "What is the difference between CTC & Green Tea?",
-    answer: "CTC tea is fully oxidized for a strong, robust flavor (ideal for milk tea), while Green Tea is unoxidized, keeping it light and rich in antioxidants."
+    question: "What is the difference between Black Tea and Green Tea?",
+    answer: "Black Tea is fully oxidized for a strong, robust flavor, while Green Tea is unoxidized, keeping it light and rich in antioxidants."
   },
   {
     question: "How much time does it take for delivery?",

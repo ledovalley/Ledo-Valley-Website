@@ -58,7 +58,7 @@ export default function ShopBanner() {
   const shouldAnimate = banners.length > 1;
 
   return (
-    <div className="w-full h-[96vh] relative overflow-hidden bg-gray-100">
+    <div className="w-full h-[72vh] relative overflow-hidden bg-gray-100">
       {!imageLoaded && shouldAnimate && (
         <div className="absolute inset-0 bg-gray-200 animate-pulse z-10" />
       )}

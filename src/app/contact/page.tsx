@@ -187,7 +187,7 @@ export default function ContactUsPage() {
                     <InfoCard
                         icon={<Mail className="w-6 h-6 text-primary" />}
                         title="Email"
-                        text="sales@ledovalley.com"
+                        text="contact@ledovalley.com"
                     />
                     <InfoCard
                         icon={<MapPin className="w-6 h-6 text-primary" />}

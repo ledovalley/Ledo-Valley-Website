@@ -12,7 +12,7 @@ export default function InfoSection() {
           {/* LEFT — TEXT */}
           <div className="text-left md:text-justify z-10">
             <h2 className="text-5xl sm:text-7xl lg:text-6xl xl:text-8xl font-semibold mb-6 lg:mb-8 font-playfair leading-tight">
-              Fresh from the Gardens
+              Fresh from the Garden
             </h2>
 
             <p className="text-text-secondary text-justify leading-relaxed mb-5 text-sm sm:text-base">

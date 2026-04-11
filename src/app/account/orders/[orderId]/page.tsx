@@ -40,7 +40,6 @@ interface Order {
     createdAt: string;
     items: OrderItem[];
     shippingAddress: ShippingAddress;
-    invoiceUrl?: string;
     payment: {
         status: string;
     };
@@ -123,6 +122,28 @@ export default function OrderDetailsPage() {
             toast.error(error instanceof Error ? error.message : "Failed to retry payment");
         } finally {
             setRetryLoading(false);
+        }
+    };
+
+    const handleDownloadInvoice = async () => {
+        if (!order) return;
+
+        try {
+            const res = await api.get(
+                `/customer/orders/${order._id}/invoice`,
+                { responseType: "blob" }
+            );
+            const url = window.URL.createObjectURL(res.data);
+            const link = document.createElement("a");
+
+            link.href = url;
+            link.download = `${order.orderNumber}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch {
+            toast.error("Failed to download invoice");
         }
     };
 
@@ -414,14 +435,13 @@ export default function OrderDetailsPage() {
                                 </button>
                             )}
 
-                        {order.invoiceUrl && (
-                            <a
-                                href={order.invoiceUrl}
-                                target="_blank"
-                                className="block text-center py-3 border rounded-full"
+                        {order.payment.status === "SUCCESS" && (
+                            <button
+                                onClick={handleDownloadInvoice}
+                                className="w-full text-center py-3 border rounded-full"
                             >
                                 Download Invoice
-                            </a>
+                            </button>
                         )}
                     </div>
                 </div>

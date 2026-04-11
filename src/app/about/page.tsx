@@ -142,7 +142,7 @@ export default function AboutPage() {
           </p>
 
           <Link
-            href="/products"
+            href="/shop"
             className="inline-block mt-6 px-8 py-3 rounded-full bg-bg-dark hover:bg-bg-dark/90 cursor-pointer text-text-on-dark text-sm font-medium hover:opacity-90 transition"
           >
             Explore Products

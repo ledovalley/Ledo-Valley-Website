@@ -65,15 +65,18 @@ export default function CheckoutPage() {
     0
   );
 
-  const GST_PERCENT = 18;
-  const SHIPPING = 60;
+  const GST_PERCENT = 5;
+  const FREE_SHIPPING_MIN_ORDER_VALUE = 500;
+  const FLAT_SHIPPING_CHARGE = 60;
 
   const discount = couponPreview?.discountAmount || 0;
 
   const taxableAmount = itemsTotal - discount;
   const gstAmount = Number(((taxableAmount * GST_PERCENT) / 100).toFixed(2));
+  const shippingAmount =
+    itemsTotal >= FREE_SHIPPING_MIN_ORDER_VALUE ? 0 : FLAT_SHIPPING_CHARGE;
   const grandTotal = Number(
-    (taxableAmount + gstAmount + SHIPPING).toFixed(2)
+    (taxableAmount + gstAmount + shippingAmount).toFixed(2)
   );
 
   const [isMounted, setIsMounted] = useState(false);
@@ -247,7 +250,15 @@ export default function CheckoutPage() {
             </div>
 
             {/* EMPTY STATE */}
-            {addresses.length === 0 && (
+            {loadingAddresses && (
+              <div className="border rounded-xl p-6 text-center bg-bg-surface">
+                <p className="text-sm text-gray-500">
+                  Loading addresses...
+                </p>
+              </div>
+            )}
+
+            {!loadingAddresses && addresses.length === 0 && (
               <div className="border rounded-xl p-6 text-center bg-bg-surface">
                 <p className="text-sm text-gray-500 mb-3">
                   No address found
@@ -631,14 +642,22 @@ export default function CheckoutPage() {
               )}
 
               <div className="flex justify-between">
-                <span>GST (18%)</span>
+                <span>GST (5%)</span>
                 <span>₹{gstAmount.toFixed(2)}</span>
               </div>
 
               <div className="flex justify-between">
                 <span>Shipping</span>
-                <span>₹{SHIPPING}</span>
+                <span>
+                  {shippingAmount === 0 ? "Free" : `₹${shippingAmount}`}
+                </span>
               </div>
+
+              {shippingAmount > 0 && (
+                <p className="text-xs text-text-secondary">
+                  Free shipping on orders ₹{FREE_SHIPPING_MIN_ORDER_VALUE} and above
+                </p>
+              )}
 
               <div className="border-t pt-3 flex justify-between font-bold text-lg">
                 <span>Grand Total</span>

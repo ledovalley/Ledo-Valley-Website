@@ -62,18 +62,34 @@ export default function useShopProducts({
       try {
         setLoading(true);
 
+        const params = new URLSearchParams();
+        params.set("page", String(page));
+        params.set("limit", String(limit));
+        params.set("sort", sort);
+
+        if (filters.available !== undefined) {
+          params.set("available", String(filters.available));
+        }
+
+        filters.teaTypes.forEach((teaType) => {
+          params.append("teaType", teaType);
+        });
+
+        if (filters.weight !== undefined) {
+          params.set("weight", String(filters.weight));
+          params.set("unit", "g");
+        }
+
+        if (filters.minPrice !== undefined) {
+          params.set("minPrice", String(filters.minPrice));
+        }
+
+        if (filters.maxPrice !== undefined) {
+          params.set("maxPrice", String(filters.maxPrice));
+        }
+
         const res = await api.get("/customer/products", {
-          params: {
-            page,
-            limit,
-            sort,
-            available: filters.available,
-            teaType: filters.teaTypes,
-            weight: filters.weight,
-            unit: filters.weight ? "g" : undefined,
-            minPrice: filters.minPrice,
-            maxPrice: filters.maxPrice,
-          },
+          params,
         });
 
         if (!active) return;

@@ -15,15 +15,15 @@ const teaTypes = [
         image: Green,
     },
     {
-        name: "CTC Tea",
+        name: "Black Tea",
         image: CTC,
     },
     {
-        name: "Masala Tea",
+        name: "Organic Tea",
         image: Masala,
     },
     {
-        name: "Exotic Tea",
+        name: "Speciality Tea",
         image: Exotic,
     },
 ];
@@ -32,7 +32,7 @@ export default function TeaTypesSection() {
     const router = useRouter();
 
     const handleClick = (type: string) => {
-        router.push(`/shop?teaType=${type}`);
+        router.push(`/shop?teaType=${encodeURIComponent(type)}`);
     };
 
     return (
