@@ -94,7 +94,7 @@ function ImageGallery({
                                     alt="Thumbnail"
                                     fill
                                     sizes="96px"
-                                    className="object-contain p-2"
+                                    className="object-contain"
                                 />
                             </button>
                         ))}
@@ -119,7 +119,7 @@ function ImageGallery({
                         fill
                         priority
                         sizes="(max-width: 1024px) 100vw, 50vw"
-                        className="object-contain p-6 sm:p-8 lg:p-10"
+                        className="object-contain"
                     />
                 </div>
             </div>
