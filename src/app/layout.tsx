@@ -9,6 +9,7 @@ import { Toaster } from "sonner";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
 import { UIProvider } from "@/context/UIContext";
+import { Analytics } from "@vercel/analytics/next"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -51,6 +52,7 @@ export default function RootLayout({
           bg-bg-page
         `}
       >
+        <Analytics />
         <AuthProvider>
           <CartProvider>
             <UIProvider>
