@@ -18,7 +18,7 @@ const FAQS = [
   },
   {
     question: "Who do I contact for Bulk Orders?",
-    answer: "For bulk or wholesale inquiries, please email bulk@ledovalley.in for our latest B2B price list."
+    answer: "For bulk or wholesale inquiries, please email contact@ledovalley.in for our latest B2B price list."
   },
   {
     question: "What are the accepted payment methods?",

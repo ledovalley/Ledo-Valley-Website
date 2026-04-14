@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ShieldCheck, Globe, Leaf, Award } from "lucide-react";
-import heroImage from "@/assets/images/hero.jpg";
+import heroImage from "@/assets/images/aboutUsBanner.webp";
 
 export default function AboutPage() {
   return (
@@ -10,7 +10,7 @@ export default function AboutPage() {
 
       {/* ================= HERO ================= */}
       <section
-        className="relative h-[96vh] flex items-center justify-center bg-cover bg-center"
+        className="relative h-[76vh] flex items-center justify-center bg-cover bg-center"
         style={{
           backgroundImage: `url(${heroImage.src})`,
         }}
@@ -37,18 +37,16 @@ export default function AboutPage() {
             Our Story
           </h2>
           <p>
-            Ledo Valley Consumer Products was founded with a commitment to
-            delivering premium-quality tea and consumer products while
-            maintaining the highest standards of food safety and hygiene.
+            Rooted in the rich tea heritage of Assam, Ledo Valley was born with a simple vision—to bring pure, authentic, and high-quality tea from the source directly to your cup.
           </p>
           <p>
-            Based in Tinsukia, Assam — a region globally renowned for its tea —
-            we combine traditional expertise with modern manufacturing practices
-            to ensure that every product meets rigorous quality benchmarks.
+            Since 1968, we have been dedicated to delivering tea that reflects the true essence of Assam—bold in taste, rich in color, and refreshing in every sip. With decades of experience and a deep connection to tea craftsmanship, we carefully select and blend our teas to ensure consistent quality and freshness.
           </p>
           <p>
-            Our goal is not only to serve customers across India but to build a
-            globally recognized brand rooted in trust, transparency, and excellence.
+            At Ledo Valley, tea is more than just a beverage—it’s a daily ritual, a moment of connection, and a source of comfort. From homes to tea stalls, we are proud to be a part of millions of chai moments across generations.
+          </p>
+          <p className="">
+            Crafted with care. Served with trust. Enjoyed by millions.
           </p>
         </div>
       </section>

@@ -3,10 +3,10 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-import Green from "@/assets/images/tea/green.jpg";
-import CTC from "@/assets/images/tea/ctc.jpg";
-import Masala from "@/assets/images/tea/masala.jpg";
-import Exotic from "@/assets/images/tea/exotic.jpg";
+import Green from "@/assets/images/tea/green.webp";
+import CTC from "@/assets/images/tea/ctc.webp";
+import Masala from "@/assets/images/tea/masala.webp";
+import Exotic from "@/assets/images/tea/exotic.webp";
 import Link from "next/link";
 
 const teaTypes = [
@@ -54,8 +54,8 @@ export default function TeaTypesSection() {
                                 <Image
                                     src={tea.image}
                                     alt={tea.name}
-                                    width={100}
-                                    height={100}
+                                    width={800}
+                                    height={800}
                                     className="w-full object-cover"
                                 />
                             </div>

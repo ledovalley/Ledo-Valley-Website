@@ -55,7 +55,7 @@ function RatingStars({
                 const isHalf = rating >= star - 0.5 && rating < star;
 
                 return (
-                    <span key={star} className="relative w-4 h-4">
+                    <span key={star} className="relative w-4 h-4 z-0">
                         <span className="absolute inset-0 text-gray-300">★</span>
                         {isFull && (
                             <span className="absolute inset-0 text-yellow-400">★</span>

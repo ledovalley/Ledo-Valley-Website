@@ -391,7 +391,7 @@ export default function OrderDetailsPage() {
                         )}
 
                         <div className="flex justify-between text-sm">
-                            <span>GST</span>
+                            <span>GST included</span>
                             <span>₹{order.gstAmount}</span>
                         </div>
 

@@ -72,11 +72,13 @@ export default function CheckoutPage() {
   const discount = couponPreview?.discountAmount || 0;
 
   const taxableAmount = itemsTotal - discount;
-  const gstAmount = Number(((taxableAmount * GST_PERCENT) / 100).toFixed(2));
+  const gstAmount = Number(
+    (taxableAmount - taxableAmount / (1 + GST_PERCENT / 100)).toFixed(2)
+  );
   const shippingAmount =
     itemsTotal >= FREE_SHIPPING_MIN_ORDER_VALUE ? 0 : FLAT_SHIPPING_CHARGE;
   const grandTotal = Number(
-    (taxableAmount + gstAmount + shippingAmount).toFixed(2)
+    (taxableAmount + shippingAmount).toFixed(2)
   );
 
   const [isMounted, setIsMounted] = useState(false);
@@ -642,9 +644,13 @@ export default function CheckoutPage() {
               )}
 
               <div className="flex justify-between">
-                <span>GST (5%)</span>
+                <span>GST included (5%)</span>
                 <span>₹{gstAmount.toFixed(2)}</span>
               </div>
+
+              <p className="text-xs text-text-secondary">
+                Product prices are inclusive of 5% GST.
+              </p>
 
               <div className="flex justify-between">
                 <span>Shipping</span>
