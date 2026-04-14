@@ -1,7 +1,9 @@
+// Metadata is provided via app/contact/layout.tsx
 "use client";
 
 import { useState } from "react";
 import { Mail, Phone, MapPin, Clock } from "lucide-react";
+
 
 export default function ContactUsPage() {
     const [formData, setFormData] = useState({

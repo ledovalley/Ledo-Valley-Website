@@ -41,7 +41,7 @@ interface Coupon {
 /* ================= COMPONENT ================= */
 
 export default function CheckoutPage() {
-  const { cart, updateQuantity, removeFromCart } = useCart();
+  const { cart, updateQuantity, removeFromCart, refreshCart } = useCart();
   const { isLoggedIn, token } = useAuth();
   const router = useRouter();
 
@@ -208,11 +208,19 @@ export default function CheckoutPage() {
         )}`
       );
     } catch (error: unknown) {
-      const axiosError = error as AxiosError<{ message: string }>;
+      const axiosError = error as AxiosError<{
+        message: string;
+        cartUpdated?: boolean;
+      }>;
 
-      toast.error(
-        axiosError.response?.data?.message || "Checkout failed"
-      );
+      const message =
+        axiosError.response?.data?.message || "Checkout failed";
+
+      toast.error(message);
+
+      if (axiosError.response?.data?.cartUpdated) {
+        await refreshCart();
+      }
     } finally {
       setLoading(false);
     }

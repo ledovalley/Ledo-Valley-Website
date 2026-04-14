@@ -1,204 +1,194 @@
-"use client";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import ProductPageClient from "./ProductPageClient";
 
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
-import api from "@/lib/api";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://api.ledovalley.com/api";
 
-import ProductImages from "@/components/products/ProductImages";
-import ProductInfo from "@/components/products/ProductInfo";
-import ProductReviews from "@/components/products/ProductReviews";
-import { AxiosError } from "axios";
+import { Product, Variant, Review } from "@/types/product-api";
 
-/* ================= TYPES ================= */
 
-interface Variant {
-  _id: string;
-  weight: { value: number; unit: string };
-  sellingPrice: number;
-  finalPrice: number;
-  stock: number;
-  images: { url: string }[];
+async function fetchProduct(slug: string): Promise<Product | null> {
+  try {
+    const res = await fetch(`${API_BASE}/customer/products/${slug}`, {
+      next: { revalidate: 3600 }, // ISR: revalidate every hour
+    });
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
 }
 
-interface Review {
-  _id: string;
-  customerName: string;
-  rating: number;
-  review: string;
-  createdAt: string;
+/* =====================================================
+   GENERATE STATIC PARAMS (pre-render all product pages)
+===================================================== */
+export async function generateStaticParams() {
+  try {
+    const res = await fetch(`${API_BASE}/customer/products?limit=200&status=ACTIVE`, {
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.products || []).map((p: { slug: string }) => ({ slug: p.slug }));
+  } catch {
+    return [];
+  }
 }
 
-interface Product {
-  _id: string;
-  name: string;
-  slug: string;
-  description: string;
-  bestFor: string[];
-  rating: number;
-  reviewCount: number;
-  variants: Variant[];
-  reviews: Review[];
-}
+/* =====================================================
+   GENERATE METADATA — Dynamic per-product SEO
+===================================================== */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const product = await fetchProduct(slug);
 
-interface EligibleOrder {
-  orderId: string;
-  orderNumber: string;
-}
-
-/* ================= PAGE ================= */
-
-export default function SingleProductPage() {
-  const params = useParams();
-  const slug = Array.isArray(params.slug)
-    ? params.slug[0]
-    : params.slug;
-
-  const [product, setProduct] = useState<Product | null>(null);
-  const [error, setError] = useState(false);
-  const [selectedVariantId, setSelectedVariantId] = useState<string>("");
-  const [eligibleOrders, setEligibleOrders] = useState<EligibleOrder[]>([]);
-  const [canReview, setCanReview] = useState(false);
-
-  useEffect(() => {
-    if (!slug) return;
-
-    let cancelled = false;
-
-    async function fetchProduct() {
-      try {
-        const res = await api.get(`/customer/products/${slug}`);
-        if (cancelled) return;
-
-        const data: Product = res.data;
-
-        setProduct(data);
-        setSelectedVariantId(data.variants[0]?._id || "");
-
-        try {
-          const eligibilityRes = await api.get(
-            `/customer/products/${data._id}/review-eligibility`
-          );
-
-          if (cancelled) return;
-
-          setCanReview(eligibilityRes.data.eligible);
-          setEligibleOrders(eligibilityRes.data.orders || []);
-        } catch {
-          if (!cancelled) setCanReview(false);
-        }
-      } catch {
-        if (!cancelled) {
-          setError(true);
-        }
-      }
-    }
-
-    fetchProduct();
-
-    return () => {
-      cancelled = true;
+  if (!product) {
+    return {
+      title: "Product Not Found",
+      description: "The product you are looking for does not exist.",
+      robots: { index: false, follow: false },
     };
-  }, [slug]);
-
-  /* ================= LOADING ================= */
-
-  if (!product && !error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-text-secondary">
-        Loading product...
-      </div>
-    );
   }
 
-  /* ================= ERROR ================= */
+  const firstImage = product.variants?.[0]?.images?.[0]?.url;
+  const cheapestVariant = product.variants?.reduce(
+    (min, v) => (v.finalPrice < (min?.finalPrice ?? Infinity) ? v : min),
+    product.variants[0]
+  );
 
-  if (error || !product) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-text-secondary">
-        Product not found.
-      </div>
-    );
-  }
+  const priceStr = cheapestVariant
+    ? `Starting at ₹${cheapestVariant.finalPrice}`
+    : "";
 
-  /* ================= REVIEW SUBMIT ================= */
+  const title = `${product.name} | Buy Online`;
+  const description = `${product.name} — Premium ${product.teaType} from Ledo Valley. ${priceStr}. ${product.bestFor?.length
+      ? `Best for: ${product.bestFor.slice(0, 3).join(", ")}.`
+      : ""
+    } Shop authentic Assam tea online.`;
 
-  const handleReviewSubmit = async (
-    rating: number,
-    review: string,
-    orderId: string
-  ) => {
-    try {
-      await api.post(`/customer/products/${product._id}/review`, {
-        rating,
-        review,
-        orderId,
-      });
+  const canonicalUrl = `https://www.ledovalley.com/shop/${slug}`;
 
-      const updatedProduct = await api.get(
-        `/customer/products/${product.slug}`
-      );
+  return {
+    title,
+    description,
+    alternates: { canonical: canonicalUrl },
+    openGraph: {
+      title: `${product.name} | Ledo Valley`,
+      description,
+      url: canonicalUrl,
+      type: "website",
+      images: firstImage
+        ? [{ url: firstImage, width: 800, height: 800, alt: product.name }]
+        : [{ url: "/og-banner.jpg", width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${product.name} | Ledo Valley`,
+      description,
+      images: firstImage ? [firstImage] : ["/og-banner.jpg"],
+    },
+  };
+}
 
-      setProduct(updatedProduct.data);
-      setCanReview(false);
-      setEligibleOrders([]);
-    } catch (error) {
-      const axiosError = error as AxiosError<{
-        message?: string;
-      }>;
+/* =====================================================
+   PAGE — Server Component Shell
+===================================================== */
+export default async function SingleProductPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const product = await fetchProduct(slug);
 
-      alert(
-        axiosError.response?.data?.message ||
-        "Failed to submit review"
-      );
-    }
+  if (!product) return notFound();
+
+  // JSON-LD Product Schema for Google Rich Results (star ratings in search!)
+  const cheapestVariant = product.variants?.reduce(
+    (min, v) => (v.finalPrice < (min?.finalPrice ?? Infinity) ? v : min),
+    product.variants[0]
+  );
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.description?.replace(/<[^>]+>/g, "") || product.name,
+    brand: {
+      "@type": "Brand",
+      name: "Ledo Valley",
+    },
+    url: `https://www.ledovalley.com/shop/${product.slug}`,
+    image: product.variants.flatMap((v) => v.images.map((img) => img.url)),
+    ...(product.reviewCount > 0 && {
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: product.rating.toFixed(1),
+        reviewCount: product.reviewCount,
+        bestRating: "5",
+        worstRating: "1",
+      },
+    }),
+    ...(cheapestVariant && {
+      offers: {
+        "@type": "Offer",
+        priceCurrency: "INR",
+        price: cheapestVariant.finalPrice.toString(),
+        availability:
+          cheapestVariant.stock > 0
+            ? "https://schema.org/InStock"
+            : "https://schema.org/OutOfStock",
+        seller: {
+          "@type": "Organization",
+          name: "Ledo Valley",
+        },
+        url: `https://www.ledovalley.com/shop/${product.slug}`,
+      },
+    }),
+    ...(product.reviews?.length > 0 && {
+      review: product.reviews.slice(0, 5).map((r) => ({
+        "@type": "Review",
+        reviewRating: {
+          "@type": "Rating",
+          ratingValue: r.rating,
+          bestRating: "5",
+        },
+        author: {
+          "@type": "Person",
+          name: r.customerName,
+        },
+        reviewBody: r.review,
+        datePublished: r.createdAt,
+      })),
+    }),
   };
 
-  /* ================= RENDER ================= */
+  // Breadcrumb JSON-LD
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://www.ledovalley.com" },
+      { "@type": "ListItem", position: 2, name: "Shop", item: "https://www.ledovalley.com/shop" },
+      { "@type": "ListItem", position: 3, name: product.name, item: `https://www.ledovalley.com/shop/${product.slug}` },
+    ],
+  };
 
   return (
-    <div className="bg-bg-page">
-
-      {/* ================= PRODUCT SECTION ================= */}
-      <div
-        className="
-          max-w-7xl mx-auto
-          px-4 sm:px-6 lg:px-8
-          pt-24 sm:pt-28 lg:pt-36
-          pb-12 sm:pb-16
-          grid grid-cols-1 lg:grid-cols-12
-          gap-8 lg:gap-16
-          min-w-0
-        "
-      >
-        {/* Images */}
-        <div className="col-span-12 lg:col-span-6 lg:sticky lg:top-28 h-fit">
-          <ProductImages
-            variants={product.variants}
-            selectedVariantId={selectedVariantId}
-          />
-        </div>
-
-        {/* Info */}
-        <div className="col-span-12 lg:col-span-6">
-          <ProductInfo
-            product={product}
-            selectedVariantId={selectedVariantId}
-            onVariantChange={setSelectedVariantId}
-          />
-        </div>
-      </div>
-
-      {/* ================= REVIEWS ================= */}
-      <div className="border-t border-border-muted/20 mt-10 sm:mt-16">
-        <ProductReviews
-          reviews={product.reviews}
-          rating={product.rating}
-          reviewCount={product.reviewCount}
-          canReview={canReview}
-          eligibleOrders={eligibleOrders}
-          onSubmit={handleReviewSubmit}
-        />
-      </div>
-    </div>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <ProductPageClient product={product} />
+    </>
   );
 }

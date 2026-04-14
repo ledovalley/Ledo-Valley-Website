@@ -1,8 +1,20 @@
-"use client";
-
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ShieldCheck, Globe, Leaf, Award } from "lucide-react";
 import heroImage from "@/assets/images/aboutUsBanner.webp";
+
+export const metadata: Metadata = {
+  title: "About Ledo Valley | Premium Assam Tea Brand Since 1968",
+  description:
+    "Learn about Ledo Valley — a premium Assam tea brand since 1968. Rooted in quality, safety, and the rich heritage of Assam's tea gardens in Tinsukia.",
+  alternates: { canonical: "https://www.ledovalley.com/about" },
+  openGraph: {
+    title: "About Ledo Valley | Premium Assam Tea Since 1968",
+    description: "Rooted in the rich tea heritage of Assam since 1968. Learn about our story, mission, and commitment to quality.",
+    url: "https://www.ledovalley.com/about",
+    images: [{ url: "/og-banner.jpg", width: 1200, height: 630 }],
+  },
+};
 
 export default function AboutPage() {
   return (

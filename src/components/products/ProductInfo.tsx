@@ -6,32 +6,8 @@ import { useUI } from "@/context/UIContext";
 import { MinusIcon, PlusIcon } from "lucide-react";
 import { useState, useMemo } from "react";
 
-interface Variant {
-    _id: string;
-    weight: {
-        value: number;
-        unit: string;
-    };
-    sellingPrice: number;
-    finalPrice: number;
-    discount?: {
-        type: "PERCENT" | "FLAT";
-        value?: number;
-    };
-    stock: number;
-    images?: { url: string }[];
-}
+import { Product } from "@/types/product-api";
 
-interface Product {
-    _id: string;
-    slug: string;
-    name: string;
-    description: string;
-    bestFor: string[];
-    rating: number;
-    reviewCount: number;
-    variants: Variant[];
-}
 
 interface Props {
     product: Product;
@@ -163,9 +139,10 @@ export default function ProductInfo({
                     </div>
 
                     {/* Description */}
-                    <p className="text-sm sm:text-base text-text-secondary leading-relaxed max-w-xl">
-                        {product.description}
-                    </p>
+                    <div
+                        className="text-sm sm:text-base text-text-secondary leading-relaxed max-w-xl prose prose-sm sm:prose-base focus:outline-none"
+                        dangerouslySetInnerHTML={{ __html: product.description }}
+                    />
 
                     {/* Best For */}
                     {product.bestFor?.length > 0 && (

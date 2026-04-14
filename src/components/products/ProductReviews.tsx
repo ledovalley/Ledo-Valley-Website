@@ -3,13 +3,8 @@
 import { useState } from "react";
 import { Check, Star } from "lucide-react";
 
-interface Review {
-  _id: string;
-  customerName: string;
-  rating: number;
-  review: string;
-  createdAt: string;
-}
+import { Review } from "@/types/product-api";
+
 
 interface EligibleOrder {
   orderId: string;
