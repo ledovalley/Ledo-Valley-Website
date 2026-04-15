@@ -16,6 +16,7 @@ import {
   Clock3,
 } from "lucide-react";
 import { toast } from "sonner";
+import { PAYU_URL } from "@/lib/constants";
 
 interface Weight {
   value: number;
@@ -71,7 +72,7 @@ export default function OrdersPage() {
 
       const form = document.createElement("form");
       form.method = "POST";
-      form.action = "https://test.payu.in/_payment";
+      form.action = PAYU_URL; // ✅ Dynamic URL (Live/Test)
 
       Object.entries(data).forEach(([key, value]) => {
         const input = document.createElement("input");

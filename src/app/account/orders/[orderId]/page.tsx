@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import api from "@/lib/api";
 import Image from "next/image";
 import { toast } from "sonner";
+import { PAYU_URL } from "@/lib/constants";
 
 interface OrderItem {
     productName: string;
@@ -109,7 +110,7 @@ export default function OrderDetailsPage() {
 
             const form = document.createElement("form");
             form.method = "POST";
-            form.action = "https://test.payu.in/_payment";
+            form.action = PAYU_URL; // ✅ Dynamic URL (Live/Test)
 
             Object.entries(data).forEach(([key, value]) => {
                 const input = document.createElement("input");

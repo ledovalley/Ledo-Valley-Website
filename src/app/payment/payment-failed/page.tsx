@@ -10,6 +10,7 @@ import {
   ShoppingBag,
   CreditCard
 } from "lucide-react";
+import { PAYU_URL } from "@/lib/constants";
 import { toast } from "sonner";
 
 /* ================= TYPES ================= */
@@ -81,7 +82,7 @@ function PaymentFailedContent() {
 
       const form = document.createElement("form");
       form.method = "POST";
-      form.action = "https://test.payu.in/_payment";
+      form.action = PAYU_URL; // ✅ Dynamic URL
 
       Object.entries(data).forEach(([key, value]) => {
         const input = document.createElement("input");

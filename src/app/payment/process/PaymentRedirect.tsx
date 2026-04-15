@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import { PAYU_URL } from "@/lib/constants";
 
 export default function PaymentRedirect() {
   const searchParams = useSearchParams();
@@ -14,7 +15,7 @@ export default function PaymentRedirect() {
 
     const form = document.createElement("form");
     form.method = "POST";
-    form.action = "https://test.payu.in/_payment";
+    form.action = PAYU_URL;
 
     Object.entries(data).forEach(([key, value]) => {
       const input = document.createElement("input");

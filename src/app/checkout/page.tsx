@@ -2,6 +2,7 @@
 
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
+import { PAYU_URL } from "@/lib/constants";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import api from "@/lib/api";
@@ -191,7 +192,7 @@ export default function CheckoutPage() {
 
       const form = document.createElement("form");
       form.method = "POST";
-      form.action = "https://test.payu.in/_payment";
+      form.action = PAYU_URL; // ✅ Use dynamic URL
 
       Object.entries(data).forEach(([key, value]) => {
         const input = document.createElement("input");
