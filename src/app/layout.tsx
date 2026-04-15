@@ -11,6 +11,7 @@ import { CartProvider } from "@/context/CartContext";
 import { UIProvider } from "@/context/UIContext";
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import InitialLoader from "@/components/layout/InitialLoader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -116,13 +117,15 @@ export default function RootLayout({
         <SpeedInsights />
         <Analytics />
         <AuthProvider>
-          <CartProvider>
-            <UIProvider>
-              <Toaster position="top-right" richColors />
-              <AppShell>{children}</AppShell>
-              <Footer />
-            </UIProvider>
-          </CartProvider>
+          <InitialLoader>
+            <CartProvider>
+              <UIProvider>
+                <Toaster position="top-right" richColors />
+                <AppShell>{children}</AppShell>
+                <Footer />
+              </UIProvider>
+            </CartProvider>
+          </InitialLoader>
         </AuthProvider>
       </body>
     </html>

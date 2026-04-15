@@ -82,8 +82,30 @@
   }
 }
 
+@keyframes shimmer {
+  0% {
+    background-position: -468px 0;
+  }
+  100% {
+    background-position: 468px 0;
+  }
+}
+
 .animate-progress {
   animation: progress 4s linear forwards;
+}
+
+.animate-shimmer {
+  animation: shimmer 1.5s linear infinite forwards;
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.05),
+    rgba(0, 0, 0, 0.1) 20%,
+    rgba(0, 0, 0, 0.05) 40%,
+    rgba(0, 0, 0, 0.05) 100%
+  );
+  background-size: 800px 104px;
+  position: relative;
 }
 
 html,
