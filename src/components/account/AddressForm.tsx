@@ -4,6 +4,7 @@ import { useState } from "react";
 import api from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
+import { CheckCircle2, Loader2, MapPinHouse } from "lucide-react";
 
 export interface AddressInput {
   name: string;
@@ -48,11 +49,7 @@ export default function AddressForm({
 
   const [saving, setSaving] = useState(false);
 
-  /* ================= HANDLE CHANGE ================= */
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
 
     setForm((prev) => ({
@@ -61,46 +58,40 @@ export default function AddressForm({
         type === "checkbox" ? checked : value,
     }));
 
-    // Clear error when typing
     setErrors((prev) => ({
       ...prev,
       [name]: "",
     }));
   };
 
-  /* ================= VALIDATION ================= */
-
   const validate = () => {
     const newErrors: typeof errors = {};
 
-    if (!form.name.trim())
-      newErrors.name = "Full name is required";
+    if (!form.name.trim()) newErrors.name = "Full name is required";
 
-    if (!form.phone.trim())
+    if (!form.phone.trim()) {
       newErrors.phone = "Phone number is required";
-    else if (!/^[6-9]\d{9}$/.test(form.phone))
+    } else if (!/^[6-9]\d{9}$/.test(form.phone)) {
       newErrors.phone = "Enter valid 10 digit phone";
+    }
 
-    if (!form.addressLine1.trim())
-      newErrors.addressLine1 = "Address Line 1 is required";
+    if (!form.addressLine1.trim()) {
+      newErrors.addressLine1 = "Address line 1 is required";
+    }
 
-    if (!form.city.trim())
-      newErrors.city = "City is required";
+    if (!form.city.trim()) newErrors.city = "City is required";
 
-    if (!form.state.trim())
-      newErrors.state = "State is required";
+    if (!form.state.trim()) newErrors.state = "State is required";
 
-    if (!form.pincode.trim())
+    if (!form.pincode.trim()) {
       newErrors.pincode = "Pincode is required";
-    else if (!/^\d{6}$/.test(form.pincode))
+    } else if (!/^\d{6}$/.test(form.pincode)) {
       newErrors.pincode = "Enter valid 6 digit pincode";
+    }
 
     setErrors(newErrors);
-
     return Object.keys(newErrors).length === 0;
   };
-
-  /* ================= SUBMIT ================= */
 
   const handleSubmit = async () => {
     if (!token) return;
@@ -123,18 +114,14 @@ export default function AddressForm({
       };
 
       if (addressId) {
-        await api.put(
-          `/customer/addresses/${addressId}`,
-          payload,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        await api.put(`/customer/addresses/${addressId}`, payload, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         toast.success("Address updated");
       } else {
-        await api.post(
-          "/customer/addresses",
-          payload,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        await api.post("/customer/addresses", payload, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         toast.success("Address added");
       }
 
@@ -146,16 +133,24 @@ export default function AddressForm({
     }
   };
 
-  /* ================= INPUT RENDER ================= */
+  const inputBase =
+    "w-full rounded-2xl border bg-bg-page px-4 py-3 text-sm text-text-primary outline-none transition placeholder:text-text-secondary/70 focus:border-border-muted focus:ring-2 focus:ring-highlight/30";
 
   const renderInput = (
     label: string,
     name: keyof AddressInput,
-    type: string = "text"
+    type: string = "text",
+    required: boolean = true,
+    placeholder?: string
   ) => (
-    <div className="space-y-1">
-      <label className="text-sm font-medium">
-        {label} <span className="text-red-500">*</span>
+    <div className="space-y-1.5">
+      <label className="block text-sm font-medium text-text-primary">
+        {label}
+        {required ? (
+          <span className="ml-1 text-warning">*</span>
+        ) : (
+          <span className="ml-1 text-text-secondary">(Optional)</span>
+        )}
       </label>
 
       <input
@@ -163,61 +158,120 @@ export default function AddressForm({
         name={name}
         value={String(form[name] ?? "")}
         onChange={handleChange}
-        className={`w-full border rounded-full px-4 py-2 transition
-          ${
-            errors[name]
-              ? "border-red-500 focus:ring-red-500"
-              : "focus:ring-black"
-          }
-        `}
+        placeholder={placeholder}
+        className={`${inputBase} ${errors[name]
+            ? "border-warning focus:border-warning focus:ring-warning/20"
+            : "border-border-default"
+          }`}
       />
 
       {errors[name] && (
-        <p className="text-xs text-red-500">
-          {errors[name]}
-        </p>
+        <p className="text-xs text-warning">{errors[name]}</p>
       )}
     </div>
   );
 
-  /* ================= UI ================= */
-
   return (
-    <div className="border p-8 rounded-2xl space-y-6 shadow-2xl">
-      <h3 className="text-xl font-semibold">
-        {addressId ? "Edit Address" : "Add Address"}
-      </h3>
+    <div className="rounded-[28px] border border-border-muted/10 bg-bg-surface p-5 sm:p-6">
+      <div className="mb-6 flex items-start gap-3">
+        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-bg-page text-text-primary">
+          <MapPinHouse className="h-5 w-5" />
+        </div>
 
-      {renderInput("Full Name", "name")}
-      {renderInput("Phone", "phone", "tel")}
-      {renderInput("Address Line 1", "addressLine1")}
-      {renderInput("Address Line 2", "addressLine2")}
-      {renderInput("City", "city")}
-      {renderInput("State", "state")}
-      {renderInput("Pincode", "pincode", "number")}
+        <div>
+          <h3 className="font-playfair text-xl font-semibold text-text-primary">
+            {addressId ? "Edit Address" : "Add Address"}
+          </h3>
+          <p className="mt-1 text-sm text-text-secondary">
+            Fill in your delivery details below.
+          </p>
+        </div>
+      </div>
 
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          name="isDefault"
-          checked={form.isDefault}
-          onChange={handleChange}
-        />
-        Set as default address
-      </label>
+      <div className="grid gap-5 sm:grid-cols-2">
+        <div className="sm:col-span-2">
+          {renderInput("Full Name", "name", "text", true, "Enter full name")}
+        </div>
 
-      <div className="flex gap-4 pt-4">
+        <div className="sm:col-span-2">
+          {renderInput(
+            "Phone",
+            "phone",
+            "tel",
+            true,
+            "Enter 10 digit mobile number"
+          )}
+        </div>
+
+        <div className="sm:col-span-2">
+          {renderInput(
+            "Address Line 1",
+            "addressLine1",
+            "text",
+            true,
+            "House no, street, area"
+          )}
+        </div>
+
+        <div className="sm:col-span-2">
+          {renderInput(
+            "Address Line 2",
+            "addressLine2",
+            "text",
+            false,
+            "Apartment, landmark, etc."
+          )}
+        </div>
+
+        <div>
+          {renderInput("City", "city", "text", true, "City")}
+        </div>
+
+        <div>
+          {renderInput("State", "state", "text", true, "State")}
+        </div>
+
+        <div className="sm:col-span-2">
+          {renderInput("Pincode", "pincode", "text", true, "6 digit pincode")}
+        </div>
+      </div>
+
+      <div className="mt-5 rounded-2xl border border-border-default bg-bg-page p-4">
+        <label className="flex items-start gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            name="isDefault"
+            checked={form.isDefault}
+            onChange={handleChange}
+            className="mt-1 h-4 w-4 rounded border-border-muted accent-brand-primary"
+          />
+
+          <div>
+            <div className="flex items-center gap-2 text-sm font-medium text-text-primary">
+              <CheckCircle2 className="h-4 w-4 text-text-primary" />
+              Set as default address
+            </div>
+            <p className="mt-1 text-xs text-text-secondary">
+              This address will be selected automatically during checkout.
+            </p>
+          </div>
+        </label>
+      </div>
+
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
         <button
           onClick={handleSubmit}
           disabled={saving}
-          className="px-6 py-3 bg-bg-dark text-white rounded-full text-sm cursor-pointer hover:bg-bg-dark/90 transition disabled:opacity-50"
+          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-bg-dark px-6 py-3 text-sm font-medium text-text-on-dark transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {saving ? "Saving..." : "Save Address"}
+          {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+          {saving ? "Saving..." : addressId ? "Update Address" : "Save Address"}
         </button>
 
         <button
           onClick={onCancel}
-          className="px-6 py-3 border rounded-full text-sm cursor-pointer hover:bg-gray-50 transition"
+          disabled={saving}
+          className="inline-flex items-center justify-center rounded-2xl border border-border-muted bg-bg-page px-6 py-3 text-sm font-medium text-text-primary transition hover:bg-bg-surface disabled:cursor-not-allowed disabled:opacity-60"
         >
           Cancel
         </button>
