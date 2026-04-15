@@ -63,7 +63,7 @@ export default function Navbar({ onCartOpen }: NavbarProps) {
         <div className="relative h-16 rounded-full px-6 sm:px-8 backdrop-blur-md bg-white/70 shadow-sm flex items-center justify-between">
 
           {/* LEFT (Desktop Links) */}
-          <div className="hidden md:flex gap-8 text-sm font-medium">
+          <div className="hidden md:flex gap-4 text-sm font-medium">
             <Link href="/shop" className="hover:font-semibold">Shop</Link>
             <Link href="/about" className="hover:font-semibold">About Us</Link>
             <Link href="/contact" className="hover:font-semibold">Contact</Link>
@@ -85,7 +85,7 @@ export default function Navbar({ onCartOpen }: NavbarProps) {
             <Image
               src={LedoLogo}
               alt="Ledo Valley Logo"
-              className="h-8 w-auto"
+              className="h-10 w-auto"
               priority
             />
           </Link>
