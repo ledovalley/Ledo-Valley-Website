@@ -42,6 +42,7 @@ interface Order {
     shippingAddress: ShippingAddress;
     payment: {
         status: string;
+        retryCount?: number;
     };
 }
 
@@ -77,19 +78,21 @@ export default function OrderDetailsPage() {
     };
 
     const isRetryAllowed = () => {
+        if (!order) return false;
+
         if (
-            order?.status !== "PAYMENT_FAILED" ||
-            order?.payment?.status !== "FAILED"
+            !["PAYMENT_PENDING", "PAYMENT_FAILED"].includes(order.status)
         ) return false;
 
         const createdAt = new Date(order.createdAt).getTime();
         const now = Date.now();
+        const SEVENTY_TWO_HOURS = 72 * 60 * 60 * 1000;
 
-        const diff = now - createdAt;
+        if (now - createdAt > SEVENTY_TWO_HOURS) return false;
 
-        const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
+        if ((order.payment?.retryCount || 0) >= 3) return false;
 
-        return diff <= TWENTY_FOUR_HOURS;
+        return true;
     };
 
     const handleRetry = async () => {
@@ -185,18 +188,18 @@ export default function OrderDetailsPage() {
             {/* ================= BACK BUTTON ================= */}
             <button
                 onClick={() => router.push("/account/orders")}
-                className="hidden text-sm text-gray-500 cursor-pointer hover:text-black mb-6 md:flex items-center gap-2"
+                className="items-center hidden gap-2 mb-6 text-sm text-gray-500 cursor-pointer hover:text-black md:flex"
             >
                 ← Back to Orders
             </button>
 
             {/* ================= HEADER ================= */}
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 border-b border-border-muted/20 pb-6">
+            <div className="flex flex-col gap-4 pb-6 border-b sm:flex-row sm:justify-between sm:items-center border-border-muted/20">
                 <div>
                     <h1 className="text-2xl font-semibold">
                         Order #{order.orderNumber}
                     </h1>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="mt-1 text-sm text-gray-500">
                         Placed on{" "}
                         {new Date(order.createdAt).toLocaleDateString()}
                     </p>
@@ -210,7 +213,7 @@ export default function OrderDetailsPage() {
             </div>
 
             {/* ================= MODERN TIMELINE ================= */}
-            <div className="bg-bg-surface/80 border border-border-muted/30 rounded-3xl p-6 sm:p-8">
+            <div className="p-6 border bg-bg-surface/80 border-border-muted/30 rounded-3xl sm:p-8">
                 <div className="relative flex items-center justify-between text-xs sm:text-sm">
 
                     {/* Progress Line */}
@@ -226,15 +229,15 @@ export default function OrderDetailsPage() {
                     />
 
                     {/* Step 1 */}
-                    <div className="relative text-center flex-1">
-                        <div className="w-8 h-8 rounded-full bg-bg-dark text-white flex items-center justify-center text-xs font-semibold mx-auto">
+                    <div className="relative flex-1 text-center">
+                        <div className="flex items-center justify-center w-8 h-8 mx-auto text-xs font-semibold text-white rounded-full bg-bg-dark">
                             ✓
                         </div>
-                        <p className="text-xs mt-3">Placed</p>
+                        <p className="mt-3 text-xs">Placed</p>
                     </div>
 
                     {/* Step 2 */}
-                    <div className="relative text-center flex-1">
+                    <div className="relative flex-1 text-center">
                         <div
                             className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold mx-auto ${["SHIPPED", "DELIVERED"].includes(order.status)
                                 ? "bg-bg-dark text-white"
@@ -243,11 +246,11 @@ export default function OrderDetailsPage() {
                         >
                             2
                         </div>
-                        <p className="text-xs mt-3">Shipped</p>
+                        <p className="mt-3 text-xs">Shipped</p>
                     </div>
 
                     {/* Step 3 */}
-                    <div className="relative text-center flex-1">
+                    <div className="relative flex-1 text-center">
                         <div
                             className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold mx-auto ${order.status === "DELIVERED"
                                 ? "bg-bg-dark text-white"
@@ -256,26 +259,26 @@ export default function OrderDetailsPage() {
                         >
                             3
                         </div>
-                        <p className="text-xs mt-3">Delivered</p>
+                        <p className="mt-3 text-xs">Delivered</p>
                     </div>
                 </div>
             </div>
 
             {/* ================= MAIN GRID ================= */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 sm:gap-8">
 
                 {/* LEFT SIDE */}
-                <div className="lg:col-span-2 space-y-6">
+                <div className="space-y-6 lg:col-span-2">
                     {/* SHIPPING */}
-                    <div className="bg-bg-surface/80 rounded-3xl p-6 sm:p-8 border border-border-muted/30">
-                        <h2 className="text-lg font-semibold mb-4">
+                    <div className="p-6 border bg-bg-surface/80 rounded-3xl sm:p-8 border-border-muted/30">
+                        <h2 className="mb-4 text-lg font-semibold">
                             Shipping Address
                         </h2>
 
                         <p className="font-medium">
                             {order.shippingAddress.name}
                         </p>
-                        <p className="text-sm text-gray-600 mt-1">
+                        <p className="mt-1 text-sm text-gray-600">
                             {order.shippingAddress.addressLine1}
                             {order.shippingAddress.addressLine2 &&
                                 `, ${order.shippingAddress.addressLine2}`}
@@ -285,13 +288,13 @@ export default function OrderDetailsPage() {
                             {order.shippingAddress.state} -{" "}
                             {order.shippingAddress.pincode}
                         </p>
-                        <p className="text-sm mt-3">
+                        <p className="mt-3 text-sm">
                             Phone: {order.shippingAddress.phone}
                         </p>
                     </div>
 
                     {/* ITEMS */}
-                    <div className="bg-bg-surface/80 rounded-3xl p-6 sm:p-8 border border-border-muted/30">
+                    <div className="p-6 border bg-bg-surface/80 rounded-3xl sm:p-8 border-border-muted/30">
                         <h2 className="text-lg font-semibold">
                             Order Items
                         </h2>
@@ -299,26 +302,11 @@ export default function OrderDetailsPage() {
                         {order.items.map((item, index) => (
                             <div
                                 key={index}
-                                className="
-                                    flex
-                                    gap-4 sm:gap-6
-                                    items-start sm:items-center
-                                    py-6
-                                    border-b last:border-0
-                                    border-border-muted/20
-                                "
+                                className="flex items-start gap-4 py-6 border-b  sm:gap-6 sm:items-center last:border-0 border-border-muted/20"
                             >
                                 {/* IMAGE */}
                                 <div
-                                    className="
-                                        relative
-                                        w-20 h-20 sm:w-24 sm:h-24
-                                        shrink-0
-                                        bg-white
-                                        rounded-2xl
-                                        overflow-hidden
-                                        border border-border-muted/20
-                                        "
+                                    className="relative w-20 h-20 overflow-hidden bg-white border  sm:w-24 sm:h-24 shrink-0 rounded-2xl border-border-muted/20"
                                 >
                                     {item.image ? (
                                         <Image
@@ -326,7 +314,7 @@ export default function OrderDetailsPage() {
                                             alt={item.productName}
                                             fill
                                             sizes="96px"
-                                            className="object-contain p-2"
+                                            className="object-contain"
                                         />
                                     ) : (
                                         <div className="flex items-center justify-center w-full h-full text-xs text-gray-400">
@@ -338,7 +326,7 @@ export default function OrderDetailsPage() {
                                 {/* CONTENT */}
                                 <div className="flex-1 min-w-0">
 
-                                    <div className="flex justify-between sm:items-start gap-2 sm:gap-4">
+                                    <div className="flex justify-between gap-2 sm:items-start sm:gap-4">
 
                                         {/* LEFT TEXT */}
                                         <div className="min-w-0">
@@ -373,7 +361,7 @@ export default function OrderDetailsPage() {
                 <div className="space-y-6 lg:sticky lg:top-28">
 
                     {/* SUMMARY */}
-                    <div className="bg-bg-surface/80 rounded-3xl p-6 sm:p-8 border border-border-muted/30 space-y-4">
+                    <div className="p-6 space-y-4 border bg-bg-surface/80 rounded-3xl sm:p-8 border-border-muted/30">
                         <h2 className="text-lg font-semibold">
                             Payment Summary
                         </h2>
@@ -384,7 +372,7 @@ export default function OrderDetailsPage() {
                         </div>
 
                         {order.discountAmount > 0 && (
-                            <div className="flex justify-between text-green-600 text-sm">
+                            <div className="flex justify-between text-sm text-green-600">
                                 <span>Discount</span>
                                 <span>- ₹{order.discountAmount}</span>
                             </div>
@@ -400,7 +388,7 @@ export default function OrderDetailsPage() {
                             <span>₹{order.shippingAmount}</span>
                         </div>
 
-                        <div className="border-t pt-4 flex justify-between font-semibold text-lg">
+                        <div className="flex justify-between pt-4 text-lg font-semibold border-t">
                             <span>Total</span>
                             <span>₹{order.grandTotal}</span>
                         </div>
@@ -413,15 +401,17 @@ export default function OrderDetailsPage() {
                             <button
                                 onClick={handleRetry}
                                 disabled={retryLoading}
-                                className="w-full py-3 bg-bg-dark text-white rounded-full hover:bg-bg-dark/90 transition disabled:opacity-50"
+                                className="w-full py-3 text-white transition rounded-full bg-bg-dark hover:bg-bg-dark/90 disabled:opacity-50"
                             >
                                 {retryLoading ? "Processing..." : "Retry Payment"}
                             </button>
                         )}
 
                         {order.status === "PAYMENT_FAILED" && !isRetryAllowed() && (
-                            <div className="text-sm text-red-500 text-center">
-                                Retry window expired (24 hours)
+                            <div className="text-sm text-center text-red-500">
+                                { (order.payment?.retryCount || 0) >= 3 
+                                    ? "Maximum retry attempts reached (3)" 
+                                    : "Retry window expired (3 days)" }
                             </div>
                         )}
 
@@ -429,7 +419,7 @@ export default function OrderDetailsPage() {
                             && (
                                 <button
                                     onClick={handleCancel}
-                                    className="w-full py-3 bg-bg-dark text-text-on-dark cursor-pointer rounded-full"
+                                    className="w-full py-3 rounded-full cursor-pointer bg-bg-dark text-text-on-dark"
                                 >
                                     Cancel Order
                                 </button>
@@ -438,7 +428,7 @@ export default function OrderDetailsPage() {
                         {order.payment.status === "SUCCESS" && (
                             <button
                                 onClick={handleDownloadInvoice}
-                                className="w-full text-center py-3 border rounded-full"
+                                className="w-full py-3 text-center border rounded-full"
                             >
                                 Download Invoice
                             </button>

@@ -134,7 +134,7 @@ export default function AddressForm({
   };
 
   const inputBase =
-    "w-full rounded-2xl border bg-bg-page px-4 py-3 text-sm text-text-primary outline-none transition placeholder:text-text-secondary/70 focus:border-border-muted focus:ring-2 focus:ring-highlight/30";
+    "w-full rounded-2xl border border-border-muted/10 bg-neutral-50/80 px-4 py-3 text-sm text-text-primary outline-none transition placeholder:text-text-secondary/70 focus:border-border-muted focus:ring-2 focus:ring-highlight/30";
 
   const renderInput = (
     label: string,
@@ -173,13 +173,13 @@ export default function AddressForm({
 
   return (
     <div className="rounded-[28px] border border-border-muted/10 bg-bg-surface p-5 sm:p-6">
-      <div className="mb-6 flex items-start gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-bg-page text-text-primary">
-          <MapPinHouse className="h-5 w-5" />
+      <div className="flex items-start gap-3 mb-6">
+        <div className="flex items-center justify-center h-11 w-11 rounded-2xl bg-bg-page text-text-primary">
+          <MapPinHouse className="w-5 h-5" />
         </div>
 
         <div>
-          <h3 className="font-playfair text-xl font-semibold text-text-primary">
+          <h3 className="text-xl font-semibold font-playfair text-text-primary">
             {addressId ? "Edit Address" : "Add Address"}
           </h3>
           <p className="mt-1 text-sm text-text-secondary">
@@ -236,19 +236,19 @@ export default function AddressForm({
         </div>
       </div>
 
-      <div className="mt-5 rounded-2xl border border-border-default bg-bg-page p-4">
+      <div className="p-4 mt-5 border rounded-2xl border-border-default bg-bg-page">
         <label className="flex items-start gap-3 cursor-pointer">
           <input
             type="checkbox"
             name="isDefault"
             checked={form.isDefault}
             onChange={handleChange}
-            className="mt-1 h-4 w-4 rounded border-border-muted accent-brand-primary"
+            className="w-4 h-4 mt-1 rounded border-border-muted accent-brand-primary"
           />
 
           <div>
             <div className="flex items-center gap-2 text-sm font-medium text-text-primary">
-              <CheckCircle2 className="h-4 w-4 text-text-primary" />
+              <CheckCircle2 className="w-4 h-4 text-text-primary" />
               Set as default address
             </div>
             <p className="mt-1 text-xs text-text-secondary">
@@ -258,20 +258,20 @@ export default function AddressForm({
         </label>
       </div>
 
-      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+      <div className="flex flex-col gap-3 mt-6 sm:flex-row">
         <button
           onClick={handleSubmit}
           disabled={saving}
-          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-bg-dark px-6 py-3 text-sm font-medium text-text-on-dark transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-medium transition rounded-2xl bg-bg-dark text-text-on-dark hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+          {saving && <Loader2 className="w-4 h-4 animate-spin" />}
           {saving ? "Saving..." : addressId ? "Update Address" : "Save Address"}
         </button>
 
         <button
           onClick={onCancel}
           disabled={saving}
-          className="inline-flex items-center justify-center rounded-2xl border border-border-muted bg-bg-page px-6 py-3 text-sm font-medium text-text-primary transition hover:bg-bg-surface disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center justify-center px-6 py-3 text-sm font-medium transition border rounded-2xl border-border-muted bg-bg-page text-text-primary hover:bg-bg-surface disabled:cursor-not-allowed disabled:opacity-60"
         >
           Cancel
         </button>

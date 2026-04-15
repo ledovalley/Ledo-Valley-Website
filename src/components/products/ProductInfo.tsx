@@ -119,23 +119,26 @@ export default function ProductInfo({
                     />
 
                     {/* Pricing */}
-                    <div className="flex flex-wrap items-end gap-3 sm:gap-4">
+                    <div className="">
+                        <div className="flex flex-wrap items-end gap-3 sm:gap-4">
 
-                        <span className="text-brand-primary text-2xl sm:text-3xl lg:text-4xl font-extrabold">
-                            ₹{selectedVariant.finalPrice.toFixed(0)}
-                        </span>
+                            <span className="text-brand-primary text-2xl sm:text-3xl lg:text-4xl font-extrabold">
+                                ₹{selectedVariant.finalPrice.toFixed(0)}
+                            </span>
 
-                        {discountPercent > 0 && (
-                            <>
-                                <span className="text-sm sm:text-lg line-through text-text-secondary/40">
-                                    ₹{selectedVariant.sellingPrice}
-                                </span>
+                            {discountPercent > 0 && (
+                                <>
+                                    <span className="text-sm sm:text-lg line-through text-text-secondary/40">
+                                        ₹{selectedVariant.sellingPrice}
+                                    </span>
 
-                                <span className="text-xs bg-warning/10 text-warning px-3 py-1 rounded-full font-medium">
-                                    {discountPercent}% OFF
-                                </span>
-                            </>
-                        )}
+                                    <span className="text-xs bg-warning/10 text-warning px-3 py-1 rounded-full font-medium">
+                                        {discountPercent}% OFF
+                                    </span>
+                                </>
+                            )}
+                        </div>
+                        <div className="text-sm text-text-secondary">Inclusive of GST(5%).</div>
                     </div>
 
                     {/* Description */}

@@ -34,14 +34,14 @@ export default function AccountLayout({
   ];
 
   return (
-    <div className="mx-auto max-w-7xl px-4 pb-16 pt-28 sm:px-6 sm:pb-20 sm:pt-36 lg:px-8">
+    <div className="px-4 pt-24 pb-16 mx-auto max-w-7xl sm:px-6 sm:pb-20 sm:pt-36 lg:px-8">
       {/* MOBILE HEADER */}
-      <div className="md:hidden">
+      <div className="px-3 md:hidden">
         <button
           onClick={() => router.push("/account/orders")}
-          className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-neutral-500 transition hover:text-neutral-900"
+          className="inline-flex items-center gap-2 p-2 mb-5 text-sm font-medium transition border rounded-lg bg-neutral-50/40 border-border-muted/20 text-neutral-500 hover:text-neutral-900"
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="w-4 h-4" />
           Back to Orders
         </button>
 
@@ -52,7 +52,7 @@ export default function AccountLayout({
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-neutral-900">
             My Account
           </h1>
-          <p className="mt-2 max-w-xl text-sm text-neutral-500">
+          <p className="max-w-xl mt-2 text-sm text-neutral-500">
             Manage your profile, saved addresses, and order history from one
             place.
           </p>
@@ -68,11 +68,11 @@ export default function AccountLayout({
                 key={link.href}
                 href={link.href}
                 className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-medium transition ${active
-                    ? "border-neutral-900 bg-neutral-900 text-white"
-                    : "border-neutral-200 bg-white text-neutral-700 hover:border-neutral-300 hover:bg-neutral-50"
+                    ? "border-border-muted/20 bg-bg-dark text-white"
+                    : "border-neutral-200 bg-neutral-50/40 text-neutral-700 hover:border-neutral-300 hover:bg-neutral-50"
                   }`}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="w-4 h-4" />
                 {link.label}
               </Link>
             );
@@ -80,11 +80,11 @@ export default function AccountLayout({
         </div>
       </div>
 
-      <div className="grid gap-8 md:grid-cols-[280px_minmax(0,1fr)] lg:gap-10">
+      <div className="grid gap-1 md:grid-cols-[280px_minmax(0,1fr)] lg:gap-6">
         {/* DESKTOP SIDEBAR */}
         <aside className="hidden md:block">
           <div className="sticky top-28 rounded-[28px] border border-border-muted/20 bg-bg-surface p-5">
-            <div className="border-b border-neutral-200 pb-5">
+            <div className="pb-5 border-b border-neutral-200">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neutral-400">
                 Account
               </p>
@@ -116,7 +116,7 @@ export default function AccountLayout({
                           : "bg-neutral-100 text-neutral-500 group-hover:bg-white"
                         }`}
                     >
-                      <Icon className="h-4 w-4" />
+                      <Icon className="w-4 h-4" />
                     </span>
 
                     <span className="min-w-0">

@@ -7,7 +7,7 @@ import ProductInfo from "@/components/products/ProductInfo";
 import ProductReviews from "@/components/products/ProductReviews";
 import { AxiosError } from "axios";
 
-import { Product, Variant, Review } from "@/types/product-api";
+import { Product } from "@/types/product-api";
 
 
 interface EligibleOrder {
