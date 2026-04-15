@@ -83,13 +83,13 @@ export async function generateMetadata({
       type: "website",
       images: firstImage
         ? [{ url: firstImage, width: 800, height: 800, alt: product.name }]
-        : [{ url: "/og-banner.jpg", width: 1200, height: 630 }],
+        : [{ url: "/og-banner1.jpeg", width: 1200, height: 630 }],
     },
     twitter: {
       card: "summary_large_image",
       title: `${product.name} | Ledo Valley`,
       description,
-      images: firstImage ? [firstImage] : ["/og-banner.jpg"],
+      images: firstImage ? [firstImage] : ["/og-banner1.jpeg"],
     },
   };
 }

@@ -31,8 +31,6 @@ export default function TopBanner() {
       try {
         const res = await api.get("/customer/top-banner/banner");
         if (isMounted) setBanners(res.data || []);
-
-        console.log("Fetched banners:", res.data);
       } catch (err) {
         console.error("Banner fetch failed:", err);
       }
@@ -107,7 +105,7 @@ export default function TopBanner() {
 
   return (
     <div
-      className="relative bg-bg-dark text-text-on-dark text-xs overflow-hidden"
+      className="relative overflow-hidden text-xs bg-bg-dark text-text-on-dark"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -122,7 +120,7 @@ export default function TopBanner() {
           {visibleBanners.map((banner) => (
             <div
               key={banner._id}
-              className="h-10 w-full flex items-center justify-center gap-3 px-4"
+              className="flex items-center justify-center w-full h-10 gap-3 px-4"
             >
               <span className="text-center whitespace-nowrap">
                 {banner.message}
@@ -131,7 +129,7 @@ export default function TopBanner() {
               {banner.couponCode && (
                 <button
                   onClick={() => handleCopy(banner)}
-                  className="flex items-center gap-1 underline font-medium hover:opacity-80 cursor-pointer transition"
+                  className="flex items-center gap-1 font-medium underline transition cursor-pointer hover:opacity-80"
                 >
                   {copiedId === banner._id ? (
                     <>

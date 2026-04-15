@@ -1,6 +1,7 @@
 "use client";
 
 import TopSellerProductCard from "../products/TopSellerProductCard";
+import ProductSkeleton from "../products/ProductSkeleton";
 
 interface Variant {
   _id: string;
@@ -39,8 +40,10 @@ export default function ShopProducts({
 }: Props) {
   if (loading) {
     return (
-      <div className="text-center py-16 text-text-secondary">
-        Loading products...
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {[...Array(6)].map((_, i) => (
+          <ProductSkeleton key={i} />
+        ))}
       </div>
     );
   }

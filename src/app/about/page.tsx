@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     title: "About Ledo Valley | Premium Assam Tea Since 1968",
     description: "Rooted in the rich tea heritage of Assam since 1968. Learn about our story, mission, and commitment to quality.",
     url: "https://www.ledovalley.com/about",
-    images: [{ url: "/og-banner.jpg", width: 1200, height: 630 }],
+    images: [{ url: "/og-banner1.jpeg", width: 1200, height: 630 }],
   },
 };
 

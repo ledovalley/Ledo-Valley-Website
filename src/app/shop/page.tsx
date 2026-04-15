@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     title: "Shop Premium Assam Tea | Ledo Valley",
     description: "Browse our full range of premium Assam teas. Black, Green, Organic & Speciality teas delivered fresh across India.",
     url: "https://www.ledovalley.com/shop",
-    images: [{ url: "/og-banner.jpg", width: 1200, height: 630 }],
+    images: [{ url: "/og-banner1.jpeg", width: 1200, height: 630 }],
   },
 };
 

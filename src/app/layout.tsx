@@ -64,7 +64,7 @@ export const metadata: Metadata = {
       "Buy premium Assam tea online from Ledo Valley. Sourced directly from the heart of Assam since 1968. Shop Black Tea, Green Tea, Organic Tea & more.",
     images: [
       {
-        url: "/og-banner.jpg",
+        url: "/og-banner1.jpeg",
         width: 1200,
         height: 630,
         alt: "Ledo Valley — Premium Assam Tea Since 1968",
@@ -77,7 +77,7 @@ export const metadata: Metadata = {
     title: "Ledo Valley | Premium Assam Tea — Buy Online",
     description:
       "Buy premium Assam tea online from Ledo Valley. Sourced directly from the heart of Assam since 1968.",
-    images: ["/og-banner.jpg"],
+    images: ["/og-banner1.jpeg"],
   },
 
   robots: {

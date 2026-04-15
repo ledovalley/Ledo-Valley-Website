@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     description:
       "Reach out to Ledo Valley for bulk orders, partnerships, or product queries. Based in Tinsukia, Assam.",
     url: "https://www.ledovalley.com/contact",
-    images: [{ url: "/og-banner.jpg", width: 1200, height: 630 }],
+    images: [{ url: "/og-banner1.jpeg", width: 1200, height: 630 }],
   },
 };
 

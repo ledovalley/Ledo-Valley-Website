@@ -1,7 +1,6 @@
 import axios from "axios";
 import { getCustomerToken, logoutCustomer } from "./customerAuth";
 
-console.log("API URL:", process.env.NEXT_PUBLIC_API_URL);
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,

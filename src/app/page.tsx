@@ -22,7 +22,7 @@ export default function HomePage() {
     "@type": "Organization",
     name: "Ledo Valley",
     url: "https://www.ledovalley.com",
-    logo: "https://www.ledovalley.com/og-banner.jpg",
+    logo: "https://www.ledovalley.com/og-banner1.jpeg",
     description: "Premium Assam tea brand since 1968. Direct from Tinsukia, Assam.",
     contactPoint: {
       "@type": "ContactPoint",

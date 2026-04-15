@@ -56,7 +56,7 @@ export default function ShopClient() {
 
   return (
     <div className="bg-bg-page">
-      <ShopBanner />
+      <ShopBanner teaType={teaTypeFromUrl} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-12">
 
