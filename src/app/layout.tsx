@@ -12,6 +12,7 @@ import { UIProvider } from "@/context/UIContext";
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import InitialLoader from "@/components/layout/InitialLoader";
+import ServerWakingUpOverlay from "@/components/layout/ServerWakingUpOverlay";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -121,6 +122,7 @@ export default function RootLayout({
             <CartProvider>
               <UIProvider>
                 <Toaster position="top-right" richColors />
+                <ServerWakingUpOverlay />
                 <AppShell>{children}</AppShell>
                 <Footer />
               </UIProvider>

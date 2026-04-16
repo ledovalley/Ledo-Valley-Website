@@ -10,7 +10,7 @@ import { Product, Variant, Review } from "@/types/product-api";
 async function fetchProduct(slug: string): Promise<Product | null> {
   try {
     const res = await fetch(`${API_BASE}/customer/products/${slug}`, {
-      next: { revalidate: 3600 }, // ISR: revalidate every hour
+      next: { revalidate: 60 }, // ISR: revalidate every minute
     });
     if (!res.ok) return null;
     return res.json();

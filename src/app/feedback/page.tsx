@@ -49,8 +49,8 @@ function SectionHeader({
   icon: React.ReactNode;
 }) {
   return (
-    <div className="mb-5 flex items-start gap-4">
-      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-50 text-amber-700 ring-1 ring-amber-100">
+    <div className="flex items-start gap-4 mb-5">
+      <div className="flex items-center justify-center h-11 w-11 shrink-0 rounded-2xl bg-amber-50 text-amber-700 ring-1 ring-amber-100">
         {icon}
       </div>
       <div>
@@ -184,8 +184,8 @@ export default function SubmitFeedbackPage() {
     return (
       <div className="min-h-screen bg-[#f8f7f4] px-4 py-10 sm:px-6">
         <div className="mx-auto flex min-h-[70vh] max-w-xl items-center">
-          <div className="w-full rounded-4xl border border-black/5 bg-white p-8 text-center shadow-sm sm:p-10">
-            <div className="mx-auto mb-6 flex h-18 w-18 items-center justify-center rounded-full bg-green-100 text-green-600">
+          <div className="w-full p-8 text-center bg-white border shadow-sm rounded-4xl border-black/5 sm:p-10">
+            <div className="flex items-center justify-center mx-auto mb-6 text-green-600 bg-green-100 rounded-full h-18 w-18">
               <CheckCircle className="h-9 w-9" />
             </div>
 
@@ -197,14 +197,14 @@ export default function SubmitFeedbackPage() {
               Thank you for sharing
             </h1>
 
-            <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-gray-500">
+            <p className="max-w-md mx-auto mt-3 text-sm leading-6 text-gray-500">
               Your feedback has been submitted successfully and will appear on the
               product page after moderation.
             </p>
 
             <Link
               href="/"
-              className="mt-8 inline-flex w-full items-center justify-center rounded-2xl bg-gray-900 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-gray-800"
+              className="mt-8 inline-flex w-full items-center justify-center rounded-2xl bg-bg-dark px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-bg-dark/80"
             >
               Return to home
             </Link>
@@ -216,9 +216,9 @@ export default function SubmitFeedbackPage() {
 
   return (
     <div className="min-h-screen px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-3xl">
-        <div className="mb-10 mt-20 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
+      <div className="max-w-3xl mx-auto">
+        <div className="mt-20 mb-10 text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1 text-xs font-medium border rounded-full border-amber-200 bg-amber-50 text-amber-700">
             <ShieldCheck className="h-3.5 w-3.5" />
             Verified customer feedback form
           </div>
@@ -227,28 +227,28 @@ export default function SubmitFeedbackPage() {
             Share your experience
           </h1>
 
-          <p className="mx-auto mt-3 max-w-2xl text-base leading-7 text-gray-500 sm:text-lg">
+          <p className="max-w-2xl mx-auto mt-3 text-base leading-7 text-gray-500 sm:text-lg">
             Bought our tea through a partner or received it as a gift? We’d love
             to hear what you thought.
           </p>
 
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-2 text-xs text-gray-500">
-            <span className="rounded-full bg-white px-3 py-1 ring-1 ring-black/5">
+          <div className="flex flex-wrap items-center justify-center gap-2 mt-5 text-xs text-gray-500">
+            <span className="px-3 py-1 bg-white rounded-full ring-1 ring-black/5">
               Takes under 2 minutes
             </span>
-            <span className="rounded-full bg-white px-3 py-1 ring-1 ring-black/5">
+            <span className="px-3 py-1 bg-white rounded-full ring-1 ring-black/5">
               Photo optional
             </span>
-            <span className="rounded-full bg-white px-3 py-1 ring-1 ring-black/5">
+            <span className="px-3 py-1 bg-white rounded-full ring-1 ring-black/5">
               Reviewed before publishing
             </span>
           </div>
         </div>
 
-        <div className="rounded-4xl border border-black/5 bg-white/60 p-6 shadow-sm sm:p-8 md:p-10">
+        <div className="p-6 border shadow-sm rounded-4xl border-black/5 bg-white/60 sm:p-8 md:p-10">
           {error && (
             <div
-              className="mb-8 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+              className="px-4 py-3 mb-8 text-sm text-red-700 border border-red-200 rounded-2xl bg-red-50"
               role="alert"
               aria-live="polite"
             >
@@ -262,7 +262,7 @@ export default function SubmitFeedbackPage() {
                 step="1"
                 title="What are you reviewing?"
                 description="Choose the product you tried, and optionally select the variant."
-                icon={<Package2 className="h-5 w-5" />}
+                icon={<Package2 className="w-5 h-5" />}
               />
 
               <div className="space-y-4">
@@ -277,11 +277,11 @@ export default function SubmitFeedbackPage() {
                   {loading ? (
                     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
                       {[...Array(3)].map((_, i) => (
-                        <div key={i} className="h-40 animate-pulse rounded-2xl bg-gray-100" />
+                        <div key={i} className="h-40 bg-gray-100 animate-pulse rounded-2xl" />
                       ))}
                     </div>
                   ) : (
-                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 max-h-105 overflow-y-auto p-1 pr-2 custom-scrollbar">
+                    <div className="grid grid-cols-2 gap-4 p-1 pr-2 overflow-y-auto sm:grid-cols-3 md:grid-cols-4 max-h-105 custom-scrollbar">
                       {products.map((p) => {
                         const img = p.variants?.[0]?.images?.[0]?.url || "https://images.unsplash.com/photo-1576092762791-dd9e2220c4c7?auto=format&fit=crop&q=80&w=300";
                         const isSelected = selectedProduct?._id === p._id;
@@ -299,7 +299,7 @@ export default function SubmitFeedbackPage() {
                                 : "border-gray-200 bg-white hover:border-amber-200 hover:bg-amber-50/30 hover:shadow-sm"
                             }`}
                           >
-                            <div className="relative h-20 w-20 overflow-hidden rounded-full ring-1 ring-black/5 bg-white shadow-sm">
+                            <div className="relative w-20 h-20 overflow-hidden bg-white rounded-full shadow-sm ring-1 ring-black/5">
                               <Image 
                                 src={img} 
                                 alt={p.name} 
@@ -314,7 +314,7 @@ export default function SubmitFeedbackPage() {
                             
                             {isSelected && (
                               <div className="absolute top-2 right-2 text-amber-600">
-                                <CheckCircle className="h-5 w-5 fill-amber-100" />
+                                <CheckCircle className="w-5 h-5 fill-amber-100" />
                               </div>
                             )}
                           </button>
@@ -334,7 +334,7 @@ export default function SubmitFeedbackPage() {
                     </label>
                     <select
                       id="variant"
-                      className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-gray-900 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
+                      className="w-full px-4 py-3 text-gray-900 transition bg-white border border-gray-200 outline-none rounded-2xl focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
                       value={selectedVariantId}
                       onChange={(e) => setSelectedVariantId(e.target.value)}
                     >
@@ -356,12 +356,12 @@ export default function SubmitFeedbackPage() {
                 step="2"
                 title="Rate and review"
                 description="Tell us how your experience was in a few quick steps."
-                icon={<Star className="h-5 w-5" />}
+                icon={<Star className="w-5 h-5" />}
               />
 
               <div className="space-y-6">
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                  <label className="block mb-2 text-sm font-medium text-gray-700">
                     Overall rating <span className="text-red-500">*</span>
                   </label>
 
@@ -375,7 +375,7 @@ export default function SubmitFeedbackPage() {
                           onMouseLeave={() => setHoverRating(0)}
                           onClick={() => setRating(star)}
                           aria-label={`Rate ${star} star${star > 1 ? "s" : ""}`}
-                          className="rounded-full p-1 transition-transform hover:scale-110 focus:outline-none focus:ring-4 focus:ring-amber-100"
+                          className="p-1 transition-transform rounded-full hover:scale-110 focus:outline-none focus:ring-4 focus:ring-amber-100"
                         >
                           <Star
                             className={`h-9 w-9 transition ${(hoverRating || rating) >= star
@@ -406,26 +406,26 @@ export default function SubmitFeedbackPage() {
                   </label>
                   <textarea
                     id="review"
-                    className="w-full resize-none rounded-2xl border border-gray-200 bg-white px-4 py-3 text-gray-900 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
+                    className="w-full px-4 py-3 text-gray-900 transition bg-white border border-gray-200 outline-none resize-none rounded-2xl focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
                     rows={5}
                     placeholder="What stood out to you? Taste, aroma, packaging, freshness, or anything else."
                     value={review}
                     onChange={(e) => setReview(e.target.value)}
                   />
-                  <div className="mt-2 text-right text-xs text-gray-400">
+                  <div className="mt-2 text-xs text-right text-gray-400">
                     {review.length}/500
                   </div>
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                  <label className="block mb-2 text-sm font-medium text-gray-700">
                     Add a photo <span className="text-gray-400">(Optional)</span>
                   </label>
 
                   {imagePreview ? (
-                    <div className="rounded-3xl border border-gray-200 bg-white p-3">
+                    <div className="p-3 bg-white border border-gray-200 rounded-3xl">
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                        <div className="relative h-32 w-32 overflow-hidden rounded-2xl border border-gray-200">
+                        <div className="relative w-32 h-32 overflow-hidden border border-gray-200 rounded-2xl">
                           <Image
                             src={imagePreview}
                             alt="Selected review image preview"
@@ -442,8 +442,8 @@ export default function SubmitFeedbackPage() {
                             JPG, PNG, or WEBP up to 5MB.
                           </div>
 
-                          <div className="mt-4 flex flex-wrap gap-2">
-                            <label className="inline-flex cursor-pointer items-center rounded-xl border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50">
+                          <div className="flex flex-wrap gap-2 mt-4">
+                            <label className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 transition border border-gray-200 cursor-pointer rounded-xl hover:bg-gray-50">
                               Change photo
                               <input
                                 type="file"
@@ -459,9 +459,9 @@ export default function SubmitFeedbackPage() {
                                 setImage(null);
                                 setImagePreview(null);
                               }}
-                              className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 transition hover:bg-red-100"
+                              className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-red-700 transition border border-red-200 rounded-xl bg-red-50 hover:bg-red-100"
                             >
-                              <X className="h-4 w-4" />
+                              <X className="w-4 h-4" />
                               Remove
                             </button>
                           </div>
@@ -469,9 +469,9 @@ export default function SubmitFeedbackPage() {
                       </div>
                     </div>
                   ) : (
-                    <label className="flex cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed border-gray-300 bg-white px-6 py-8 text-center transition hover:border-amber-400 hover:bg-amber-50/30">
-                      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-700">
-                        <ImagePlus className="h-6 w-6" />
+                    <label className="flex flex-col items-center justify-center px-6 py-8 text-center transition bg-white border-2 border-gray-300 border-dashed cursor-pointer rounded-3xl hover:border-amber-400 hover:bg-amber-50/30">
+                      <div className="flex items-center justify-center h-14 w-14 rounded-2xl bg-amber-50 text-amber-700">
+                        <ImagePlus className="w-6 h-6" />
                       </div>
                       <div className="mt-4 text-sm font-semibold text-gray-900">
                         Upload a photo with your review
@@ -479,8 +479,8 @@ export default function SubmitFeedbackPage() {
                       <div className="mt-1 text-xs text-gray-500">
                         Supported formats: JPG, PNG, WEBP · Max size 5MB
                       </div>
-                      <div className="mt-4 inline-flex items-center gap-2 rounded-xl bg-gray-900 px-4 py-2 text-sm font-medium text-white">
-                        <UploadCloud className="h-4 w-4" />
+                      <div className="inline-flex items-center gap-2 px-4 py-2 mt-4 text-sm font-medium text-white bg-bg-dark rounded-xl">
+                        <UploadCloud className="w-4 h-4" />
                         Choose image
                       </div>
                       <input
@@ -500,7 +500,7 @@ export default function SubmitFeedbackPage() {
                 step="3"
                 title="About you"
                 description="We only ask for the basics needed to attribute your review."
-                icon={<UserCircle2 className="h-5 w-5" />}
+                icon={<UserCircle2 className="w-5 h-5" />}
               />
 
               <div className="space-y-4">
@@ -516,7 +516,7 @@ export default function SubmitFeedbackPage() {
                     type="text"
                     required
                     autoComplete="name"
-                    className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-gray-900 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
+                    className="w-full px-4 py-3 text-gray-900 transition bg-white border border-gray-200 outline-none rounded-2xl focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
                     placeholder="How should we display your name?"
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
@@ -535,7 +535,7 @@ export default function SubmitFeedbackPage() {
                       id="email"
                       type="email"
                       autoComplete="email"
-                      className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-gray-900 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
+                      className="w-full px-4 py-3 text-gray-900 transition bg-white border border-gray-200 outline-none rounded-2xl focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
                       placeholder="For verification if needed"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -553,7 +553,7 @@ export default function SubmitFeedbackPage() {
                       id="phone"
                       type="tel"
                       autoComplete="tel"
-                      className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-gray-900 outline-none transition focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
+                      className="w-full px-4 py-3 text-gray-900 transition bg-white border border-gray-200 outline-none rounded-2xl focus:border-amber-400 focus:ring-4 focus:ring-amber-100"
                       placeholder="Optional"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
@@ -578,11 +578,11 @@ export default function SubmitFeedbackPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gray-900 px-5 py-4 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto sm:min-w-55"
+                  className="inline-flex items-center justify-center w-full gap-2 px-5 py-4 text-sm font-semibold text-white transition rounded-2xl bg-bg-dark hover:bg-bg-dark disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto sm:min-w-55"
                 >
                   {submitting ? (
                     <>
-                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <Loader2 className="w-5 h-5 animate-spin" />
                       Submitting...
                     </>
                   ) : (

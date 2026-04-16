@@ -4,13 +4,17 @@ import {
   createContext,
   useContext,
   useState,
+  useEffect,
   ReactNode,
 } from "react";
+import { setWakeUpObserver } from "@/lib/api";
 
 interface UIContextType {
   isLoginOpen: boolean;
   openLogin: () => void;
   closeLogin: () => void;
+  isServerWakingUp: boolean;
+  setIsServerWakingUp: (val: boolean) => void;
 }
 
 const UIContext = createContext<UIContextType | null>(null);
@@ -22,6 +26,12 @@ export function UIProvider({
 }) {
   const [isLoginOpen, setIsLoginOpen] =
     useState(false);
+  const [isServerWakingUp, setIsServerWakingUp] =
+    useState(false);
+
+  useEffect(() => {
+    setWakeUpObserver(setIsServerWakingUp);
+  }, []);
 
   const openLogin = () => setIsLoginOpen(true);
   const closeLogin = () => setIsLoginOpen(false);
@@ -32,6 +42,8 @@ export function UIProvider({
         isLoginOpen,
         openLogin,
         closeLogin,
+        isServerWakingUp,
+        setIsServerWakingUp,
       }}
     >
       {children}
