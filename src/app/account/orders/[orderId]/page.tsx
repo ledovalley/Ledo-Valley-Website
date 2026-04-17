@@ -91,7 +91,7 @@ export default function OrderDetailsPage() {
 
         if (now - createdAt > SEVENTY_TWO_HOURS) return false;
 
-        if ((order.payment?.retryCount || 0) >= 3) return false;
+        if ((order.payment?.retryCount || 0) >= 1) return false;
 
         return true;
     };

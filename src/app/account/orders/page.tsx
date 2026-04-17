@@ -123,7 +123,7 @@ export default function OrdersPage() {
       return false;
     }
 
-    if ((order.payment?.retryCount || 0) >= 3) {
+    if ((order.payment?.retryCount || 0) >= 1) {
       return false;
     }
 
