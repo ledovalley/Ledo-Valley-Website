@@ -36,15 +36,17 @@ export default function CheckoutEmailVerificationModal({ isOpen, onVerified, onC
 
         const checkVerificationStatus = async () => {
             try {
-                const res = await api.get<ProfileResponse>("/customer/profile", {
+                const res = await api.get<{ success: boolean, data: ProfileResponse }>("/customer/profile", {
                     headers: { Authorization: `Bearer ${token}` }
                 });
 
-                if (res.data.emailVerified) {
+                const profileData = res.data.data;
+
+                if (profileData.emailVerified) {
                     setIsVerified(true);
                     onVerified();
-                } else if (res.data.email) {
-                    setEmail(res.data.email);
+                } else if (profileData.email) {
+                    setEmail(profileData.email);
                 }
                 
             } catch (error) {

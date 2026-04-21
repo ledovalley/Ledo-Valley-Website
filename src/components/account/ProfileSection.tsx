@@ -28,14 +28,15 @@ export default function ProfileSection() {
     setLoading(true);
 
     api
-      .get<CustomerProfile>("/customer/profile", {
+      .get<{ success: boolean; data: CustomerProfile }>("/customer/profile", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
       .then((res) => {
-        setProfile(res.data);
-        setName(res.data.name || "");
+        const profileData = res.data.data;
+        setProfile(profileData);
+        setName(profileData.name || "");
       })
       .catch(() => {
         toast.error("Failed to load profile");
@@ -51,7 +52,7 @@ export default function ProfileSection() {
     try {
       setSaving(true);
 
-      const res = await api.put<CustomerProfile>(
+      const res = await api.put<{ success: boolean; data: CustomerProfile }>(
         "/customer/profile",
         { name: name.trim() },
         {
@@ -61,8 +62,9 @@ export default function ProfileSection() {
         }
       );
 
-      setProfile(res.data);
-      setName(res.data.name || "");
+      const updatedProfile = res.data.data;
+      setProfile(updatedProfile);
+      setName(updatedProfile.name || "");
       toast.success("Profile updated");
     } catch {
       toast.error("Failed to update profile");

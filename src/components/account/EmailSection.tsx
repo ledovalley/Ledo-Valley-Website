@@ -27,14 +27,15 @@ export default function EmailSection() {
     setFetching(true);
 
     api
-      .get("/customer/profile", {
+      .get<{ success: boolean; data: any }>("/customer/profile", {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
-        const userEmail = res.data.email || "";
+        const profileData = res.data.data;
+        const userEmail = profileData.email || "";
         setEmail(userEmail);
         setInitialEmail(userEmail);
-        setVerified(!!res.data.emailVerified);
+        setVerified(!!profileData.emailVerified);
       })
       .catch(() => {
         toast.error("Failed to load email details");

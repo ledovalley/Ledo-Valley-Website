@@ -220,7 +220,7 @@ export default function OrdersPage() {
 
   if (!orders.length) {
     return (
-      <section className="flex min-h-[60vh] flex-col items-center justify-center rounded-4xl border border-dashed border-border-muted/20 bg-linear-to-b from-white to-neutral-50 px-6 py-16 text-center">
+      <section className="flex min-h-[60vh] flex-col items-center justify-center rounded-4xl border border-dashed border-border-muted/20 bg-bg-surface px-6 py-16 text-center">
         <div className="flex items-center justify-center w-16 h-16 text-white rounded-full bg-bg-dark">
           <ShoppingBag className="h-7 w-7" />
         </div>
