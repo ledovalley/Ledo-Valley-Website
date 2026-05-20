@@ -46,19 +46,20 @@ export default function AboutPage() {
       <section className="container mx-auto px-6 mt-16 max-w-5xl">
         <div className="space-y-6 text-text-muted leading-relaxed">
           <h2 className="text-2xl md:text-3xl font-playfair font-semibold text-text-primary">
-            Our Story
+            From Bhiwani to Brahmputra
           </h2>
           <p>
-            Rooted in the rich tea heritage of Assam, Ledo Valley was born with a simple vision—to bring pure, authentic, and high-quality tea from the source directly to your cup.
+            In 1968, Harilal Jain left Buwani Khera, Bhiwani, Haryana, and arrived in Tinsukia, Assam, with almost nothing. He started small — a few kilograms of tea, sold door to door, every single day. No shop. No capital. Just belief.
           </p>
           <p>
-            Since 1968, we have been dedicated to delivering tea that reflects the true essence of Assam—bold in taste, rich in color, and refreshing in every sip. With decades of experience and a deep connection to tea craftsmanship, we carefully select and blend our teas to ensure consistent quality and freshness.
+            That belief compounded. His son Sushil Kumar Jain took the trade across the districts of Assam, and earned a stake in the very tea estates his father had once traded from. His grandsons Yash and Abhay Jain took it further still — across the mountains and rivers of the Northeast, until Ledo Valley reached all seven states of the region.
           </p>
           <p>
-            At Ledo Valley, tea is more than just a beverage—it’s a daily ritual, a moment of connection, and a source of comfort. From homes to tea stalls, we are proud to be a part of millions of chai moments across generations.
+            Three generations. One family. One unbroken commitment to the finest tea from the land they chose to call home.
           </p>
-          <p className="">
+          <p className="flex flex-col">
             Crafted with care. Served with trust. Enjoyed by millions.
+            <span className="text-primary font-bold">LEDO VALLEY TEA · TINSUKIA, ASSAM · EST. 1968</span>
           </p>
         </div>
       </section>
