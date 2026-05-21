@@ -60,6 +60,8 @@ export default function CheckoutPage() {
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [showCouponModal, setShowCouponModal] = useState(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
+  
+  const [paymentMethod, setPaymentMethod] = useState<"PAYU" | "COD">("PAYU");
 
   /* ================= PRICE CALCULATION ================= */
 
@@ -182,6 +184,7 @@ export default function CheckoutPage() {
         {
           addressId: selectedAddress,
           couponCode: couponCode || undefined,
+          paymentMethod,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -189,6 +192,12 @@ export default function CheckoutPage() {
       );
 
       const data = res.data;
+
+      if (data.method === "COD") {
+        await refreshCart();
+        router.push("/payment/payment-success");
+        return;
+      }
 
       /* ================= PAYU SUBMIT ================= */
 
@@ -650,6 +659,42 @@ export default function CheckoutPage() {
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* Payment Method Selection */}
+            <div className="border rounded-3xl p-6 space-y-4">
+              <h2 className="text-xl font-semibold">Payment Method</h2>
+              <div className="space-y-3">
+                <label className={`flex items-center gap-3 p-4 border rounded-2xl cursor-pointer transition ${paymentMethod === "PAYU" ? "border-bg-dark bg-bg-surface" : "border-gray-200"}`}>
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="PAYU"
+                    checked={paymentMethod === "PAYU"}
+                    onChange={() => setPaymentMethod("PAYU")}
+                    className="w-5 h-5 text-bg-dark focus:ring-bg-dark cursor-pointer"
+                  />
+                  <div>
+                    <p className="font-semibold">Pay Online</p>
+                    <p className="text-xs text-gray-500">Credit/Debit Card, UPI, NetBanking</p>
+                  </div>
+                </label>
+                
+                <label className={`flex items-center gap-3 p-4 border rounded-2xl cursor-pointer transition ${paymentMethod === "COD" ? "border-bg-dark bg-bg-surface" : "border-gray-200"}`}>
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="COD"
+                    checked={paymentMethod === "COD"}
+                    onChange={() => setPaymentMethod("COD")}
+                    className="w-5 h-5 text-bg-dark focus:ring-bg-dark cursor-pointer"
+                  />
+                  <div>
+                    <p className="font-semibold">Cash on Delivery</p>
+                    <p className="text-xs text-gray-500">Pay at your doorstep when receiving the order</p>
+                  </div>
+                </label>
+              </div>
             </div>
 
             {/* Payment Summary */}

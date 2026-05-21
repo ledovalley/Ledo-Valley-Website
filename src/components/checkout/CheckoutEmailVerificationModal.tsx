@@ -32,7 +32,6 @@ export default function CheckoutEmailVerificationModal({ isOpen, onVerified, onC
     useEffect(() => {
         if (!isOpen || !token) return;
 
-        let pollingInterval: NodeJS.Timeout;
 
         const checkVerificationStatus = async () => {
             try {
@@ -60,7 +59,7 @@ export default function CheckoutEmailVerificationModal({ isOpen, onVerified, onC
         checkVerificationStatus();
 
         // Poll every 3 seconds only if we know they have an email but it isn't verified
-        pollingInterval = setInterval(() => {
+        const pollingInterval = setInterval(() => {
             if (!isVerified) {
                 checkVerificationStatus();
             }

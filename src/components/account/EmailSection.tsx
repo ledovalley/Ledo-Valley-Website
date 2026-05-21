@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import api from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
+import { AxiosError } from "axios";
 import {
   Mail,
   CheckCircle2,
@@ -27,7 +28,7 @@ export default function EmailSection() {
     setFetching(true);
 
     api
-      .get<{ success: boolean; data: any }>("/customer/profile", {
+      .get<{ success: boolean; data: { email?: string; emailVerified?: boolean; [key: string]: unknown } }>("/customer/profile", {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
@@ -69,8 +70,9 @@ export default function EmailSection() {
       setInitialEmail(email.trim());
       setVerified(false);
       toast.success("Verification email sent");
-    } catch {
-      toast.error("Failed to update email");
+    } catch (error: unknown) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      toast.error(axiosError.response?.data?.message || "Failed to update email");
     } finally {
       setLoading(false);
     }
