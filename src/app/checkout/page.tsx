@@ -30,6 +30,7 @@ interface Address {
 interface CouponPreview {
   discountAmount: number;
   finalAmount: number;
+  notApplicableOnCOD?: boolean;
 }
 
 interface Coupon {
@@ -71,8 +72,8 @@ export default function CheckoutPage() {
   );
 
   const GST_PERCENT = 5;
-  const FREE_SHIPPING_MIN_ORDER_VALUE = 500;
-  const FLAT_SHIPPING_CHARGE = 60;
+  const FREE_SHIPPING_MIN_ORDER_VALUE = 1000;
+  const FLAT_SHIPPING_CHARGE = 90;
 
   const discount = couponPreview?.discountAmount || 0;
 
@@ -82,8 +83,9 @@ export default function CheckoutPage() {
   );
   const shippingAmount =
     itemsTotal >= FREE_SHIPPING_MIN_ORDER_VALUE ? 0 : FLAT_SHIPPING_CHARGE;
+  const codCharge = paymentMethod === "COD" ? 9 : 0;
   const grandTotal = Number(
-    (taxableAmount + shippingAmount).toFixed(2)
+    (taxableAmount + shippingAmount + codCharge).toFixed(2)
   );
 
   const [isMounted, setIsMounted] = useState(false);
@@ -686,7 +688,14 @@ export default function CheckoutPage() {
                     name="paymentMethod"
                     value="COD"
                     checked={paymentMethod === "COD"}
-                    onChange={() => setPaymentMethod("COD")}
+                    onChange={() => {
+                      if (couponPreview?.notApplicableOnCOD) {
+                        setCouponCode("");
+                        setCouponPreview(null);
+                        toast.warning("Coupon removed: Not applicable on Cash on Delivery orders.");
+                      }
+                      setPaymentMethod("COD");
+                    }}
                     className="w-5 h-5 text-bg-dark focus:ring-bg-dark cursor-pointer"
                   />
                   <div>
@@ -736,6 +745,13 @@ export default function CheckoutPage() {
                   <p className="text-xs text-text-secondary">
                     Free shipping on orders ₹{FREE_SHIPPING_MIN_ORDER_VALUE} and above
                   </p>
+                )}
+
+                {codCharge > 0 && (
+                  <div className="flex justify-between">
+                    <span>COD Charge</span>
+                    <span>₹{codCharge}</span>
+                  </div>
                 )}
 
                 <div className="border-t pt-3 flex justify-between font-bold text-lg">
