@@ -54,6 +54,7 @@ export default function OrderDetailsPage() {
     const [order, setOrder] = useState<Order | null>(null);
     const [loading, setLoading] = useState(true);
     const [retryLoading, setRetryLoading] = useState(false);
+    const [cancelLoading, setCancelLoading] = useState(false);
 
     useEffect(() => {
         const fetchOrder = async () => {
@@ -73,9 +74,24 @@ export default function OrderDetailsPage() {
     }, [orderId]);
 
     const handleCancel = async () => {
-        if (!order) return;
-        await api.patch(`/customer/orders/${order._id}/cancel`);
-        router.refresh();
+        if (!order || cancelLoading) return;
+        try {
+            setCancelLoading(true);
+            await api.patch(`/customer/orders/${order._id}/cancel`);
+            setOrder({ 
+                ...order, 
+                status: "CANCELLED",
+                payment: {
+                    ...order.payment,
+                    status: order.payment.status === "PENDING" ? "FAILED" : order.payment.status
+                }
+            });
+            toast.success("Order cancelled successfully");
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || error.message || "Failed to cancel order");
+        } finally {
+            setCancelLoading(false);
+        }
     };
 
     const isRetryAllowed = () => {
@@ -420,8 +436,10 @@ export default function OrderDetailsPage() {
                             && (
                                 <button
                                     onClick={handleCancel}
-                                    className="w-full py-3 rounded-full cursor-pointer bg-bg-dark text-text-on-dark"
+                                    disabled={cancelLoading}
+                                    className="flex items-center justify-center w-full gap-2 py-3 rounded-full cursor-pointer bg-bg-dark text-text-on-dark disabled:opacity-50"
                                 >
+                                    {cancelLoading && <div className="w-4 h-4 border-2 border-white rounded-full animate-spin border-t-transparent"></div>}
                                     Cancel Order
                                 </button>
                             )}
