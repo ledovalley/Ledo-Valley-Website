@@ -390,18 +390,18 @@ export default function CheckoutPage() {
               {/* MODAL */}
               {showAddressModal && (
                 <div className="fixed inset-0 p-4 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
-                  <div className="bg-bg-page rounded-3xl p-6 w-full max-w-2xl relative">
-
-                    <button
-                      onClick={() => setShowAddressModal(false)}
-                      className="absolute top-4 right-4 text-gray-500 hover:bg-bg-surface px-2.5 py-1 rounded-full cursor-pointer"
-                    >
-                      ✕
-                    </button>
-
-                    <h3 className="text-lg font-semibold mb-4 font-playfair">
-                      Add New Address
-                    </h3>
+                  <div className="bg-bg-page rounded-3xl w-full max-w-2xl relative flex flex-col max-h-[90vh] overflow-hidden shadow-2xl">
+                    <div className="flex-none px-6 py-5 border-b border-black/5 flex items-center justify-between">
+                      <h3 className="text-xl font-semibold font-playfair m-0 text-text-primary">
+                        Add New Address
+                      </h3>
+                      <button
+                        onClick={() => setShowAddressModal(false)}
+                        className="text-gray-500 hover:bg-black/5 w-8 h-8 flex items-center justify-center rounded-full cursor-pointer transition"
+                      >
+                        ✕
+                      </button>
+                    </div>
 
                     <CheckoutAddressForm
                       token={token}
