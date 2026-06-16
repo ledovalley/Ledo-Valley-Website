@@ -148,6 +148,11 @@ export default function CheckoutPage() {
   const handleApplyCoupon = async () => {
     if (!couponCode) return;
 
+    if (paymentMethod === "COD") {
+      toast.warning("Discount coupons cannot be applied to Cash on Delivery orders.");
+      return;
+    }
+
     try {
       const res = await api.post(
         "/customer/coupons/validate",
@@ -689,10 +694,10 @@ export default function CheckoutPage() {
                     value="COD"
                     checked={paymentMethod === "COD"}
                     onChange={() => {
-                      if (couponPreview?.notApplicableOnCOD) {
+                      if (couponPreview) {
                         setCouponCode("");
                         setCouponPreview(null);
-                        toast.warning("Coupon removed: Not applicable on Cash on Delivery orders.");
+                        toast.warning("Coupon removed: Discount coupons are not allowed on Cash on Delivery orders.");
                       }
                       setPaymentMethod("COD");
                     }}
