@@ -15,6 +15,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next"
 import InitialLoader from "@/components/layout/InitialLoader";
 import ServerWakingUpOverlay from "@/components/layout/ServerWakingUpOverlay";
 import Image from "next/image";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -151,7 +152,8 @@ export default function RootLayout({
         </>
         <SpeedInsights />
         <Analytics />
-        <AuthProvider>
+        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
+          <AuthProvider>
           <InitialLoader>
             <CartProvider>
               <UIProvider>
@@ -175,6 +177,7 @@ export default function RootLayout({
             </CartProvider>
           </InitialLoader>
         </AuthProvider>
+        </GoogleOAuthProvider>
       </body>
     </html>
   );

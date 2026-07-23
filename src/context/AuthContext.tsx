@@ -12,6 +12,10 @@ import {
 export interface Customer {
   _id: string;
   phone: string;
+  email?: string;
+  name?: string;
+  googleId?: string;
+  emailVerified?: boolean;
 }
 
 interface AuthContextType {

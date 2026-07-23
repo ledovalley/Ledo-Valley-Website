@@ -5,6 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useUI } from "@/context/UIContext";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ShoppingBag,
   User,
@@ -23,6 +24,7 @@ export default function Navbar({ onCartOpen }: NavbarProps) {
   const [isSticky, setIsSticky] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const router = useRouter();
 
   const { isLoggedIn, customer, logout } = useAuth();
   const { totalItems } = useCart();
@@ -50,6 +52,7 @@ export default function Navbar({ onCartOpen }: NavbarProps) {
   const handleLogout = () => {
     logout();
     setProfileOpen(false);
+    router.push("/");
   };
 
   return (
