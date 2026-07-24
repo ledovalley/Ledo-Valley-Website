@@ -89,7 +89,7 @@ function PaymentSuccessContent() {
         Thank you for your purchase. Your order has been successfully placed and is now being processed.
       </p>
 
-      <div className="w-full text-left bg-white border shadow-sm border-black/5 rounded-3xl overflow-hidden mb-8">
+      <div className="w-full text-left bg-bg-surface border shadow-sm border-black/5 rounded-3xl overflow-hidden mb-8">
         <div className="p-6 sm:p-8 bg-bg-surface/30">
           <h3 className="mb-4 text-lg font-semibold font-playfair flex items-center gap-2">
             <Package size={20} className="text-gray-500" />
@@ -128,7 +128,7 @@ function PaymentSuccessContent() {
         </div>
 
         {order.shippingAddress && (
-          <div className="p-6 sm:p-8 border-t border-black/5 bg-gray-50/50">
+          <div className="p-6 sm:p-8 border-t border-black/5 bg-bg-surface">
             <h3 className="mb-3 text-sm font-semibold text-gray-700 flex items-center gap-2">
               <MapPin size={16} className="text-gray-400" />
               Delivering To

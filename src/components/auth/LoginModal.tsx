@@ -21,7 +21,8 @@ type Step =
   | "FORGOT_PASSWORD" 
   | "RESET_PASSWORD" 
   | "LEGACY_PHONE" 
-  | "LEGACY_OTP";
+  | "LEGACY_OTP"
+  | "GOOGLE_PHONE";
 
 export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
   const { login } = useAuth();
@@ -34,6 +35,9 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
   const [phone, setPhone] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   
+  // Google Temp State
+  const [googleTempToken, setGoogleTempToken] = useState("");
+
   // OTP State
   const OTP_LENGTH = 6;
   const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(""));
@@ -148,12 +152,44 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
       setLoading(true);
       setError("");
       const res = await api.post("/auth/customer/google-login", { token: credentialResponse.credential });
+      
+      if (res.status === 202 && res.data.action === "COLLECT_PHONE") {
+        setGoogleTempToken(res.data.googleToken);
+        changeStep("GOOGLE_PHONE");
+        toast.info(res.data.message);
+      } else {
+        login(res.data.token, res.data.customer);
+        onSuccess?.();
+        onClose();
+      }
+    } catch (err) {
+      const error = err as AxiosError<{ message?: string }>;
+      setError(error.response?.data?.message || "Google Login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isValidPhone(phone)) {
+      setError("Please enter a valid 10-digit phone number without repeating patterns.");
+      return;
+    }
+    try {
+      setLoading(true);
+      setError("");
+      const res = await api.post("/auth/customer/google-signup", { 
+        token: googleTempToken, 
+        phone 
+      });
       login(res.data.token, res.data.customer);
+      toast.success("Account created successfully!");
       onSuccess?.();
       onClose();
     } catch (err) {
       const error = err as AxiosError<{ message?: string }>;
-      setError(error.response?.data?.message || "Google Login failed");
+      setError(error.response?.data?.message || "Google Signup failed");
     } finally {
       setLoading(false);
     }
@@ -327,7 +363,23 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
               {loading ? "Registering…" : "Sign Up"}
             </button>
 
-            <p className="text-xs pt-2 text-center">Already have an account? <button type="button" onClick={() => changeStep("LOGIN")} className="font-semibold text-(--color-brand-primary) cursor-pointer hover:underline">Login</button></p>
+                    <div className="my-4 flex items-center before:mt-0.5 before:flex-1 before:border-t before:border-gray-300 after:mt-0.5 after:flex-1 after:border-t after:border-gray-300">
+                      <p className="mx-4 mb-0 text-center text-xs font-semibold text-gray-500">OR</p>
+                    </div>
+
+                    <div className="flex justify-center w-full">
+                       <GoogleLogin
+                        onSuccess={handleGoogleSuccess}
+                        onError={() => setError("Google Login Failed")}
+                        shape="pill"
+                        size="large"
+                        width="300"
+                        text="signup_with"
+                        useOneTap
+                      />
+                    </div>
+
+            <p className="text-xs pt-4 text-center">Already have an account? <button type="button" onClick={() => changeStep("LOGIN")} className="font-semibold text-(--color-brand-primary) cursor-pointer hover:underline">Login</button></p>
           </form>
         )}
 
@@ -367,6 +419,26 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
               {loading ? "Resetting…" : "Reset Password"}
             </button>
             <p className="text-xs text-center"><button type="button" onClick={() => changeStep("LOGIN")} className="text-(--color-brand-primary) hover:underline cursor-pointer">Back to Login</button></p>
+          </form>
+        )}
+
+        {/* --- GOOGLE PHONE VIEW --- */}
+        {step === "GOOGLE_PHONE" && (
+          <form onSubmit={handleGoogleSignup} className="space-y-4">
+            <div className="text-center space-y-2 mb-6">
+              <h3 className="text-xl font-semibold font-playfair text-text-primary">Almost Done!</h3>
+              <p className="text-sm text-text-secondary">Please enter your phone number to complete registration. This is required for shipping updates.</p>
+            </div>
+            
+            <div className="relative">
+              <Phone size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary" />
+              <input type="tel" placeholder="Enter phone number" required value={phone} onChange={(e) => setPhone(e.target.value)}
+                className="w-full rounded-full border pl-11 pr-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-(--color-brand-primary)/30" autoFocus />
+            </div>
+            
+            <button type="submit" disabled={loading || phone.length < 10} className="w-full rounded-full bg-(--color-brand-primary) text-(--color-text-on-dark) py-3 text-sm font-medium hover:opacity-90 transition disabled:opacity-50 cursor-pointer">
+              {loading ? "Creating Account…" : "Complete Registration"}
+            </button>
           </form>
         )}
 
