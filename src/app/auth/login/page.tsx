@@ -45,11 +45,13 @@ export default function LoginPage() {
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
 
     /* ================= RESET STATE ================= */
     const changeStep = (newStep: Step) => {
       setStep(newStep);
       setError("");
+      setFieldErrors({});
       setOtp(Array(OTP_LENGTH).fill(""));
     };
 
@@ -73,23 +75,37 @@ export default function LoginPage() {
 
     const handleRegister = async (e: React.FormEvent) => {
       e.preventDefault();
+      setFieldErrors({});
+      setError("");
+      let hasError = false;
+      const newErrors: any = {};
+
       if (!isValidPhone(phone)) {
-        setError("Please enter a valid 10-digit phone number without repeating patterns.");
-        return;
+        newErrors.phone = "Please enter a valid 10-digit phone number without repeating patterns.";
+        hasError = true;
       }
       if (password !== confirmPassword) {
-        setError("Passwords do not match");
+        newErrors.confirmPassword = "Passwords do not match";
+        hasError = true;
+      }
+      
+      if (hasError) {
+        setFieldErrors(newErrors);
         return;
       }
+
       try {
         setLoading(true);
-        setError("");
         await api.post("/auth/customer/register", { name, email, phone, password, confirmPassword });
         changeStep("VERIFY_EMAIL_OTP");
         toast.success("OTP sent to your email!");
       } catch (err) {
-        const error = err as AxiosError<{ message?: string }>;
-        setError(error.response?.data?.message || "Registration failed");
+        const errorMsg = (err as AxiosError<{ message?: string }>).response?.data?.message || "Registration failed";
+        if (errorMsg.toLowerCase().includes("email or phone")) {
+          setFieldErrors({ email: errorMsg, phone: errorMsg });
+        } else {
+          setError(errorMsg);
+        }
       } finally {
         setLoading(false);
       }
@@ -315,25 +331,44 @@ export default function LoginPage() {
                 {/* --- REGISTER VIEW --- */}
                 {step === "REGISTER" && (
                   <form onSubmit={handleRegister} className="space-y-4">
-                    <div className="relative">
-                      <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary" />
-                      <input type="text" placeholder="Full Name" required value={name} onChange={(e) => setName(e.target.value)} className="w-full rounded-full border pl-11 pr-5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-(--color-brand-primary)/30" />
+                    <div>
+                      <div className="relative">
+                        <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary" />
+                        <input type="text" placeholder="Full Name" required value={name} onChange={(e) => setName(e.target.value)} className="w-full rounded-full border pl-11 pr-5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-(--color-brand-primary)/30" />
+                      </div>
+                      {fieldErrors.name && <p className="text-red-500 text-xs mt-1 ml-4">{fieldErrors.name}</p>}
                     </div>
-                    <div className="relative">
-                      <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary" />
-                      <input type="email" placeholder="Email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full rounded-full border pl-11 pr-5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-(--color-brand-primary)/30" />
+                    
+                    <div>
+                      <div className="relative">
+                        <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary" />
+                        <input type="email" placeholder="Email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full rounded-full border pl-11 pr-5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-(--color-brand-primary)/30" />
+                      </div>
+                      {fieldErrors.email && <p className="text-red-500 text-xs mt-1 ml-4">{fieldErrors.email}</p>}
                     </div>
-                    <div className="relative">
-                      <Phone size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary" />
-                      <input type="tel" placeholder="Phone Number" required value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full rounded-full border pl-11 pr-5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-(--color-brand-primary)/30" />
+                    
+                    <div>
+                      <div className="relative">
+                        <Phone size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary" />
+                        <input type="tel" placeholder="Phone Number" required value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full rounded-full border pl-11 pr-5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-(--color-brand-primary)/30" />
+                      </div>
+                      {fieldErrors.phone && <p className="text-red-500 text-xs mt-1 ml-4">{fieldErrors.phone}</p>}
                     </div>
-                    <div className="relative">
-                      <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary" />
-                      <input type="password" placeholder="Password" required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full rounded-full border pl-11 pr-5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-(--color-brand-primary)/30" />
+                    
+                    <div>
+                      <div className="relative">
+                        <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary" />
+                        <input type="password" placeholder="Password" required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full rounded-full border pl-11 pr-5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-(--color-brand-primary)/30" />
+                      </div>
+                      {fieldErrors.password && <p className="text-red-500 text-xs mt-1 ml-4">{fieldErrors.password}</p>}
                     </div>
-                    <div className="relative">
-                      <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary" />
-                      <input type="password" placeholder="Confirm Password" required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full rounded-full border pl-11 pr-5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-(--color-brand-primary)/30" />
+                    
+                    <div>
+                      <div className="relative">
+                        <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary" />
+                        <input type="password" placeholder="Confirm Password" required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full rounded-full border pl-11 pr-5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-(--color-brand-primary)/30" />
+                      </div>
+                      {fieldErrors.confirmPassword && <p className="text-red-500 text-xs mt-1 ml-4">{fieldErrors.confirmPassword}</p>}
                     </div>
 
                     <p className="text-xs text-text-secondary text-center">By continuing, I agree to the <span className="font-semibold cursor-pointer hover:underline">Terms of Use</span> & <span className="font-semibold cursor-pointer hover:underline">Privacy Policy</span>.</p>
