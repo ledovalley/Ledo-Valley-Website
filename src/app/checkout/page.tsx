@@ -64,6 +64,13 @@ export default function CheckoutPage() {
   
   const [paymentMethod, setPaymentMethod] = useState<"PAYU" | "COD">("PAYU");
 
+  const [settings, setSettings] = useState({
+    codCharge: 29,
+    freeShippingThreshold: 1000,
+    flatShippingCharge: 90,
+    gstPercent: 5,
+  });
+
   /* ================= PRICE CALCULATION ================= */
 
   const itemsTotal = cart.reduce(
@@ -71,19 +78,15 @@ export default function CheckoutPage() {
     0
   );
 
-  const GST_PERCENT = 5;
-  const FREE_SHIPPING_MIN_ORDER_VALUE = 1000;
-  const FLAT_SHIPPING_CHARGE = 90;
-
   const discount = couponPreview?.discountAmount || 0;
 
   const taxableAmount = itemsTotal - discount;
   const gstAmount = Number(
-    (taxableAmount - taxableAmount / (1 + GST_PERCENT / 100)).toFixed(2)
+    (taxableAmount - taxableAmount / (1 + settings.gstPercent / 100)).toFixed(2)
   );
   const shippingAmount =
-    itemsTotal >= FREE_SHIPPING_MIN_ORDER_VALUE ? 0 : FLAT_SHIPPING_CHARGE;
-  const codCharge = paymentMethod === "COD" ? 9 : 0;
+    itemsTotal >= settings.freeShippingThreshold ? 0 : settings.flatShippingCharge;
+  const codCharge = paymentMethod === "COD" ? settings.codCharge : 0;
   const grandTotal = Number(
     (taxableAmount + shippingAmount + codCharge).toFixed(2)
   );
@@ -129,6 +132,20 @@ export default function CheckoutPage() {
 
     fetchAddresses();
   }, [token]);
+
+  /* ================= LOAD SETTINGS ================= */
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await api.get("/public/settings");
+        if (res.data) setSettings(res.data);
+      } catch (error) {
+        console.error("Failed to load global settings:", error);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   /* ================= COUPON VALIDATION ================= */
 
@@ -731,12 +748,12 @@ export default function CheckoutPage() {
                 )}
 
                 <div className="flex justify-between">
-                  <span>GST included (5%)</span>
+                  <span>GST included ({settings.gstPercent}%)</span>
                   <span>₹{gstAmount.toFixed(2)}</span>
                 </div>
 
                 <p className="text-xs text-text-secondary">
-                  Product prices are inclusive of 5% GST.
+                  Product prices are inclusive of {settings.gstPercent}% GST.
                 </p>
 
                 <div className="flex justify-between">
@@ -748,7 +765,7 @@ export default function CheckoutPage() {
 
                 {shippingAmount > 0 && (
                   <p className="text-xs text-text-secondary">
-                    Free shipping on orders ₹{FREE_SHIPPING_MIN_ORDER_VALUE} and above
+                    Free shipping on orders ₹{settings.freeShippingThreshold} and above
                   </p>
                 )}
 
