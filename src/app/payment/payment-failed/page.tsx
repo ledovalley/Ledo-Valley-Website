@@ -12,6 +12,7 @@ import {
 import { PAYU_URL } from "@/lib/constants";
 import { toast } from "sonner";
 import axios from "axios";
+import { trackPurchaseFailed } from "@/lib/gtm";
 
 /* ================= TYPES ================= */
 
@@ -47,6 +48,7 @@ function PaymentFailedContent() {
         if (orderId) {
           const res = await api.get<OrderSummary>(`/customer/orders/${orderId}`);
           setOrder(res.data);
+          trackPurchaseFailed(res.data, urlError || undefined);
         } else {
           // Fallback: fetch latest failed order
           const res = await api.get<OrderSummary[]>("/customer/orders");
@@ -55,6 +57,7 @@ function PaymentFailedContent() {
           );
           if (failedOrder) {
             setOrder(failedOrder);
+            trackPurchaseFailed(failedOrder, urlError || undefined);
           }
         }
       } catch (err) {

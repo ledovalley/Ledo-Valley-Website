@@ -7,8 +7,9 @@ import { useUI } from "@/context/UIContext";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import clsx from "clsx";
+import { trackViewCart, trackBeginCheckout } from "@/lib/gtm";
 
 interface Props {
   open: boolean;
@@ -36,11 +37,21 @@ export default function CartDrawer({
   const [updatingKey, setUpdatingKey] =
     useState<string | null>(null);
 
+  useEffect(() => {
+    if (open && cart.length > 0) {
+      trackViewCart(cart, totalAmount);
+    }
+  }, [open]);
+
   if (!open) return null;
 
   /* ================= CHECKOUT ================= */
 
   const handleCheckout = () => {
+    if (cart.length > 0) {
+      trackBeginCheckout(cart, totalAmount);
+    }
+
     if (!isLoggedIn) {
       onClose();
       openLogin(); // ✅ Clean

@@ -186,6 +186,21 @@ export const trackRemoveFromCart = (product: any, quantity: number = 1) => {
   } catch (err) { console.error("GTM trackRemoveFromCart Error", err); }
 };
 
+export const trackViewCart = (cartItems: any[], totalValue: number) => {
+  try {
+    trackEcommerce('view_cart', {
+      currency: "INR",
+      items: cartItems.map((item) => ({
+        item_id: item.productId || item._id,
+        item_name: item.name,
+        price: item.price,
+        item_brand: "Ledo Valley",
+        quantity: item.quantity,
+      }))
+    });
+  } catch (err) { console.error("GTM trackViewCart Error", err); }
+};
+
 export const trackBeginCheckout = (cartItems: any[], totalValue: number) => {
   if (!cartItems || cartItems.length === 0) return;
   try {
@@ -219,4 +234,56 @@ export const trackPurchase = (order: any) => {
       }))
     });
   } catch (err) { console.error("GTM trackPurchase Error", err); }
+};
+
+export const trackPurchaseFailed = (order: any, errorMsg?: string) => {
+  if (!order || !order.items || order.items.length === 0) return;
+  
+  if (typeof window !== 'undefined') {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ ecommerce: null }); // Clear previous
+    
+    window.dataLayer.push({
+      event: "purchase_failed",
+      error_data: {
+        error_code: "PAYMENT_FAILED",
+        error_message: errorMsg || order.payment?.failureReason || "Payment failed or was declined",
+        payment_gateway: "PayU",
+        payment_method: "online"
+      },
+      ecommerce: {
+        transaction_id: order.orderNumber || order._id || "",
+        value: Number(order.grandTotal) || 0,
+        currency: "INR",
+        items: order.items.map((item: any, index: number) => ({
+          item_id: String(item.productId || item.id),
+          item_name: item.productName || item.name,
+          item_brand: "Ledo Valley",
+          item_category: "Tea",
+          item_variant: "",
+          price: Number(item.price),
+          quantity: Number(item.quantity),
+          index: index
+        }))
+      },
+      fb_data: {
+        content_type: "product",
+        contents: order.items.map((item: any) => ({
+          id: String(item.productId || item.id),
+          quantity: Number(item.quantity),
+          item_price: Number(item.price)
+        })),
+        content_ids: order.items.map((item: any) => String(item.productId || item.id)),
+        num_items: order.items.reduce((total: number, i: any) => total + Number(i.quantity), 0),
+        value: Number(order.grandTotal) || 0,
+        currency: "INR"
+      },
+      user_data: {
+        email: order.customer?.email ? order.customer.email.trim().toLowerCase() : "",
+        phone: order.customer?.phone ? order.customer.phone.replace(/[^0-9+]/g, "") : "",
+        first_name: order.customer?.firstName ? order.customer.firstName.trim().toLowerCase() : "",
+        last_name: order.customer?.lastName ? order.customer.lastName.trim().toLowerCase() : ""
+      }
+    });
+  }
 };

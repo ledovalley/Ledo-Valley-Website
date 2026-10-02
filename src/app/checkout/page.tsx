@@ -12,7 +12,6 @@ import CheckoutAddressForm from "@/components/checkout/CheckoutAddressForm";
 import CheckoutEmailVerificationModal from "@/components/checkout/CheckoutEmailVerificationModal";
 import Image from "next/image";
 import { Trash2Icon } from "lucide-react";
-import { trackBeginCheckout } from "@/lib/gtm";
 
 /* ================= TYPES ================= */
 
@@ -97,10 +96,7 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     setIsMounted(true);
-    if (cart.length > 0) {
-      trackBeginCheckout(cart, grandTotal);
-    }
-  }, [cart, grandTotal]);
+  }, []);
 
   /* ================= PROTECT ROUTE ================= */
 
