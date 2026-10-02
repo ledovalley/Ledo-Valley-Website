@@ -8,6 +8,7 @@ import ProductReviews from "@/components/products/ProductReviews";
 import { AxiosError } from "axios";
 
 import { Product } from "@/types/product-api";
+import { trackViewItem } from "@/lib/gtm";
 
 
 interface EligibleOrder {
@@ -22,6 +23,18 @@ export default function ProductPageClient({ product: initialProduct }: { product
   );
   const [eligibleOrders, setEligibleOrders] = useState<EligibleOrder[]>([]);
   const [canReview, setCanReview] = useState(false);
+
+  // Track product view on mount
+  useEffect(() => {
+    if (initialProduct) {
+      // Create a simplified product object with the base price for tracking
+      const trackProduct = {
+        ...initialProduct,
+        price: initialProduct.variants?.[0]?.finalPrice || 0
+      };
+      trackViewItem(trackProduct);
+    }
+  }, [initialProduct]);
 
   // Fetch review eligibility on mount (requires auth, gracefully ignored if not logged in)
   useEffect(() => {

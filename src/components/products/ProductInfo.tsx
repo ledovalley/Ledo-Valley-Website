@@ -7,6 +7,7 @@ import { MinusIcon, PlusIcon } from "lucide-react";
 import { useState, useMemo } from "react";
 
 import { Product } from "@/types/product-api";
+import { trackAddToCart } from "@/lib/gtm";
 
 
 interface Props {
@@ -261,6 +262,8 @@ function QuantitySection({
                 quantity,
                 priceAtAdd: price,
             });
+
+            trackAddToCart({ id: productId, name, price }, quantity);
 
             setQuantity(1);
         } finally {

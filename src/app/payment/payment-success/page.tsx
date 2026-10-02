@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from "react";
 import api from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, ShoppingBag, Package, MapPin } from "lucide-react";
+import { trackPurchase } from "@/lib/gtm";
 
 /* ================= TYPES ================= */
 
@@ -42,7 +43,9 @@ function PaymentSuccessContent() {
         const res = await api.get<OrderSummary[]>("/customer/orders");
 
         if (res.data.length > 0) {
-          setOrder(res.data[0]);
+          const fetchedOrder = res.data[0];
+          setOrder(fetchedOrder);
+          trackPurchase(fetchedOrder);
         }
       } catch (err) {
         console.error("Failed to load order", err);
