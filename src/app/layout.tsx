@@ -16,6 +16,8 @@ import InitialLoader from "@/components/layout/InitialLoader";
 import ServerWakingUpOverlay from "@/components/layout/ServerWakingUpOverlay";
 import Image from "next/image";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { Suspense } from "react";
+import RouteTracker from "@/components/layout/RouteTracker";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -153,6 +155,9 @@ export default function RootLayout({
                 )}
 
                 <AppShell>{children}</AppShell>
+                <Suspense fallback={null}>
+                  <RouteTracker />
+                </Suspense>
                 <Footer />
               </UIProvider>
             </CartProvider>

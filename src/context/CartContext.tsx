@@ -242,10 +242,7 @@ export function CartProvider({
 
   /* ================= TOTALS ================= */
 
-  const totalItems = cart.reduce(
-    (sum, item) => sum + item.quantity,
-    0
-  );
+  const totalItems = cart.length;
 
   const totalAmount = cart.reduce(
     (sum, item) =>
