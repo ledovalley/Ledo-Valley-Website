@@ -30,7 +30,6 @@ interface Address {
 interface CouponPreview {
   discountAmount: number;
   finalAmount: number;
-  notApplicableOnCOD?: boolean;
 }
 
 interface Coupon {
@@ -62,10 +61,9 @@ export default function CheckoutPage() {
   const [showCouponModal, setShowCouponModal] = useState(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
   
-  const [paymentMethod, setPaymentMethod] = useState<"PAYU" | "COD">("PAYU");
+  const [paymentMethod] = useState<"PAYU">("PAYU");
 
   const [settings, setSettings] = useState({
-    codCharge: 29,
     freeShippingThreshold: 1000,
     flatShippingCharge: 90,
     gstPercent: 5,
@@ -86,9 +84,8 @@ export default function CheckoutPage() {
   );
   const shippingAmount =
     itemsTotal >= settings.freeShippingThreshold ? 0 : settings.flatShippingCharge;
-  const codCharge = paymentMethod === "COD" ? settings.codCharge : 0;
   const grandTotal = Number(
-    (taxableAmount + shippingAmount + codCharge).toFixed(2)
+    (taxableAmount + shippingAmount).toFixed(2)
   );
 
   const [isMounted, setIsMounted] = useState(false);
@@ -165,11 +162,6 @@ export default function CheckoutPage() {
   const handleApplyCoupon = async () => {
     if (!couponCode) return;
 
-    if (paymentMethod === "COD") {
-      toast.warning("Discount coupons cannot be applied to Cash on Delivery orders.");
-      return;
-    }
-
     try {
       const res = await api.post(
         "/customer/coupons/validate",
@@ -216,12 +208,6 @@ export default function CheckoutPage() {
       );
 
       const data = res.data;
-
-      if (data.method === "COD") {
-        await refreshCart();
-        router.push("/payment/payment-success");
-        return;
-      }
 
       /* ================= PAYU SUBMIT ================= */
 
@@ -689,40 +675,18 @@ export default function CheckoutPage() {
             <div className="border rounded-3xl p-6 space-y-4">
               <h2 className="text-xl font-semibold">Payment Method</h2>
               <div className="space-y-3">
-                <label className={`flex items-center gap-3 p-4 border rounded-2xl cursor-pointer transition ${paymentMethod === "PAYU" ? "border-bg-dark bg-bg-surface" : "border-gray-200"}`}>
+                <label className="flex items-center gap-3 p-4 border rounded-2xl cursor-pointer transition border-bg-dark bg-bg-surface">
                   <input
                     type="radio"
                     name="paymentMethod"
                     value="PAYU"
-                    checked={paymentMethod === "PAYU"}
-                    onChange={() => setPaymentMethod("PAYU")}
+                    checked={true}
+                    readOnly
                     className="w-5 h-5 text-bg-dark focus:ring-bg-dark cursor-pointer"
                   />
                   <div>
                     <p className="font-semibold">Pay Online</p>
                     <p className="text-xs text-gray-500">Credit/Debit Card, UPI, NetBanking</p>
-                  </div>
-                </label>
-                
-                <label className={`flex items-center gap-3 p-4 border rounded-2xl cursor-pointer transition ${paymentMethod === "COD" ? "border-bg-dark bg-bg-surface" : "border-gray-200"}`}>
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="COD"
-                    checked={paymentMethod === "COD"}
-                    onChange={() => {
-                      if (couponPreview) {
-                        setCouponCode("");
-                        setCouponPreview(null);
-                        toast.warning("Coupon removed: Discount coupons are not allowed on Cash on Delivery orders.");
-                      }
-                      setPaymentMethod("COD");
-                    }}
-                    className="w-5 h-5 text-bg-dark focus:ring-bg-dark cursor-pointer"
-                  />
-                  <div>
-                    <p className="font-semibold">Cash on Delivery</p>
-                    <p className="text-xs text-gray-500">Pay at your doorstep when receiving the order</p>
                   </div>
                 </label>
               </div>
@@ -767,13 +731,6 @@ export default function CheckoutPage() {
                   <p className="text-xs text-text-secondary">
                     Free shipping on orders ₹{settings.freeShippingThreshold} and above
                   </p>
-                )}
-
-                {codCharge > 0 && (
-                  <div className="flex justify-between">
-                    <span>COD Charge</span>
-                    <span>₹{codCharge}</span>
-                  </div>
                 )}
 
                 <div className="border-t pt-3 flex justify-between font-bold text-lg">
