@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { SITE_INFO } from "@/lib/siteInfo";
 
 const FAQS = [
   {
@@ -14,11 +15,11 @@ const FAQS = [
   },
   {
     question: "What are the return or exchange policies?",
-    answer: "We accept returns for damaged products or shipping errors within 48 hours of delivery. Please keep the original packaging intact."
+    answer: `If your order arrives damaged, defective or wrong, tell us within ${SITE_INFO.returnWindow} of delivery with photos, and keep the original packaging. See our Returns & Refund Policy for details.`
   },
   {
     question: "Who do I contact for Bulk Orders?",
-    answer: "For bulk or wholesale inquiries, please email contact@ledovalley.in for our latest B2B price list."
+    answer: `For bulk or wholesale inquiries, email ${SITE_INFO.email} or call ${SITE_INFO.phoneDisplay} for our latest B2B price list.`
   },
   {
     question: "What are the accepted payment methods?",
@@ -26,7 +27,7 @@ const FAQS = [
   },
   {
     question: "Do I need to login for order placement?",
-    answer: "Yes, you must login with your phone number via OTP to place an order and track its status."
+    answer: "Yes. Before placing an order you'll log in or create an account with your email or Google, so you can track your order and download invoices."
   }
 ];
 

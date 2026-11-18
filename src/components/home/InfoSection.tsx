@@ -16,7 +16,7 @@ export default function InfoSection() {
             </h2>
 
             <p className="text-text-secondary text-justify leading-relaxed mb-5 text-sm sm:text-base">
-              Ledo Valley Tea is rooted in the rich tea heritage of Assam, where fertile valleys, misty mornings, and generations of craftsmanship come together to create exceptional tea. With over two decades of experience in tea manufacturing and packaging, we are committed to delivering authentic Assam teas that reflect strength, aroma, and character in every cup.
+              Ledo Valley Tea is rooted in the rich tea heritage of Assam, where fertile valleys, misty mornings, and generations of craftsmanship come together to create exceptional tea. Our family has been in the Assam tea trade since 1968, and for over two decades we have manufactured and packed our own teas. We are committed to delivering authentic Assam teas that reflect strength, aroma, and character in every cup.
             </p>
 
             <p className="text-text-secondary text-justify leading-relaxed mb-5 text-sm sm:text-base">

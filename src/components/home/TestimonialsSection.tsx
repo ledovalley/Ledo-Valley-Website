@@ -56,7 +56,7 @@ export default function TestimonialsSection() {
       <div className="container mx-auto px-6">
 
         <h2 className="font-playfair text-(--color-text-on-dark) text-center text-3xl md:text-4xl font-medium mb-10">
-          What Our Customer&apos;s Say
+          What Our Customers Say
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

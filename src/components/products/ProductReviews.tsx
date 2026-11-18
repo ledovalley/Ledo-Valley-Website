@@ -199,7 +199,12 @@ export default function ProductReviews({
             </p>
 
             <p className="text-xs text-text-secondary">
-              Posted on {new Date(review.createdAt).toDateString()}
+              Posted on{" "}
+              {new Date(review.createdAt).toLocaleDateString("en-IN", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              })}
             </p>
           </div>
         ))}

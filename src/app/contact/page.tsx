@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import { Mail, Phone, MapPin, Clock } from "lucide-react";
+import { SITE_INFO } from "@/lib/siteInfo";
 
 
 export default function ContactUsPage() {
@@ -67,8 +68,8 @@ export default function ContactUsPage() {
                         Contact <span className="text-primary">Ledo Valley</span>
                     </h1>
                     <p className="mt-4 md:mt-6 text-base md:text-lg text-text-muted">
-                        Have a bulk requirement, technical query, or partnership inquiry?
-                        Our team is here to assist you professionally.
+                        Questions about an order, our teas, bulk or wholesale buying, or
+                        distribution? Send us a message and we&apos;ll get back to you.
                     </p>
                 </div>
             </section>
@@ -169,11 +170,11 @@ export default function ContactUsPage() {
             <section className="bg-primary text-text-primary py-14 text-center">
                 <div className="container mx-auto px-6 max-w-3xl">
                     <h3 className="text-xl md:text-2xl font-semibold font-playfair">
-                        Reliable Supply. Transparent Communication.
+                        Buying for your shop, café or office?
                     </h3>
                     <p className="mt-2 text-text-primary/90 text-sm md:text-base">
-                        Partner with Ledo Valley for quality industrial solutions delivered
-                        on time.
+                        We supply retailers and distributors across India. Ask us for our
+                        wholesale price list.
                     </p>
                 </div>
             </section>
@@ -184,22 +185,26 @@ export default function ContactUsPage() {
                     <InfoCard
                         icon={<Phone className="w-6 h-6 text-primary" />}
                         title="Call Us"
-                        text="+91 70990-38036"
+                        text={SITE_INFO.phoneDisplay}
+                        href={SITE_INFO.phoneHref}
                     />
                     <InfoCard
                         icon={<Mail className="w-6 h-6 text-primary" />}
                         title="Email"
-                        text="contact@ledovalley.com"
+                        text={SITE_INFO.email}
+                        href={`mailto:${SITE_INFO.email}`}
                     />
                     <InfoCard
                         icon={<MapPin className="w-6 h-6 text-primary" />}
                         title="Office"
-                        text="Unit No. 7C Cosmo Plaza Market, AT Road, Tinsukia, Assam - 786125"
+                        text={SITE_INFO.address}
+                        href={SITE_INFO.mapsHref}
+                        external
                     />
                     <InfoCard
                         icon={<Clock className="w-6 h-6 text-primary" />}
                         title="Working Hours"
-                        text="Mon – Sat, 9:00 AM – 6:00 PM"
+                        text={SITE_INFO.hours}
                     />
                 </div>
             </section>
@@ -251,14 +256,26 @@ interface InfoCardProps {
     icon: React.ReactNode;
     title: string;
     text: string;
+    href?: string;
+    external?: boolean;
 }
 
-function InfoCard({ icon, title, text }: InfoCardProps) {
+function InfoCard({ icon, title, text, href, external }: InfoCardProps) {
     return (
         <div className="rounded-2xl border border-border-muted/30 p-6 bg-bg-surface/80 hover:shadow-lg transition">
             <div className="bg-bg-dark/20 w-fit p-4 rounded-xl">{icon}</div>
             <h3 className="mt-4 font-semibold text-lg font-playfair">{title}</h3>
-            <p className="text-text-muted mt-2 text-sm">{text}</p>
+            {href ? (
+                <a
+                    href={href}
+                    {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                    className="mt-2 block text-sm text-text-muted underline-offset-2 hover:underline"
+                >
+                    {text}
+                </a>
+            ) : (
+                <p className="text-text-muted mt-2 text-sm">{text}</p>
+            )}
         </div>
     );
 }

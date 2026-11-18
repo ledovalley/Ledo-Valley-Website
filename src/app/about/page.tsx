@@ -46,7 +46,7 @@ export default function AboutPage() {
       <section className="container mx-auto px-6 mt-16 max-w-5xl">
         <div className="space-y-6 text-text-muted leading-relaxed">
           <h2 className="text-2xl md:text-3xl font-playfair font-semibold text-text-primary">
-            From Bhiwani to Brahmputra
+            From Bhiwani to the Brahmaputra
           </h2>
           <p>
             In 1968, Harilal Jain left Buwani Khera, Bhiwani, Haryana, and arrived in Tinsukia, Assam, with almost nothing. He started small — a few kilograms of tea, sold door to door, every single day. No shop. No capital. Just belief.

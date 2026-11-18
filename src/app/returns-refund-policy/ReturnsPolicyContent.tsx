@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { SITE_INFO } from "@/lib/siteInfo";
 
 export default function ReturnsPolicyContent() {
   return (
@@ -30,7 +31,7 @@ export default function ReturnsPolicyContent() {
 
             <p className="mt-4">
               If you receive your package in a damaged or broken condition,
-              please notify us within <strong>24 hours of delivery</strong>.
+              please notify us within <strong>{SITE_INFO.returnWindow} of delivery</strong>.
             </p>
 
             <ul className="list-disc pl-6 mt-4 space-y-3">
@@ -51,7 +52,9 @@ export default function ReturnsPolicyContent() {
             </p>
 
             <p className="mt-2 font-medium text-text-primary">
-              contact@ledovalley.com
+              <a href={`mailto:${SITE_INFO.email}`} className="underline underline-offset-2">
+                {SITE_INFO.email}
+              </a>
             </p>
           </div>
 
@@ -63,7 +66,7 @@ export default function ReturnsPolicyContent() {
 
             <p className="mt-4">
               If you receive a defective product, please inform us within
-              <strong> 24 hours of delivery</strong> with supporting images.
+              <strong> {SITE_INFO.returnWindow} of delivery</strong> with supporting images.
             </p>
 
             <ul className="list-disc pl-6 mt-4 space-y-3">
