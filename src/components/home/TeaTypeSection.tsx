@@ -1,7 +1,4 @@
-"use client";
-
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 
 import Green from "@/assets/images/tea/green.webp";
 import CTC from "@/assets/images/tea/ctc.webp";
@@ -29,12 +26,6 @@ const teaTypes = [
 ];
 
 export default function TeaTypesSection() {
-    const router = useRouter();
-
-    const handleClick = (type: string) => {
-        router.push(`/shop?teaType=${encodeURIComponent(type)}`);
-    };
-
     return (
         <section className="py-20 bg-bg-page">
             <div className="container mx-auto px-6">
@@ -45,10 +36,11 @@ export default function TeaTypesSection() {
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-12">
                     {teaTypes.map((tea) => (
-                        <div
+                        // Real links, so search engines can follow them to each category.
+                        <Link
                             key={tea.name}
-                            onClick={() => handleClick(tea.name)}
-                            className="cursor-pointer group"
+                            href={`/shop?teaType=${encodeURIComponent(tea.name)}`}
+                            className="cursor-pointer group block"
                         >
                             <div className="rounded-4xl overflow-hidden mb-4">
                                 <Image
@@ -65,7 +57,7 @@ export default function TeaTypesSection() {
                                     {tea.name}
                                 </p>
                             </div>
-                        </div>
+                        </Link>
                     ))}
                 </div>
 

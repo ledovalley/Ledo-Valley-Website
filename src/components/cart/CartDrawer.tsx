@@ -115,6 +115,7 @@ export default function CartDrawer({
 
           <button
             onClick={onClose}
+            aria-label="Close cart"
             className="p-2 rounded-full cursor-pointer hover:bg-black/5 transition"
           >
             <X size={18} />

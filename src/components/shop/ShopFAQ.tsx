@@ -39,7 +39,7 @@ export default function ShopFAQ() {
     };
 
     return (
-        <section className="bg-bg-page py-16 mt-16">
+        <section id="faq" className="bg-bg-page py-16 mt-16 scroll-mt-28">
             <div className="container mx-auto px-6">
                 <h3 className="text-5xl font-playfair mb-8">
                     FAQ

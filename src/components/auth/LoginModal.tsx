@@ -38,6 +38,15 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
   // Google Temp State
   const [googleTempToken, setGoogleTempToken] = useState("");
 
+  // Close with the Esc key
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
   // OTP State
   const OTP_LENGTH = 6;
   const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(""));
@@ -301,7 +310,7 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
             </p>
           </div>
 
-          <button onClick={onClose} className="p-2 rounded-full hover:bg-black/5 transition cursor-pointer">
+          <button onClick={onClose} aria-label="Close" className="p-2 rounded-full hover:bg-black/5 transition cursor-pointer">
             <X size={18} />
           </button>
         </div>

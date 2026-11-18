@@ -75,6 +75,8 @@ export default function Navbar({ onCartOpen }: NavbarProps) {
           {/* MOBILE MENU BUTTON */}
           <button
             className="md:hidden p-2"
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileOpen}
             onClick={(e) => {
               e.stopPropagation();
               setMobileOpen((prev) => !prev);
@@ -106,6 +108,7 @@ export default function Navbar({ onCartOpen }: NavbarProps) {
                   setProfileOpen((prev) => !prev);
                 }
               }}
+              aria-label={isLoggedIn ? "My account" : "Log in"}
               className="p-2 rounded-full cursor-pointer hover:bg-black/5 transition"
             >
               <User size={18} />
@@ -117,6 +120,7 @@ export default function Navbar({ onCartOpen }: NavbarProps) {
                 e.stopPropagation();
                 onCartOpen();
               }}
+              aria-label={totalItems > 0 ? `Cart, ${totalItems} item${totalItems === 1 ? "" : "s"}` : "Cart"}
               className="relative p-2 cursor-pointer rounded-full hover:bg-black/5 transition"
             >
               <ShoppingBag size={18} />

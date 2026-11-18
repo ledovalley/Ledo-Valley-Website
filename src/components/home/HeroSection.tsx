@@ -106,16 +106,15 @@ export default function HeroSection() {
             {b.subtitle || "Crafted from the finest Assam tea leaves"}
           </p>
 
-          {(b.buttonText && b.buttonLink) && (
-            <div className="mt-8">
-              <Link
-                href={b.buttonLink}
-                className="inline-flex items-center justify-center rounded-full bg-brand-primary px-8 py-3.5 text-sm font-semibold text-white transition hover:bg-brand-primary/90"
-              >
-                {b.buttonText}
-              </Link>
-            </div>
-          )}
+          {/* Every banner gets a button; set your own text/link in the admin's Home Banners. */}
+          <div className="mt-8">
+            <Link
+              href={b.buttonLink || "/shop"}
+              className="inline-flex items-center justify-center rounded-full bg-brand-primary px-8 py-3.5 text-sm font-semibold text-white transition hover:bg-brand-primary/90"
+            >
+              {b.buttonText || "Shop now"}
+            </Link>
+          </div>
         </div>
 
         {/* Carousel Indicators */}
@@ -124,6 +123,7 @@ export default function HeroSection() {
             {banners.map((_, idx) => (
               <button
                 key={idx}
+                aria-label={`Show banner ${idx + 1} of ${banners.length}`}
                 onClick={() => {
                   setCurrent(idx);
                   setImageLoaded(false);

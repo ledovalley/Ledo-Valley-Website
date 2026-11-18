@@ -23,14 +23,15 @@ export default function Footer() {
             {/* SOCIALS */}
             <div className="flex gap-4 mb-6 items-center justify-center sm:justify-start">
               {[
-                { Icon: Instagram, link: "https://www.instagram.com/ledo_valley_tea/" },
-                { Icon: Facebook, link: "https://www.facebook.com/assamtea.official/" },
-              ].map(({ Icon, link }, i) => (
+                { Icon: Instagram, link: "https://www.instagram.com/ledo_valley_tea/", label: "Ledo Valley on Instagram" },
+                { Icon: Facebook, link: "https://www.facebook.com/assamtea.official/", label: "Ledo Valley on Facebook" },
+              ].map(({ Icon, link, label }, i) => (
                 <a
                   key={i}
                   href={link}
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label={label}
                   className="
                     p-2 rounded-full
                     bg-(--color-bg-page)
@@ -70,10 +71,11 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* FAQ */}
+          {/* ACCOUNT */}
           <div>
-            <h4 className="text-sm font-semibold mb-4">FAQ</h4>
+            <h4 className="text-sm font-semibold mb-4">Your Account</h4>
             <ul className="space-y-2 text-sm text-(--color-text-on-dark)/70">
+              <li><Link href="/shop#faq">FAQ</Link></li>
               <li><Link href="/account">Account</Link></li>
               <li><Link href="/account/orders">Orders</Link></li>
             </ul>
