@@ -139,7 +139,14 @@ export default function OrderDetailsPage() {
             document.body.appendChild(form);
             form.submit();
         } catch (error: unknown) {
-            toast.error(error instanceof Error ? error.message : "Failed to retry payment");
+            // Show the backend's reason (e.g. the earlier payment went through or is still confirming).
+            const data = (error as { response?: { data?: { message?: string; paid?: boolean } } })?.response?.data;
+            if (data?.paid) {
+                toast.success(data.message || "Your payment went through.");
+                window.location.reload();
+                return;
+            }
+            toast.error(data?.message || (error instanceof Error ? error.message : "Failed to retry payment"));
         } finally {
             setRetryLoading(false);
         }

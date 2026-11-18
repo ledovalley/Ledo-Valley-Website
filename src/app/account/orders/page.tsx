@@ -114,6 +114,14 @@ export default function OrdersPage() {
         }
       }
 
+      // The backend refuses a retry when the earlier payment went through.
+      const paid = (error as { response?: { data?: { paid?: boolean } } })?.response?.data?.paid;
+      if (paid) {
+        toast.success(message, { id: "payment-retry" });
+        window.location.reload();
+        return;
+      }
+
       toast.error(message, { id: "payment-retry" });
     }
   };
