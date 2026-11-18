@@ -3,34 +3,63 @@
 import { useState, useEffect } from "react";
 import Loading from "@/app/loading";
 
+/*
+ * Brand splash on the first visit of a session.
+ *
+ * The page itself is always rendered underneath, so search engines, link
+ * previews and visitors on slow phones get the real content straight away
+ * (before, the whole site was replaced by the splash for 2.5 seconds and the
+ * server sent no page content at all).
+ *
+ * Set SPLASH_MS to 0 to switch the splash off entirely.
+ */
+const SPLASH_MS = 1000;
+const FADE_MS = 400;
+const SEEN_KEY = "lv_initial_loaded";
+
 export default function InitialLoader({ children }: { children: React.ReactNode }) {
-  const [isLoading, setIsLoading] = useState(true);
+  const [showSplash, setShowSplash] = useState(SPLASH_MS > 0);
+  const [fading, setFading] = useState(false);
 
   useEffect(() => {
-    // Check if we've already shown the loader in this session
-    const hasLoaded = sessionStorage.getItem("lv_initial_loaded");
-
-    if (hasLoaded) {
-      // Use a timeout of 0 to move the update to the next tick,
-      // avoiding synchronous cascading renders in the effect body.
-      const bailTimer = setTimeout(() => {
-        setIsLoading(false);
-      }, 0);
-      return () => clearTimeout(bailTimer);
+    let seen = false;
+    try {
+      seen = !!sessionStorage.getItem(SEEN_KEY);
+      sessionStorage.setItem(SEEN_KEY, "true");
+    } catch {
+      // storage unavailable: show the splash once per page load
     }
 
-    // Force show loader for at least 2.5 seconds
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-      sessionStorage.setItem("lv_initial_loaded", "true");
-    }, 2500);
+    if (seen || SPLASH_MS <= 0) {
+      setShowSplash(false);
+      return;
+    }
 
-    return () => clearTimeout(timer);
+    const fadeTimer = setTimeout(() => setFading(true), SPLASH_MS);
+    const hideTimer = setTimeout(() => setShowSplash(false), SPLASH_MS + FADE_MS);
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(hideTimer);
+    };
   }, []);
 
-  if (isLoading) {
-    return <Loading />;
-  }
-
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      {showSplash && (
+        <div
+          id="lv-splash"
+          aria-hidden="true"
+          className={`transition-opacity ${fading ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+          style={{ transitionDuration: `${FADE_MS}ms` }}
+        >
+          <Loading />
+        </div>
+      )}
+      {/* Without JavaScript the splash would never hide. */}
+      <noscript>
+        <style>{"#lv-splash{display:none}"}</style>
+      </noscript>
+    </>
+  );
 }

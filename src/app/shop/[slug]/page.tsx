@@ -7,16 +7,19 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://api.ledovalley.com/
 import { Product, Variant, Review } from "@/types/product-api";
 
 
+/*
+ * Returns null only when the API says the product doesn't exist (404/400).
+ * If the API is down or still waking up, this throws instead, so Next keeps
+ * serving the last good copy of the page rather than a "not found" page
+ * (which is marked noindex and could drop real products from Google).
+ */
 async function fetchProduct(slug: string): Promise<Product | null> {
-  try {
-    const res = await fetch(`${API_BASE}/customer/products/${slug}`, {
-      next: { revalidate: 60 }, // ISR: revalidate every minute
-    });
-    if (!res.ok) return null;
-    return res.json();
-  } catch {
-    return null;
-  }
+  const res = await fetch(`${API_BASE}/customer/products/${encodeURIComponent(slug)}`, {
+    next: { revalidate: 60 }, // ISR: revalidate every minute
+  });
+  if (res.status === 404 || res.status === 400) return null;
+  if (!res.ok) throw new Error(`Product API returned ${res.status} for ${slug}`);
+  return res.json();
 }
 
 /* =====================================================

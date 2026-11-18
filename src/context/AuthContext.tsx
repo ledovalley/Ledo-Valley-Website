@@ -5,6 +5,7 @@ import {
   useContext,
   useState,
   useCallback,
+  useEffect,
 } from "react";
 
 /* ================= TYPES ================= */
@@ -19,6 +20,8 @@ export interface Customer {
 }
 
 interface AuthContextType {
+  /** False until the saved login has been read from this browser. */
+  authReady: boolean;
   isLoggedIn: boolean;
   customer: Customer | null;
   token: string | null;
@@ -35,8 +38,12 @@ const getStoredToken = (): string | null => {
 
 const getStoredCustomer = (): Customer | null => {
   if (typeof window === "undefined") return null;
-  const stored = localStorage.getItem("customer");
-  return stored ? JSON.parse(stored) : null;
+  try {
+    const stored = localStorage.getItem("customer");
+    return stored ? JSON.parse(stored) : null;
+  } catch {
+    return null;
+  }
 };
 
 /* ================= CONTEXT ================= */
@@ -50,16 +57,22 @@ export function AuthProvider({
 }: {
   children: React.ReactNode;
 }) {
-  // ✅ Lazy initialization (NO useEffect needed)
+  // The saved login is read after the first render so the server-rendered
+  // page and the first browser render match (no hydration mismatch now that
+  // pages are no longer hidden behind the splash screen).
+  const [token, setToken] = useState<string | null>(null);
+  const [customer, setCustomer] = useState<Customer | null>(null);
+  const [authReady, setAuthReady] = useState(false);
 
-  const [token, setToken] = useState<string | null>(() =>
-    getStoredToken()
-  );
-
-  const [customer, setCustomer] =
-    useState<Customer | null>(() =>
-      getStoredCustomer()
-    );
+  useEffect(() => {
+    try {
+      setToken(getStoredToken());
+      setCustomer(getStoredCustomer());
+    } catch {
+      // storage unavailable: treat as logged out
+    }
+    setAuthReady(true);
+  }, []);
 
   const isLoggedIn = !!token;
 
@@ -92,6 +105,7 @@ export function AuthProvider({
   return (
     <AuthContext.Provider
       value={{
+        authReady,
         isLoggedIn,
         customer,
         token,

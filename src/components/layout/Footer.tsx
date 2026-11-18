@@ -83,7 +83,9 @@ export default function Footer() {
 
       {/* FULL-WIDTH BRAND TEXT */}
       <div className="mt-20 sm:mt-0 text-center">
-        <h1
+        {/* Decorative: a <p>, not an <h1>, so each page keeps a single main heading. */}
+        <p
+          aria-hidden="true"
           className="
             font-extrabold tracking-tighter leading-none
             text-(--color-text-on-dark)/10
@@ -91,7 +93,7 @@ export default function Footer() {
           "
         >
           LEDO VALLEY
-        </h1>
+        </p>
       </div>
     </footer>
   );

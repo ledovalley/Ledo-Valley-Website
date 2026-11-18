@@ -44,7 +44,7 @@ interface Coupon {
 
 export default function CheckoutPage() {
   const { cart, updateQuantity, removeFromCart, refreshCart } = useCart();
-  const { isLoggedIn, token } = useAuth();
+  const { authReady, isLoggedIn, token } = useAuth();
   const router = useRouter();
 
   const [addresses, setAddresses] = useState<Address[]>([]);
@@ -98,10 +98,11 @@ export default function CheckoutPage() {
   /* ================= PROTECT ROUTE ================= */
 
   useEffect(() => {
-    if (isLoggedIn === false) {
+    // Wait until the saved login has been read before deciding.
+    if (authReady && !isLoggedIn) {
       router.replace("/");
     }
-  }, [isLoggedIn, router]);
+  }, [authReady, isLoggedIn, router]);
 
   /* ================= LOAD ADDRESSES ================= */
 
