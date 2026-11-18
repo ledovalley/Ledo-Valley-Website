@@ -6,6 +6,7 @@ import {
   useState,
   useCallback,
   useEffect,
+  useRef,
 } from "react";
 import api from "@/lib/api";
 import { toast } from "sonner";
@@ -63,6 +64,33 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | null>(null);
 
+/* ================= GUEST CART =================
+   Visitors can add to cart without logging in. The cart is kept in this
+   browser and moved into their account as soon as they log in, which they
+   only need to do at checkout. */
+
+const GUEST_CART_KEY = "lv_guest_cart";
+
+const readGuestCart = (): CartItem[] => {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(GUEST_CART_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
+const writeGuestCart = (items: CartItem[]) => {
+  try {
+    if (items.length) localStorage.setItem(GUEST_CART_KEY, JSON.stringify(items));
+    else localStorage.removeItem(GUEST_CART_KEY);
+  } catch {
+    // storage unavailable (private mode): the cart still works for this visit
+  }
+};
+
 /* ================= PROVIDER ================= */
 
 export function CartProvider({
@@ -72,6 +100,12 @@ export function CartProvider({
 }) {
   const { isLoggedIn, token } = useAuth();
   const [cart, setCart] = useState<CartItem[]>([]);
+  const mergedForToken = useRef<string | null>(null);
+
+  const setGuestCart = (items: CartItem[]) => {
+    writeGuestCart(items);
+    setCart(items);
+  };
 
   /* ================= LOAD USER CART ================= */
 
@@ -107,8 +141,39 @@ export function CartProvider({
   useEffect(() => {
     const syncCart = async () => {
       if (!isLoggedIn || !token) {
-        setCart([]);
+        mergedForToken.current = null;
+        setCart(readGuestCart());
         return;
+      }
+
+      /* Move anything added before login into the account cart (once per login). */
+      if (mergedForToken.current !== token) {
+        mergedForToken.current = token;
+        const guestItems = readGuestCart();
+        writeGuestCart([]);
+
+        const failed: string[] = [];
+        for (const item of guestItems) {
+          try {
+            await api.post(
+              "/customer/cart",
+              {
+                productId: item.productId,
+                variantId: item.variantId,
+                quantity: item.quantity,
+              },
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+          } catch {
+            failed.push(`${item.name} (${item.weightLabel})`);
+          }
+        }
+
+        if (failed.length) {
+          toast.error(
+            `Some items couldn't be moved to your cart, possibly because they're out of stock: ${failed.join(", ")}`
+          );
+        }
       }
 
       try {
@@ -150,7 +215,17 @@ export function CartProvider({
 
   const addToCart = async (item: CartItem) => {
     if (!isLoggedIn || !token) {
-      toast.error("Please login to add items to cart");
+      const current = readGuestCart();
+      const existing = current.find(
+        (c) => c.productId === item.productId && c.variantId === item.variantId
+      );
+      const next = existing
+        ? current.map((c) =>
+            c === existing ? { ...c, quantity: c.quantity + item.quantity } : c
+          )
+        : [...current, item];
+      setGuestCart(next);
+      toast.success("Added to Cart");
       return;
     }
 
@@ -184,10 +259,19 @@ export function CartProvider({
     variantId: string,
     quantity: number
   ) => {
-    if (!isLoggedIn || !token) return;
-
     if (quantity <= 0) {
       await removeFromCart(productId, variantId);
+      return;
+    }
+
+    if (!isLoggedIn || !token) {
+      setGuestCart(
+        readGuestCart().map((c) =>
+          c.productId === productId && c.variantId === variantId
+            ? { ...c, quantity }
+            : c
+        )
+      );
       return;
     }
 
@@ -210,7 +294,14 @@ export function CartProvider({
     productId: string,
     variantId: string
   ) => {
-    if (!isLoggedIn || !token) return;
+    if (!isLoggedIn || !token) {
+      setGuestCart(
+        readGuestCart().filter(
+          (c) => !(c.productId === productId && c.variantId === variantId)
+        )
+      );
+      return;
+    }
 
     try {
       await api.delete(
@@ -227,7 +318,10 @@ export function CartProvider({
   /* ================= CLEAR ================= */
 
   const clearCart = async () => {
-    if (!isLoggedIn || !token) return;
+    if (!isLoggedIn || !token) {
+      setGuestCart([]);
+      return;
+    }
 
     try {
       await api.delete("/customer/cart", {

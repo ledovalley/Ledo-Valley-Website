@@ -1,8 +1,6 @@
 "use client";
 
-import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
-import { useUI } from "@/context/UIContext";
 import { MinusIcon, PlusIcon } from "lucide-react";
 import { useState, useMemo } from "react";
 
@@ -235,8 +233,6 @@ function QuantitySection({
     isOutOfStock: boolean;
 }) {
     const { addToCart } = useCart();
-    const { isLoggedIn } = useAuth();
-    const { openLogin } = useUI();
 
     const [quantity, setQuantity] = useState(1);
     const [adding, setAdding] = useState(false);
@@ -244,10 +240,7 @@ function QuantitySection({
     const handleAdd = async () => {
         if (isOutOfStock || adding) return;
 
-        if (!isLoggedIn) {
-            openLogin();
-            return;
-        }
+        // Guests can add to cart; login is only needed at checkout.
 
         try {
             setAdding(true);

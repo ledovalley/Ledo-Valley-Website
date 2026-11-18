@@ -4,9 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import clsx from "clsx";
 import { useCart } from "@/context/CartContext";
-import { useAuth } from "@/context/AuthContext";
 import { useState } from "react";
-import { useUI } from "@/context/UIContext";
 
 /* ================= TYPES ================= */
 
@@ -89,8 +87,6 @@ export default function ProductCard({
   layout = "default",
 }: Props) {
   const { addToCart } = useCart();
-  const { isLoggedIn } = useAuth();
-  const { openLogin } = useUI(); // ✅ clean login trigger
 
   const [adding, setAdding] = useState(false);
 
@@ -114,10 +110,7 @@ export default function ProductCard({
 
     if (stock <= 0 || adding) return;
 
-    if (!isLoggedIn) {
-      openLogin(); // ✅ no more window event hack
-      return;
-    }
+    // Guests can add to cart; login is only needed at checkout.
 
     try {
       setAdding(true);
