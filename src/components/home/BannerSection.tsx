@@ -11,7 +11,9 @@ export default function BannerSection() {
           src={bannerImage}
           alt="Ledo Valley Tea Farming"
           fill
-          priority
+          // Further down the page: load when scrolled near, not in competition with the top banner.
+          sizes="100vw"
+          quality={70}
           className="object-contain"
         />
 

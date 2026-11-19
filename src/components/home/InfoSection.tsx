@@ -58,7 +58,9 @@ export default function InfoSection() {
             xl:w-165
             2xl:w-200
           "
-          priority
+          // Below the top banner: load when scrolled near, at the size actually shown.
+          sizes="(max-width: 640px) 360px, (max-width: 1024px) 720px, 800px"
+          quality={70}
         />
       </div>
 

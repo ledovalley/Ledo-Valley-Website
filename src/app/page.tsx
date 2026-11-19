@@ -6,6 +6,14 @@ import NewsletterSection from "@/components/home/NewsletterSection";
 import TeaTypesSection from "@/components/home/TeaTypeSection";
 import TestimonialsSection from "@/components/home/TestimonialsSection";
 import TopSellersSection from "@/components/home/TopSellerSection";
+import type { HeroBanner } from "@/components/home/HeroSection";
+import type { Product } from "@/hooks/useTopSellerProducts";
+import type { Testimonial } from "@/components/home/TestimonialsSection";
+import { getPublicData } from "@/lib/serverData";
+
+// Rebuild the cached homepage in the background at most every 5 minutes,
+// so admin changes to banners/products show up within about 5 minutes.
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Ledo Valley | Buy Premium Assam Tea Online",
@@ -16,7 +24,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  // Fetched on the server in parallel and cached (see lib/serverData.ts).
+  const [heroBanners, topSellers, testimonials] = await Promise.all([
+    getPublicData<HeroBanner[]>("/customer/home-banner"),
+    getPublicData<{ products?: Product[] }>("/customer/products?sort=popular&limit=3"),
+    getPublicData<Testimonial[]>("/admin/reviews/testimonials"),
+  ]);
+
   const organizationJsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -63,12 +78,12 @@ export default function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
       />
-      <HeroSection />
+      <HeroSection initialBanners={Array.isArray(heroBanners) ? heroBanners : undefined} />
       <InfoSection />
       <TeaTypesSection />
-      <TopSellersSection />
+      <TopSellersSection initialProducts={topSellers?.products} />
       <BannerSection />
-      <TestimonialsSection />
+      <TestimonialsSection initialTestimonials={Array.isArray(testimonials) ? testimonials : undefined} />
       <NewsletterSection />
     </>
   );

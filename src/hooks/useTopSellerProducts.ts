@@ -25,11 +25,13 @@ export interface Product {
   variants: Variant[];
 }
 
-export default function useTopSellerProducts() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+/* initialProducts comes from the server (cached); the browser only fetches if it's missing. */
+export default function useTopSellerProducts(initialProducts?: Product[]) {
+  const [products, setProducts] = useState<Product[]>(initialProducts ?? []);
+  const [loading, setLoading] = useState(!initialProducts);
 
   useEffect(() => {
+    if (initialProducts) return;
     api
       .get("/customer/products", {
         params: {
@@ -41,7 +43,7 @@ export default function useTopSellerProducts() {
         setProducts(res.data.products || []);
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [initialProducts]);
 
   return { products, loading };
 }

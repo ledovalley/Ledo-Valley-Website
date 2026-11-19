@@ -4,14 +4,14 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { X } from "lucide-react";
 
-import ShopBanner from "@/components/shop/ShopBanner";
+import ShopBanner, { type ShopBannerData } from "@/components/shop/ShopBanner";
 import ShopToolbar from "@/components/shop/ShopToolbar";
 import ShopFilters from "@/components/shop/ShopFilters";
 import ShopProducts from "@/components/shop/ShopProducts";
 import ShopPagination from "@/components/shop/ShopPagination";
 import ShopFAQ from "@/components/shop/ShopFAQ";
 
-import useShopProducts from "@/hooks/useShopProducts";
+import useShopProducts, { type InitialShopData } from "@/hooks/useShopProducts";
 
 export interface Filters {
   available?: boolean;
@@ -21,7 +21,15 @@ export interface Filters {
   maxPrice?: number;
 }
 
-export default function ShopClient() {
+export default function ShopClient({
+  initialProducts,
+  initialBanners,
+}: {
+  /** Page 1 / newest / no filters, from the server (cached). */
+  initialProducts?: InitialShopData;
+  /** Default shop banners, from the server (cached). */
+  initialBanners?: ShopBannerData[];
+} = {}) {
   const searchParams = useSearchParams();
   const teaTypeFromUrl = searchParams.get("teaType");
 
@@ -52,11 +60,12 @@ export default function ShopClient() {
     limit,
     sort,
     filters,
+    initial: initialProducts,
   });
 
   return (
     <div className="bg-bg-page">
-      <ShopBanner teaType={teaTypeFromUrl} />
+      <ShopBanner teaType={teaTypeFromUrl} initialBanners={initialBanners} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-12">
 

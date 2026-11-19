@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Star, StarHalf, CheckCircle } from "lucide-react";
 import api from "@/lib/api";
 
-interface Testimonial {
+export interface Testimonial {
   _id: string;
   customerName: string;
   rating: number;
@@ -33,11 +33,13 @@ function StarRating({ rating }: { rating: number }) {
   );
 }
 
-export default function TestimonialsSection() {
-  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
-  const [loading, setLoading] = useState(true);
+/* initialTestimonials comes from the server (cached); the browser only fetches if it's missing. */
+export default function TestimonialsSection({ initialTestimonials }: { initialTestimonials?: Testimonial[] }) {
+  const [testimonials, setTestimonials] = useState<Testimonial[]>(initialTestimonials ?? []);
+  const [loading, setLoading] = useState(!initialTestimonials);
 
   useEffect(() => {
+    if (initialTestimonials) return;
     api
       .get("/admin/reviews/testimonials")
       .then((res) => {
@@ -46,7 +48,7 @@ export default function TestimonialsSection() {
       .finally(() => {
         setLoading(false);
       });
-  }, []);
+  }, [initialTestimonials]);
 
   if (loading) return null;
   if (!testimonials.length) return null;

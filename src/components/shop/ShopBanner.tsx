@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import axios from "@/lib/api";
+import { cloudinaryResized } from "@/lib/cloudinary";
 
-interface Banner {
+export interface ShopBannerData {
   _id: string;
   image: {
     url: string;
@@ -14,15 +15,34 @@ interface Banner {
   };
 }
 
-export default function ShopBanner({ teaType }: { teaType?: string | null }) {
-  const [banners, setBanners] = useState<Banner[]>([]);
+type Banner = ShopBannerData;
+
+/*
+ * initialBanners: the default (no tea type) banners from the server, cached,
+ * so the shop banner shows immediately. Tea-type pages still fetch their own.
+ */
+export default function ShopBanner({
+  teaType,
+  initialBanners,
+}: {
+  teaType?: string | null;
+  initialBanners?: Banner[];
+}) {
+  const useInitial = !teaType && !!initialBanners;
+  const [banners, setBanners] = useState<Banner[]>(useInitial ? initialBanners! : []);
   const [current, setCurrent] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const [loading, setLoading] = useState(!useInitial);
+  const [imageLoaded, setImageLoaded] = useState(useInitial);
 
   /* ================= FETCH ================= */
 
   useEffect(() => {
+    if (!teaType && initialBanners) {
+      setBanners(initialBanners);
+      setCurrent(0);
+      setLoading(false);
+      return;
+    }
     const load = async () => {
       try {
         setLoading(true);
@@ -38,7 +58,7 @@ export default function ShopBanner({ teaType }: { teaType?: string | null }) {
     };
 
     load();
-  }, [teaType]);
+  }, [teaType, initialBanners]);
 
   /* ================= ROTATION (ONLY IF MULTIPLE) ================= */
 
@@ -75,15 +95,17 @@ export default function ShopBanner({ teaType }: { teaType?: string | null }) {
         {currentBanner.mobileImage?.url && (
           <source
             media="(max-width: 640px)"
-            srcSet={currentBanner.mobileImage.url}
+            srcSet={cloudinaryResized(currentBanner.mobileImage.url, 828)}
           />
         )}
         <Image
           src={currentBanner.image.url}
           alt="Shop Banner"
           fill
-          priority
-          onLoadingComplete={() => setImageLoaded(true)}
+          priority={current === 0}
+          sizes="100vw"
+          quality={70}
+          onLoad={() => setImageLoaded(true)}
           className={`object-cover ${shouldAnimate
             ? `transition-opacity duration-700 ${imageLoaded ? "opacity-100" : "opacity-0"
             }`

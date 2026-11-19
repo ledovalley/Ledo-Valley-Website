@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import api from "@/lib/api";
 import type { Filters } from "@/app/shop/ShopClient";
+import { shopRequestKey } from "@/lib/shopKey";
 
 interface Variant {
   _id: string;
@@ -21,7 +22,7 @@ interface Variant {
   }[];
 }
 
-interface Product {
+export interface ShopProduct {
   _id: string;
   slug: string;
   name: string;
@@ -30,22 +31,41 @@ interface Product {
   variants: Variant[];
 }
 
+type Product = ShopProduct;
+
+export interface InitialShopData {
+  /** Which request this data answers, e.g. page 1, newest, no filters. */
+  key: string;
+  products: Product[];
+  total: number;
+}
+
 interface Params {
   page: number;
   limit: number;
   sort: string;
   filters: Filters;
+  /** First page from the server (cached); used instead of a browser request when it matches. */
+  initial?: InitialShopData;
 }
+
+
 
 export default function useShopProducts({
   page,
   limit,
   sort,
   filters,
+  initial,
 }: Params) {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [total, setTotal] = useState(0);
+  const requestKey = shopRequestKey(page, limit, sort, filters);
+  const usableInitial = initial && initial.key === requestKey ? initial : undefined;
+
+  const [products, setProducts] = useState<Product[]>(usableInitial?.products ?? []);
+  const [total, setTotal] = useState(usableInitial?.total ?? 0);
   const [loading, setLoading] = useState(false);
+  // Skip the browser request only for the very first render when the server already sent it.
+  const skipFirstFetch = useRef(!!usableInitial);
 
   /**
    * 🔑 Stable filters key
@@ -56,6 +76,11 @@ export default function useShopProducts({
   );
 
   useEffect(() => {
+    if (skipFirstFetch.current) {
+      skipFirstFetch.current = false;
+      return;
+    }
+
     let active = true;
 
     const fetchProducts = async () => {

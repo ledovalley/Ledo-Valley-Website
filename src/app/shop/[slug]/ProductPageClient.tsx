@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import api from "@/lib/api";
+import { getCustomerToken } from "@/lib/customerAuth";
 import ProductImages from "@/components/products/ProductImages";
 import ProductInfo from "@/components/products/ProductInfo";
 import ProductReviews from "@/components/products/ProductReviews";
@@ -36,10 +37,15 @@ export default function ProductPageClient({ product: initialProduct }: { product
     }
   }, [initialProduct]);
 
-  // Fetch review eligibility on mount (requires auth, gracefully ignored if not logged in)
+  // Fetch review eligibility on mount. Only for logged-in customers: for
+  // visitors it always says "no" and needlessly wakes the backend.
   useEffect(() => {
     let cancelled = false;
     async function checkEligibility() {
+      if (!getCustomerToken()) {
+        setCanReview(false);
+        return;
+      }
       try {
         const res = await api.get(
           `/customer/products/${initialProduct._id}/review-eligibility`

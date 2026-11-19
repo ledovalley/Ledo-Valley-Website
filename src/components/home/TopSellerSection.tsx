@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import useTopSellerProducts from "@/hooks/useTopSellerProducts";
+import useTopSellerProducts, { type Product } from "@/hooks/useTopSellerProducts";
 import TopSellerProductCard from "../products/TopSellerProductCard";
 
-export default function TopSellerSection() {
-  const { products, loading } = useTopSellerProducts();
+export default function TopSellerSection({ initialProducts }: { initialProducts?: Product[] }) {
+  const { products, loading } = useTopSellerProducts(initialProducts);
 
   if (loading || !products.length) return null;
 

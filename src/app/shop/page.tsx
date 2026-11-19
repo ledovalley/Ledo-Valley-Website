@@ -1,6 +1,18 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import ShopClient from "./ShopClient";
+import { getPublicData } from "@/lib/serverData";
+import type { ShopProduct } from "@/hooks/useShopProducts";
+import { shopRequestKey } from "@/lib/shopKey";
+import type { ShopBannerData } from "@/components/shop/ShopBanner";
+
+// Rebuild the cached shop data in the background at most every 2 minutes.
+export const revalidate = 120;
+
+// Must match the defaults in ShopClient (page 1, 9 per page, newest, no filters).
+const DEFAULT_PAGE = 1;
+const DEFAULT_LIMIT = 9;
+const DEFAULT_SORT = "newest";
 
 export const metadata: Metadata = {
   title: "Shop Premium Assam Tea Online",
@@ -17,7 +29,23 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ShopPage() {
+export default async function ShopPage() {
+  const [firstPage, banners] = await Promise.all([
+    getPublicData<{ products?: ShopProduct[]; total?: number }>(
+      `/customer/products?page=${DEFAULT_PAGE}&limit=${DEFAULT_LIMIT}&sort=${DEFAULT_SORT}`,
+      120
+    ),
+    getPublicData<ShopBannerData[]>("/customer/shop-banner", 300),
+  ]);
+
+  const initialProducts = firstPage?.products
+    ? {
+        key: shopRequestKey(DEFAULT_PAGE, DEFAULT_LIMIT, DEFAULT_SORT, { teaTypes: [] }),
+        products: firstPage.products,
+        total: firstPage.total ?? firstPage.products.length,
+      }
+    : undefined;
+
   return (
     <Suspense
       fallback={
@@ -26,7 +54,10 @@ export default function ShopPage() {
         </div>
       }
     >
-      <ShopClient />
+      <ShopClient
+        initialProducts={initialProducts}
+        initialBanners={Array.isArray(banners) ? banners : undefined}
+      />
     </Suspense>
   );
 }

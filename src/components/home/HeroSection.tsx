@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import axios from "@/lib/api";
+import { cloudinaryResized } from "@/lib/cloudinary";
 
-interface Banner {
+export interface HeroBanner {
   _id: string;
   image: { url: string };
   mobileImage?: { url: string };
@@ -15,13 +16,21 @@ interface Banner {
   buttonLink?: string;
 }
 
-export default function HeroSection() {
-  const [banners, setBanners] = useState<Banner[]>([]);
+type Banner = HeroBanner;
+
+/*
+ * initialBanners comes from the server (cached), so the first banner shows
+ * immediately. If the server couldn't get them, the browser fetches them.
+ */
+export default function HeroSection({ initialBanners }: { initialBanners?: Banner[] }) {
+  const [banners, setBanners] = useState<Banner[]>(initialBanners ?? []);
   const [current, setCurrent] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const [loading, setLoading] = useState(!initialBanners);
+  // The first banner is shown straight away; later slides fade in once loaded.
+  const [imageLoaded, setImageLoaded] = useState(true);
 
   useEffect(() => {
+    if (initialBanners) return;
     const load = async () => {
       try {
         const { data } = await axios.get("/customer/home-banner");
@@ -33,7 +42,7 @@ export default function HeroSection() {
       }
     };
     load();
-  }, []);
+  }, [initialBanners]);
 
   useEffect(() => {
     if (banners.length <= 1) return;
@@ -61,15 +70,18 @@ export default function HeroSection() {
           {b.mobileImage?.url && (
             <source
               media="(max-width: 640px)"
-              srcSet={b.mobileImage.url}
+              // Phone-sized, compressed copy instead of the full original.
+              srcSet={cloudinaryResized(b.mobileImage.url, 828)}
             />
           )}
           <Image
             src={b.image.url}
             alt={b.title || "Hero Banner"}
             fill
-            priority
-            onLoadingComplete={() => setImageLoaded(true)}
+            priority={current === 0}
+            sizes="100vw"
+            quality={70}
+            onLoad={() => setImageLoaded(true)}
             className={`object-cover transition-opacity duration-1000 ${imageLoaded ? "opacity-100" : "opacity-0"
               }`}
           />
