@@ -18,6 +18,7 @@ import Image from "next/image";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Suspense } from "react";
 import RouteTracker from "@/components/layout/RouteTracker";
+import WhatsAppButton from "@/components/layout/WhatsAppButton";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -159,6 +160,7 @@ export default function RootLayout({
                   <RouteTracker />
                 </Suspense>
                 <Footer />
+                <WhatsAppButton />
               </UIProvider>
             </CartProvider>
           </InitialLoader>
