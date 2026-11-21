@@ -1,5 +1,6 @@
 export interface Variant {
   _id: string;
+  variantSku?: string;
   weight: { value: number; unit: string };
   sellingPrice: number;
   finalPrice: number;

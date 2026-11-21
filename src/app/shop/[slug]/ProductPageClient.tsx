@@ -25,6 +25,18 @@ export default function ProductPageClient({ product: initialProduct }: { product
   const [eligibleOrders, setEligibleOrders] = useState<EligibleOrder[]>([]);
   const [canReview, setCanReview] = useState(false);
 
+  // Open the pack size named in the link (?variant=…), e.g. from Google Shopping.
+  useEffect(() => {
+    try {
+      const wanted = new URLSearchParams(window.location.search).get("variant");
+      if (wanted && initialProduct.variants.some((v) => v._id === wanted)) {
+        setSelectedVariantId(wanted);
+      }
+    } catch {
+      // ignore malformed URLs
+    }
+  }, [initialProduct.variants]);
+
   // Track product view on mount
   useEffect(() => {
     if (initialProduct) {

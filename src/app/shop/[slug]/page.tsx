@@ -111,11 +111,6 @@ export default async function SingleProductPage({
   if (!product) return notFound();
 
   // JSON-LD Product Schema for Google Rich Results (star ratings in search!)
-  const cheapestVariant = product.variants?.reduce(
-    (min, v) => (v.finalPrice < (min?.finalPrice ?? Infinity) ? v : min),
-    product.variants[0]
-  );
-
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -136,21 +131,25 @@ export default async function SingleProductPage({
         worstRating: "1",
       },
     }),
-    ...(cheapestVariant && {
-      offers: {
+    // One offer per pack size, so Google sees every size and price the page sells.
+    ...(product.variants.length > 0 && {
+      offers: product.variants.map((v) => ({
         "@type": "Offer",
+        ...(v.variantSku && { sku: v.variantSku }),
+        name: `${v.weight.value} ${v.weight.unit}`,
         priceCurrency: "INR",
-        price: cheapestVariant.finalPrice.toString(),
+        price: v.finalPrice.toFixed(2),
         availability:
-          cheapestVariant.stock > 0
+          v.stock > 0 && v.availability !== false
             ? "https://schema.org/InStock"
             : "https://schema.org/OutOfStock",
+        itemCondition: "https://schema.org/NewCondition",
         seller: {
           "@type": "Organization",
           name: "Ledo Valley",
         },
-        url: `https://www.ledovalley.com/shop/${product.slug}`,
-      },
+        url: `https://www.ledovalley.com/shop/${product.slug}?variant=${v._id}`,
+      })),
     }),
     ...(product.reviews?.length > 0 && {
       review: product.reviews.slice(0, 5).map((r) => ({
