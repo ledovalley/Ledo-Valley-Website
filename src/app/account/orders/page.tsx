@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { PAYU_URL } from "@/lib/constants";
+import { trackingUrl } from "@/lib/tracking";
 
 interface Weight {
   value: number;
@@ -41,6 +42,10 @@ interface Order {
     status: string;
     retryCount?: number;
   };
+  shipping?: {
+    awbCode?: string | null;
+    courierName?: string | null;
+  } | null;
 }
 
 export default function OrdersPage() {
@@ -395,11 +400,19 @@ export default function OrdersPage() {
                     </button>
                   )}
 
-                  {order.status === "SHIPPED" && (
-                    <button className="inline-flex items-center justify-center rounded-full border border-neutral-300 bg-bg-surface px-5 py-2.5 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50">
-                      Track Order
-                    </button>
-                  )}
+                  {["READY_TO_SHIP", "SHIPPED"].includes(order.status) &&
+                    trackingUrl(order.shipping?.awbCode) && (
+                      <a
+                        href={trackingUrl(order.shipping?.awbCode) as string}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center gap-2 rounded-full border border-neutral-300 bg-bg-surface px-5 py-2.5 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50"
+                      >
+                        <Truck className="w-4 h-4" aria-hidden="true" />
+                        Track parcel
+                        <span className="sr-only">(opens in a new tab)</span>
+                      </a>
+                    )}
 
                   <button
                     onClick={() => router.push(`/account/orders/${order._id}`)}

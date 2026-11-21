@@ -6,6 +6,8 @@ import api from "@/lib/api";
 import Image from "next/image";
 import { toast } from "sonner";
 import { PAYU_URL } from "@/lib/constants";
+import ShipmentCard from "@/components/orders/ShipmentCard";
+import type { ShipmentInfo } from "@/lib/tracking";
 
 interface OrderItem {
     productName: string;
@@ -45,6 +47,7 @@ interface Order {
         status: string;
         retryCount?: number;
     };
+    shipping?: ShipmentInfo | null;
 }
 
 export default function OrderDetailsPage() {
@@ -287,6 +290,9 @@ export default function OrderDetailsPage() {
                     </div>
                 </div>
             </div>
+
+            {/* ================= DELIVERY / TRACKING ================= */}
+            <ShipmentCard status={order.status} shipping={order.shipping} />
 
             {/* ================= MAIN GRID ================= */}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 sm:gap-8">
