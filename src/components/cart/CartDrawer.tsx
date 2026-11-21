@@ -10,6 +10,7 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import clsx from "clsx";
 import { trackViewCart, trackBeginCheckout } from "@/lib/gtm";
+import FreeShippingBar from "./FreeShippingBar";
 
 interface Props {
   open: boolean;
@@ -255,6 +256,8 @@ export default function CartDrawer({
             {/* ================= FOOTER ================= */}
 
             <div className="border-t px-6 py-6 space-y-4">
+              <FreeShippingBar itemsTotal={totalAmount} />
+
               <div className="flex justify-between text-lg font-semibold">
                 <span>Total</span>
                 <span className="text-brand-primary">
