@@ -176,6 +176,12 @@ export default function ContactUsPage() {
                         We supply retailers and distributors across India. Ask us for our
                         wholesale price list.
                     </p>
+                    <a
+                        href="/distributor"
+                        className="inline-block mt-5 px-6 py-2.5 rounded-full bg-bg-dark text-white text-sm font-medium hover:bg-bg-dark/90"
+                    >
+                        Become a distributor
+                    </a>
                 </div>
             </section>
 

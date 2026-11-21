@@ -188,6 +188,14 @@ export default function Navbar({ onCartOpen }: NavbarProps) {
             >
               Contact
             </Link>
+
+            <Link
+              href="/distributor"
+              className="block text-sm font-medium"
+              onClick={() => setMobileOpen(false)}
+            >
+              Become a Distributor
+            </Link>
           </div>
         )}
       </div>
