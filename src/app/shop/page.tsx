@@ -4,6 +4,7 @@ import ShopClient from "./ShopClient";
 import { getPublicData } from "@/lib/serverData";
 import type { ShopProduct } from "@/hooks/useShopProducts";
 import { shopRequestKey } from "@/lib/shopKey";
+import { computeShopFacets } from "@/lib/shopFacets";
 import type { ShopBannerData } from "@/components/shop/ShopBanner";
 
 // Rebuild the cached shop data in the background at most every 2 minutes.
@@ -30,13 +31,20 @@ export const metadata: Metadata = {
 };
 
 export default async function ShopPage() {
-  const [firstPage, banners] = await Promise.all([
+  const [firstPage, banners, catalogue] = await Promise.all([
     getPublicData<{ products?: ShopProduct[]; total?: number }>(
       `/customer/products?page=${DEFAULT_PAGE}&limit=${DEFAULT_LIMIT}&sort=${DEFAULT_SORT}`,
       120
     ),
     getPublicData<ShopBannerData[]>("/customer/shop-banner", 300),
+    // Up to 50 products (the API's maximum) to work out the real sizes and price range.
+    getPublicData<{ products?: Parameters<typeof computeShopFacets>[0] }>(
+      "/customer/products?page=1&limit=50&sort=newest",
+      300
+    ),
   ]);
+
+  const facets = computeShopFacets(catalogue?.products);
 
   const initialProducts = firstPage?.products
     ? {
@@ -57,6 +65,7 @@ export default async function ShopPage() {
       <ShopClient
         initialProducts={initialProducts}
         initialBanners={Array.isArray(banners) ? banners : undefined}
+        facets={facets}
       />
     </Suspense>
   );

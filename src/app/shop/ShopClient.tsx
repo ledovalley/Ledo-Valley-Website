@@ -12,6 +12,7 @@ import ShopPagination from "@/components/shop/ShopPagination";
 import ShopFAQ from "@/components/shop/ShopFAQ";
 
 import useShopProducts, { type InitialShopData } from "@/hooks/useShopProducts";
+import type { ShopFacets } from "@/lib/shopFacets";
 
 export interface Filters {
   available?: boolean;
@@ -24,12 +25,16 @@ export interface Filters {
 export default function ShopClient({
   initialProducts,
   initialBanners,
+  facets,
 }: {
   /** Page 1 / newest / no filters, from the server (cached). */
   initialProducts?: InitialShopData;
   /** Default shop banners, from the server (cached). */
   initialBanners?: ShopBannerData[];
+  /** Pack sizes and price range actually on sale (for the filters). */
+  facets?: ShopFacets;
 } = {}) {
+  const priceMax = facets?.priceMax ?? 4000;
   const searchParams = useSearchParams();
   const teaTypeFromUrl = searchParams.get("teaType");
 
@@ -44,7 +49,7 @@ export default function ShopClient({
     teaTypes: teaTypeFromUrl ? [teaTypeFromUrl] : [],
     weight: undefined,
     minPrice: 0,
-    maxPrice: 4000,
+    maxPrice: priceMax,
   });
 
   /* ================= APPLIED FILTER STATE (used for API) ================= */
@@ -91,6 +96,8 @@ export default function ShopClient({
           <aside className="hidden lg:block lg:col-span-3">
             <ShopFilters
               groupId="desktop"   // 👈 IMPORTANT
+              weightOptions={facets?.weights}
+              priceMax={priceMax}
               filters={uiFilters}
               setFilters={setUiFilters}
               onApply={(newFilters) => {
@@ -132,6 +139,8 @@ export default function ShopClient({
             <div className="flex-1 overflow-y-auto p-8">
               <ShopFilters
                 groupId="mobile"   // 👈 IMPORTANT
+                weightOptions={facets?.weights}
+                priceMax={priceMax}
                 filters={uiFilters}
                 setFilters={setUiFilters}
                 onApply={(newFilters) => {

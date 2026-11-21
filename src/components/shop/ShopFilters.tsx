@@ -1,6 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
+import { weightLabel, priceStep } from "@/lib/shopFacets";
 
 const TEA_TYPES = [
   "Black Tea",
@@ -8,13 +9,9 @@ const TEA_TYPES = [
   "Organic Tea",
   "Speciality Tea",
 ];
-const WEIGHTS = [
-  { label: "100g", value: 100 },
-  { label: "250g", value: 250 },
-  { label: "500g", value: 500 },
-  { label: "750g", value: 750 },
-  { label: "1kg", value: 1000 },
-];
+// Used only if the shop couldn't work out the real pack sizes.
+const DEFAULT_WEIGHTS = [100, 250, 500, 750, 1000];
+const DEFAULT_PRICE_MAX = 4000;
 
 interface Filters {
   available?: boolean;
@@ -29,6 +26,10 @@ interface Props {
   setFilters: React.Dispatch<React.SetStateAction<Filters>>;
   onApply: (filters: Filters) => void;
   groupId?: string; // 👈 NEW
+  /** Pack sizes actually on sale, in grams. */
+  weightOptions?: number[];
+  /** Top of the price slider, from the real prices. */
+  priceMax?: number;
 }
 
 export default function ShopFilters({
@@ -36,7 +37,14 @@ export default function ShopFilters({
   setFilters,
   onApply,
   groupId = "default",
+  weightOptions,
+  priceMax = DEFAULT_PRICE_MAX,
 }: Props) {
+  const weights = (weightOptions?.length ? weightOptions : DEFAULT_WEIGHTS).map((g) => ({
+    label: weightLabel(g),
+    value: g,
+  }));
+  const step = priceStep(priceMax);
 
   const toggleTeaType = (type: string) => {
     setFilters((prev) => ({
@@ -57,7 +65,7 @@ export default function ShopFilters({
       teaTypes: [],
       weight: undefined,
       minPrice: 0,
-      maxPrice: 4000,
+      maxPrice: priceMax,
     };
 
     setFilters(cleared);
@@ -125,7 +133,22 @@ export default function ShopFilters({
         <div className="mb-6 lg:px-0">
           <h4 className="font-semibold mb-3">Weight</h4>
 
-          {WEIGHTS.map((w) => (
+          <label className="flex items-center justify-between text-sm mb-2">
+            <span>Any size</span>
+            <input
+              type="radio"
+              name={`weight-${groupId}`}
+              checked={filters.weight === undefined}
+              onChange={() =>
+                setFilters((prev) => ({
+                  ...prev,
+                  weight: undefined,
+                }))
+              }
+            />
+          </label>
+
+          {weights.map((w) => (
             <label
               key={w.value}
               className="flex items-center justify-between text-sm mb-2"
@@ -153,9 +176,10 @@ export default function ShopFilters({
           <input
             type="range"
             min={0}
-            max={4000}
-            step={50}
-            value={filters.maxPrice || 4000}
+            max={priceMax}
+            step={step}
+            value={Math.min(filters.maxPrice || priceMax, priceMax)}
+            aria-label="Maximum price"
             onChange={(e) =>
               setFilters((prev) => ({
                 ...prev,
@@ -167,7 +191,7 @@ export default function ShopFilters({
 
           <div className="flex justify-between text-sm text-text-secondary">
             <span>₹0</span>
-            <span>₹{filters.maxPrice || 4000}</span>
+            <span>Up to ₹{Math.min(filters.maxPrice || priceMax, priceMax).toLocaleString("en-IN")}</span>
           </div>
         </div>
 
