@@ -158,14 +158,14 @@ export default function CartDrawer({
                       <Link
                         href={`/shop/${item.slug}`}
                         onClick={onClose}
-                        className="relative w-18 h-18 rounded-xl overflow-hidden bg-white border border-black/5 shrink-0"
+                        className="relative w-20 h-20 rounded-xl overflow-hidden bg-white border border-black/15 shrink-0"
                       >
                         {item.image && (
                           <Image
                             src={item.image}
                             alt={item.name}
                             fill
-                            className="object-contain p-1.5"
+                            className="object-contain"
                           />
                         )}
                       </Link>
@@ -264,7 +264,7 @@ export default function CartDrawer({
                       >
                         <span className="flex items-center gap-1.5">
                           <span className="w-1.5 h-1.5 rounded-full bg-brand-primary" />
-                          <span>Make it a 2-Pack</span>
+                          <span>Make it a Pack of 2</span>
                         </span>
                         <span className="font-semibold text-2xs uppercase tracking-wider bg-brand-primary text-white px-2 py-0.5 rounded-md">
                           + Add 1

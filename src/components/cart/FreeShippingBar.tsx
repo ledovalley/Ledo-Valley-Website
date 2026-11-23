@@ -23,26 +23,42 @@ export default function FreeShippingBar({ itemsTotal }: { itemsTotal: number }) 
   const percent = Math.min(100, Math.round((itemsTotal / threshold) * 100));
 
   return (
-    <div className="px-4 py-3 rounded-2xl bg-bg-surface" role="status" aria-live="polite">
-      <p className="flex items-center gap-2 text-sm text-text-primary">
-        <Truck size={16} aria-hidden="true" className="shrink-0" />
-        {reached ? (
-          <span>
-            <strong>You&apos;ve got free delivery!</strong>
-          </span>
-        ) : (
-          <span>
-            Add <strong>{inr(remaining)}</strong> more for <strong>free delivery</strong>
-            <span className="text-text-secondary"> (otherwise {inr(charge)})</span>
-          </span>
-        )}
-      </p>
+    <div
+      className="p-3.5 rounded-2xl bg-bg-surface border border-black/8 shadow-xs space-y-2.5"
+      role="status"
+      aria-live="polite"
+    >
+      <div className="flex items-center justify-between text-xs">
+        <div className="flex items-center gap-2 text-text-primary font-medium">
+          <div className="w-6 h-6 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary shrink-0">
+            <Truck size={13} aria-hidden="true" />
+          </div>
+
+          {reached ? (
+            <span className="font-semibold text-green-700">
+              Unlocked Free Delivery! 🎉
+            </span>
+          ) : (
+            <span>
+              Add <strong className="text-brand-primary font-bold">{inr(remaining)}</strong> more for <strong className="font-semibold">Free Delivery</strong>
+            </span>
+          )}
+        </div>
+
+        <span className="text-2xs font-semibold text-text-secondary bg-black/5 px-2 py-0.5 rounded-md shrink-0">
+          {reached ? "100%" : `${percent}%`}
+        </span>
+      </div>
+
       <div
-        className="h-1.5 mt-2 overflow-hidden rounded-full bg-black/10"
+        className="h-2 w-full overflow-hidden rounded-full bg-black/6"
         aria-hidden="true"
       >
         <div
-          className={`h-full rounded-full transition-all duration-500 ${reached ? "bg-green-600" : "bg-bg-dark"}`}
+          className={`h-full rounded-full transition-all duration-500 ease-out ${reached
+              ? "bg-green-600"
+              : "bg-gradient-to-r from-brand-primary/80 to-brand-primary"
+            }`}
           style={{ width: `${percent}%` }}
         />
       </div>
