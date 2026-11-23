@@ -151,125 +151,126 @@ export default function CartDrawer({
                 return (
                   <div
                     key={key}
-                    className="flex gap-4 items-center"
+                    className="flex flex-col gap-2.5 pb-5 border-b border-black/5 last:border-b-0 last:pb-0"
                   >
-                    {/* IMAGE */}
-                    <Link
-                      href={`/shop/${item.slug}`}
-                      onClick={onClose}
-                      className="relative w-20 h-20 rounded-xl overflow-hidden bg-bg-surface"
-                    >
-                      {item.image && (
-                        <Image
-                          src={item.image}
-                          alt={item.name}
-                          fill
-                          className="object-contain p-2"
-                        />
-                      )}
-                    </Link>
+                    <div className="flex gap-3.5 items-start">
+                      {/* IMAGE */}
+                      <Link
+                        href={`/shop/${item.slug}`}
+                        onClick={onClose}
+                        className="relative w-18 h-18 rounded-xl overflow-hidden bg-white border border-black/5 shrink-0"
+                      >
+                        {item.image && (
+                          <Image
+                            src={item.image}
+                            alt={item.name}
+                            fill
+                            className="object-contain p-1.5"
+                          />
+                        )}
+                      </Link>
 
-                    {/* DETAILS */}
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between">
-                        <div className="flex gap-1">
-                          <Link
-                            href={`/shop/${item.slug}`}
-                            onClick={onClose}
-                            className="font-medium text-text-primary hover:underline"
+                      {/* DETAILS */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <Link
+                              href={`/shop/${item.slug}`}
+                              onClick={onClose}
+                              className="font-medium text-sm text-text-primary hover:underline line-clamp-1 block"
+                            >
+                              {item.name}
+                            </Link>
+
+                            <p className="text-xs text-text-secondary mt-0.5">
+                              {item.weightLabel}
+                            </p>
+                          </div>
+
+                          <button
+                            onClick={() =>
+                              removeFromCart(
+                                item.productId,
+                                item.variantId
+                              )
+                            }
+                            disabled={isUpdating}
+                            aria-label="Remove item"
+                            className="text-gray-400 cursor-pointer hover:text-red-500 transition disabled:opacity-40 p-1 -mr-1"
                           >
-                            {item.name}
-                          </Link>
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
 
-                          <p className="text-text-secondary/60 font-medium">
-                            {" | "}
-                            {item.weightLabel}
+                        {/* QTY + PRICE */}
+                        <div className="flex items-center justify-between mt-3">
+                          <div className="flex items-center border border-black/15 rounded-full overflow-hidden bg-white h-8">
+                            <button
+                              onClick={() =>
+                                handleUpdate(
+                                  item.productId,
+                                  item.variantId,
+                                  item.quantity - 1
+                                )
+                              }
+                              disabled={
+                                item.quantity <= 1 ||
+                                isUpdating
+                              }
+                              className="px-2.5 h-full flex items-center justify-center cursor-pointer hover:bg-black/5 transition disabled:opacity-30"
+                            >
+                              <Minus size={12} />
+                            </button>
+
+                            <span className="px-2 text-xs font-semibold min-w-5 text-center">
+                              {item.quantity}
+                            </span>
+
+                            <button
+                              onClick={() =>
+                                handleUpdate(
+                                  item.productId,
+                                  item.variantId,
+                                  item.quantity + 1
+                                )
+                              }
+                              disabled={isUpdating}
+                              className="px-2.5 h-full flex items-center justify-center cursor-pointer hover:bg-black/5 transition disabled:opacity-40"
+                            >
+                              <Plus size={12} />
+                            </button>
+                          </div>
+
+                          <p className="font-bold text-base text-brand-primary">
+                            ₹{(item.quantity * item.priceAtAdd).toFixed(0)}
                           </p>
                         </div>
-
-                        <button
-                          onClick={() =>
-                            removeFromCart(
-                              item.productId,
-                              item.variantId
-                            )
-                          }
-                          disabled={isUpdating}
-                          className="text-gray-400 cursor-pointer hover:text-red-500 transition disabled:opacity-40"
-                        >
-                          <Trash2 size={16} />
-                        </button>
                       </div>
-
-                      {/* QTY + PRICE */}
-                      <div className="flex items-center justify-between mt-3">
-                        <div className="flex items-center border rounded-full overflow-hidden">
-                          <button
-                            onClick={() =>
-                              handleUpdate(
-                                item.productId,
-                                item.variantId,
-                                item.quantity - 1
-                              )
-                            }
-                            disabled={
-                              item.quantity <= 1 ||
-                              isUpdating
-                            }
-                            className="px-3 py-2 cursor-pointer hover:bg-black/5 transition disabled:opacity-40"
-                          >
-                            <Minus size={14} />
-                          </button>
-
-                          <span className="px-3 text-sm font-medium">
-                            {item.quantity}
-                          </span>
-
-                          <button
-                            onClick={() =>
-                              handleUpdate(
-                                item.productId,
-                                item.variantId,
-                                item.quantity + 1
-                              )
-                            }
-                            disabled={isUpdating}
-                            className="px-3 py-2 cursor-pointer hover:bg-black/5 transition disabled:opacity-40"
-                          >
-                            <Plus size={14} />
-                          </button>
-                        </div>
-
-                        <p className="font-semibold text-brand-primary">
-                          ₹
-                          {(
-                            item.quantity *
-                            item.priceAtAdd
-                          ).toFixed(0)}
-                        </p>
-                      </div>
-
-                      {/* Tiered incentive shortcut if quantity is 1 */}
-                      {item.quantity === 1 && (
-                        <div className="mt-2.5">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleUpdate(
-                                item.productId,
-                                item.variantId,
-                                2
-                              )
-                            }
-                            disabled={isUpdating}
-                            className="w-full text-xs font-medium text-brand-primary cursor-pointer bg-brand-primary/10 hover:bg-brand-primary/15 px-3 py-1.5 rounded-xl border border-brand-primary/20 flex items-center justify-between transition disabled:opacity-50"
-                          >
-                            <span>Add 1 more to make it a 2-Pack</span>
-                            <span className="font-bold">Save more →</span>
-                          </button>
-                        </div>
-                      )}
                     </div>
+
+                    {/* Tiered incentive shortcut if quantity is 1 */}
+                    {item.quantity === 1 && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleUpdate(
+                            item.productId,
+                            item.variantId,
+                            2
+                          )
+                        }
+                        disabled={isUpdating}
+                        className="w-full py-1.5 px-3 rounded-lg text-xs font-medium bg-brand-primary/8 hover:bg-brand-primary/12 border border-brand-primary/20 text-brand-primary flex items-center justify-between transition cursor-pointer disabled:opacity-50"
+                      >
+                        <span className="flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-brand-primary" />
+                          <span>Make it a 2-Pack</span>
+                        </span>
+                        <span className="font-semibold text-2xs uppercase tracking-wider bg-brand-primary text-white px-2 py-0.5 rounded-md">
+                          + Add 1
+                        </span>
+                      </button>
+                    )}
                   </div>
                 );
               })}
