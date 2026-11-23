@@ -10,16 +10,16 @@ declare global {
   }
 }
 
-const events: Record<string, string | null> = { 
-  view_item: 'ViewContent', 
-  add_to_cart: 'AddToCart', 
+const events: Record<string, string | null> = {
+  view_item: 'ViewContent',
+  add_to_cart: 'AddToCart',
   view_cart: null,
-  begin_checkout: 'InitiateCheckout', 
+  begin_checkout: 'InitiateCheckout',
   purchase: 'Purchase',
   remove_from_cart: 'RemoveFromCart' // Adding support for removal
 };
 
-const strings = ['affiliation','coupon','item_brand','item_category','item_category2','item_category3','item_category4','item_category5','item_list_id','item_list_name','item_variant','location_id'];
+const strings = ['affiliation', 'coupon', 'item_brand', 'item_category', 'item_category2', 'item_category3', 'item_category4', 'item_category5', 'item_list_id', 'item_list_name', 'item_variant', 'location_id'];
 
 function amount(v: any, name: string): number {
   if (v === '' || v == null || typeof v === 'boolean') throw Error(name + ' is missing');
@@ -31,24 +31,24 @@ function amount(v: any, name: string): number {
 function item(raw: any) {
   if (raw.item_id == null || String(raw.item_id).trim() === '') throw Error('item_id required for catalog matching');
   if (!raw.item_name) throw Error('item_name required by this implementation');
-  
+
   const out: any = {
-    item_id: String(raw.item_id), 
-    item_name: String(raw.item_name), 
-    price: amount(raw.price,'price'), 
-    quantity: amount(raw.quantity ?? 1,'quantity')
+    item_id: String(raw.item_id),
+    item_name: String(raw.item_name),
+    price: amount(raw.price, 'price'),
+    quantity: amount(raw.quantity ?? 1, 'quantity')
   };
-  
+
   if (!Number.isInteger(out.quantity) || out.quantity < 1) throw Error('quantity must be a positive integer');
-  
-  strings.forEach(k => { 
-    if (raw[k] != null && raw[k] !== '') out[k] = String(raw[k]); 
+
+  strings.forEach(k => {
+    if (raw[k] != null && raw[k] !== '') out[k] = String(raw[k]);
   });
-  
-  ['discount','index'].forEach(k => { 
-    if (raw[k] != null) out[k] = amount(raw[k],k); 
+
+  ['discount', 'index'].forEach(k => {
+    if (raw[k] != null) out[k] = amount(raw[k], k);
   });
-  
+
   return out;
 }
 
@@ -56,7 +56,7 @@ function push(data: any) {
   if (typeof window === 'undefined') return;
   window.dataLayer = window.dataLayer || [];
   // GTM v2 merges objects; clear prior cart/order/meta fields before each event.
-  window.dataLayer.push({ecommerce:null, meta:null});
+  window.dataLayer.push({ ecommerce: null, meta: null });
   window.dataLayer.push(data);
 }
 
@@ -67,49 +67,49 @@ export function trackEcommerce(event: string, input: any) {
   if (!Array.isArray(input.items)) throw Error('items must be an array');
   if (!input.items.length && event !== 'view_cart') throw Error('items cannot be empty');
   if (input.items.length > 200) throw Error('GA4 supports up to 200 items; resolve large orders explicitly');
-  
+
   const items = input.items.map(item);
-  const value = Math.round(items.reduce((sum: number,i: any)=>sum+i.price*i.quantity,0)*100)/100;
-  const ecommerce: any = {currency:input.currency,value,items};
-  
+  const value = Math.round(items.reduce((sum: number, i: any) => sum + i.price * i.quantity, 0) * 100) / 100;
+  const ecommerce: any = { currency: input.currency, value, items };
+
   if (input.coupon != null) ecommerce.coupon = String(input.coupon);
-  
+
   let eventId = input.event_id || (window.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`);
-  
+
   if (event === 'purchase') {
     if (!input.transaction_id || !String(input.transaction_id).trim()) throw Error('purchase requires a stable transaction_id');
     ecommerce.transaction_id = String(input.transaction_id);
-    ['tax','shipping'].forEach(k => { if (input[k] != null) ecommerce[k] = amount(input[k],k); });
+    ['tax', 'shipping'].forEach(k => { if (input[k] != null) ecommerce[k] = amount(input[k], k); });
     eventId = input.event_id || 'purchase:' + ecommerce.transaction_id;
-    
+
     // Best-effort same-browser suppression, not a delivery acknowledgement.
     const key = 'ledo:purchase:' + ecommerce.transaction_id;
     if (window.__ledoPurchases?.has(key)) return false;
-    try { if (window.localStorage.getItem(key)) return false; } catch (_) {}
+    try { if (window.localStorage.getItem(key)) return false; } catch (_) { }
     window.__ledoPurchases = window.__ledoPurchases || new Set();
     window.__ledoPurchases.add(key);
-    try { window.localStorage.setItem(key,'queued'); } catch (_) {}
+    try { window.localStorage.setItem(key, 'queued'); } catch (_) { }
   }
-  
+
   const params = {
-    currency:input.currency,
+    currency: input.currency,
     value,
-    content_ids:items.map((i: any)=>i.item_id),
-    content_type:'product',
-    contents:items.map((i: any)=>({id:i.item_id,quantity:i.quantity,item_price:i.price})),
-    content_name:items.map((i: any)=>i.item_name).join(', '),
-    content_category:[...new Set(items.map((i: any)=>i.item_category).filter(Boolean))].join(', '),
-    num_items:items.reduce((sum: number,i: any)=>sum+i.quantity,0)
+    content_ids: items.map((i: any) => i.item_id),
+    content_type: 'product',
+    contents: items.map((i: any) => ({ id: i.item_id, quantity: i.quantity, item_price: i.price })),
+    content_name: items.map((i: any) => i.item_name).join(', '),
+    content_category: [...new Set(items.map((i: any) => i.item_category).filter(Boolean))].join(', '),
+    num_items: items.reduce((sum: number, i: any) => sum + i.quantity, 0)
   };
-  
+
   push({
     event,
     ecommerce,
-    meta: events[event] ? {event_name:events[event],event_id:eventId,parameters:params} : null,
+    meta: events[event] ? { event_name: events[event], event_id: eventId, parameters: params } : null,
     page_location: window.location.origin + window.location.pathname,
     page_title: document.title
   });
-  
+
   return true;
 }
 
@@ -117,19 +117,19 @@ export function trackEcommerce(event: string, input: any) {
  * Supply the previous virtual URL as referrer on SPA navigation.
  * Remove any customer data from URLs/titles before supplying them.
  */
-export function trackPageView({location, title, referrer}: any = {}) {
+export function trackPageView({ location, title, referrer }: any = {}) {
   if (typeof window === 'undefined') return;
-  const clean = (v: string) => { if (!v) return ''; try { const u=new URL(v,window.location.origin); return u.origin+u.pathname; } catch { return ''; } };
-  
+  const clean = (v: string) => { if (!v) return ''; try { const u = new URL(v, window.location.origin); return u.origin + u.pathname; } catch { return ''; } };
+
   push({
-    event:'virtual_page_view',
+    event: 'virtual_page_view',
     page_location: clean(location || window.location.href),
     page_title: title ?? document.title,
     page_referrer: clean(referrer ?? document.referrer),
-    meta:{
-      event_name:'PageView',
+    meta: {
+      event_name: 'PageView',
       event_id: window.crypto?.randomUUID?.() || String(Date.now()),
-      parameters:{}
+      parameters: {}
     }
   });
 }
@@ -156,13 +156,12 @@ export const trackViewItem = (product: any) => {
 
 export const trackAddToCart = (product: any, quantity: number = 1) => {
   try {
-    const itemPrice = product.price ?? product.priceAtAdd ?? 0;
     trackEcommerce('add_to_cart', {
       currency: "INR",
       items: [{
         item_id: product.id || product._id || product.productId,
         item_name: product.name,
-        price: itemPrice,
+        price: product.price,
         item_category: product.category?.name || product.category || 'Tea',
         item_brand: "Ledo Valley",
         quantity: quantity
@@ -173,13 +172,12 @@ export const trackAddToCart = (product: any, quantity: number = 1) => {
 
 export const trackRemoveFromCart = (product: any, quantity: number = 1) => {
   try {
-    const itemPrice = product.price ?? product.priceAtAdd ?? 0;
     trackEcommerce('remove_from_cart', {
       currency: "INR",
       items: [{
         item_id: product.id || product._id || product.productId,
         item_name: product.name,
-        price: itemPrice,
+        price: product.price,
         item_category: product.category?.name || product.category || 'Tea',
         item_brand: "Ledo Valley",
         quantity: quantity
@@ -195,7 +193,7 @@ export const trackViewCart = (cartItems: any[], totalValue: number) => {
       items: cartItems.map((item) => ({
         item_id: item.productId || item._id,
         item_name: item.name,
-        price: item.priceAtAdd ?? item.price ?? 0,
+        price: item.price,
         item_brand: "Ledo Valley",
         quantity: item.quantity,
       }))
@@ -211,7 +209,7 @@ export const trackBeginCheckout = (cartItems: any[], totalValue: number) => {
       items: cartItems.map((item) => ({
         item_id: item.productId || item._id,
         item_name: item.name,
-        price: item.priceAtAdd ?? item.price ?? 0,
+        price: item.price,
         item_brand: "Ledo Valley",
         quantity: item.quantity,
       }))
@@ -240,11 +238,11 @@ export const trackPurchase = (order: any) => {
 
 export const trackPurchaseFailed = (order: any, errorMsg?: string) => {
   if (!order || !order.items || order.items.length === 0) return;
-  
+
   if (typeof window !== 'undefined') {
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({ ecommerce: null }); // Clear previous
-    
+
     window.dataLayer.push({
       event: "purchase_failed",
       error_data: {

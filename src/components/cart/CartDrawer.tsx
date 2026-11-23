@@ -11,6 +11,7 @@ import { useState, useEffect } from "react";
 import clsx from "clsx";
 import { trackViewCart, trackBeginCheckout } from "@/lib/gtm";
 import FreeShippingBar from "./FreeShippingBar";
+import CartDrawerUpsell from "./CartDrawerUpsell";
 
 interface Props {
   open: boolean;
@@ -102,7 +103,7 @@ export default function CartDrawer({
       {/* DRAWER */}
       <aside
         className={clsx(
-          "fixed right-0 top-0 h-full w-96 z-50",
+          "fixed right-0 top-0 h-full w-full sm:w-[420px] max-w-full z-50",
           "bg-bg-page shadow-2xl flex flex-col",
           "transform transition-transform duration-300 ease-out",
           open ? "translate-x-0" : "translate-x-full"
@@ -247,6 +248,27 @@ export default function CartDrawer({
                           ).toFixed(0)}
                         </p>
                       </div>
+
+                      {/* Tiered incentive shortcut if quantity is 1 */}
+                      {item.quantity === 1 && (
+                        <div className="mt-2.5">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleUpdate(
+                                item.productId,
+                                item.variantId,
+                                2
+                              )
+                            }
+                            disabled={isUpdating}
+                            className="w-full text-xs font-medium text-brand-primary cursor-pointer bg-brand-primary/10 hover:bg-brand-primary/15 px-3 py-1.5 rounded-xl border border-brand-primary/20 flex items-center justify-between transition disabled:opacity-50"
+                          >
+                            <span>Add 1 more to make it a 2-Pack</span>
+                            <span className="font-bold">Save more →</span>
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -255,19 +277,21 @@ export default function CartDrawer({
 
             {/* ================= FOOTER ================= */}
 
-            <div className="border-t px-6 py-6 space-y-4">
+            <div className="border-t px-6 py-5 space-y-3 bg-bg-surface/30">
               <FreeShippingBar itemsTotal={totalAmount} />
 
-              <div className="flex justify-between text-lg font-semibold">
-                <span>Total</span>
-                <span className="text-brand-primary">
+              <CartDrawerUpsell />
+
+              <div className="flex justify-between items-baseline pt-1">
+                <span className="text-sm font-medium text-text-secondary">Subtotal</span>
+                <span className="text-xl font-bold text-brand-primary">
                   ₹{totalAmount.toFixed(0)}
                 </span>
               </div>
 
               <button
                 onClick={handleCheckout}
-                className="w-full py-3 cursor-pointer rounded-full bg-bg-dark text-white font-medium hover:bg-bg-dark/90 transition"
+                className="w-full py-3.5 cursor-pointer rounded-full bg-bg-dark text-white font-medium hover:bg-bg-dark/90 active:scale-98 transition shadow-sm text-sm"
               >
                 {isLoggedIn
                   ? "Proceed to Checkout"
@@ -277,7 +301,7 @@ export default function CartDrawer({
               <button
                 onClick={handleClearCart}
                 disabled={clearing}
-                className="w-full cursor-pointer text-sm text-text-secondary underline hover:text-red-500 transition disabled:opacity-50"
+                className="w-full cursor-pointer text-xs text-text-secondary hover:text-red-500 transition disabled:opacity-50 text-center block pt-1"
               >
                 {clearing ? "Clearing..." : "Clear Cart"}
               </button>
