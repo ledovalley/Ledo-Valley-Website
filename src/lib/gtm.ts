@@ -156,12 +156,13 @@ export const trackViewItem = (product: any) => {
 
 export const trackAddToCart = (product: any, quantity: number = 1) => {
   try {
+    const itemPrice = product.price ?? product.priceAtAdd ?? 0;
     trackEcommerce('add_to_cart', {
       currency: "INR",
       items: [{
         item_id: product.id || product._id || product.productId,
         item_name: product.name,
-        price: product.price,
+        price: itemPrice,
         item_category: product.category?.name || product.category || 'Tea',
         item_brand: "Ledo Valley",
         quantity: quantity
@@ -172,12 +173,13 @@ export const trackAddToCart = (product: any, quantity: number = 1) => {
 
 export const trackRemoveFromCart = (product: any, quantity: number = 1) => {
   try {
+    const itemPrice = product.price ?? product.priceAtAdd ?? 0;
     trackEcommerce('remove_from_cart', {
       currency: "INR",
       items: [{
         item_id: product.id || product._id || product.productId,
         item_name: product.name,
-        price: product.price,
+        price: itemPrice,
         item_category: product.category?.name || product.category || 'Tea',
         item_brand: "Ledo Valley",
         quantity: quantity
@@ -193,7 +195,7 @@ export const trackViewCart = (cartItems: any[], totalValue: number) => {
       items: cartItems.map((item) => ({
         item_id: item.productId || item._id,
         item_name: item.name,
-        price: item.price,
+        price: item.priceAtAdd ?? item.price ?? 0,
         item_brand: "Ledo Valley",
         quantity: item.quantity,
       }))
@@ -209,7 +211,7 @@ export const trackBeginCheckout = (cartItems: any[], totalValue: number) => {
       items: cartItems.map((item) => ({
         item_id: item.productId || item._id,
         item_name: item.name,
-        price: item.price,
+        price: item.priceAtAdd ?? item.price ?? 0,
         item_brand: "Ledo Valley",
         quantity: item.quantity,
       }))
