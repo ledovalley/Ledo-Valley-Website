@@ -192,14 +192,14 @@ export default function ProductCard({
       {/* CONTENT */}
       <div
         className={clsx(
-          "flex flex-col gap-1 sm:flex-row sm:justify-between sm:items-start",
+          "grid grid-cols-[1fr_auto] gap-x-3 items-start",
           layout === "default" ? "py-3 px-1 sm:py-4 sm:px-6" : "py-3 px-1 sm:px-4"
         )}
       >
-        <div>
+        <div className="min-w-0">
           <h3
             className={clsx(
-              "font-semibold text-text-primary",
+              "font-semibold text-text-primary leading-snug",
               layout === "default" ? "text-sm sm:text-lg" : "text-sm"
             )}
           >
@@ -217,18 +217,18 @@ export default function ProductCard({
           />
         </div>
 
-        <div className="flex items-baseline gap-2 sm:block sm:text-right">
+        <div className="text-right shrink-0">
           <span
             className={clsx(
-              "font-bold text-brand-primary",
-              layout === "default" ? "text-lg" : "text-base"
+              "font-bold text-brand-primary block leading-none",
+              layout === "default" ? "text-base sm:text-xl" : "text-base"
             )}
           >
             ₹{variant.finalPrice.toFixed(0)}
           </span>
 
           {discountPercent > 0 && (
-            <div className="text-xs line-through text-text-secondary">
+            <div className="text-xs line-through text-text-secondary mt-1">
               ₹{variant.sellingPrice.toFixed(0)}
             </div>
           )}
