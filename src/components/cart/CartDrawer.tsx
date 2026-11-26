@@ -196,15 +196,15 @@ export default function CartDrawer({
                             }
                             disabled={isUpdating}
                             aria-label="Remove item"
-                            className="text-gray-400 cursor-pointer hover:text-red-500 transition disabled:opacity-40 p-1 -mr-1"
+                            className="text-gray-400 cursor-pointer hover:text-red-500 transition disabled:opacity-40 p-2.5 -m-2 sm:p-1 sm:-mr-1 sm:m-0"
                           >
-                            <Trash2 size={15} />
+                            <Trash2 size={16} />
                           </button>
                         </div>
 
                         {/* QTY + PRICE */}
                         <div className="flex items-center justify-between mt-3">
-                          <div className="flex items-center border border-black/15 rounded-full overflow-hidden bg-white h-8">
+                          <div className="flex items-center border border-black/15 rounded-full overflow-hidden bg-white h-10 sm:h-8">
                             <button
                               onClick={() =>
                                 handleUpdate(
@@ -217,12 +217,13 @@ export default function CartDrawer({
                                 item.quantity <= 1 ||
                                 isUpdating
                               }
-                              className="px-2.5 h-full flex items-center justify-center cursor-pointer hover:bg-black/5 transition disabled:opacity-30"
+                              aria-label="One less"
+                              className="w-10 sm:w-auto sm:px-2.5 h-full flex items-center justify-center cursor-pointer hover:bg-black/5 transition disabled:opacity-30"
                             >
-                              <Minus size={12} />
+                              <Minus size={14} />
                             </button>
 
-                            <span className="px-2 text-xs font-semibold min-w-5 text-center">
+                            <span className="px-2 text-sm sm:text-xs font-semibold min-w-6 text-center" aria-live="polite">
                               {item.quantity}
                             </span>
 
@@ -235,9 +236,10 @@ export default function CartDrawer({
                                 )
                               }
                               disabled={isUpdating}
-                              className="px-2.5 h-full flex items-center justify-center cursor-pointer hover:bg-black/5 transition disabled:opacity-40"
+                              aria-label="One more"
+                              className="w-10 sm:w-auto sm:px-2.5 h-full flex items-center justify-center cursor-pointer hover:bg-black/5 transition disabled:opacity-40"
                             >
-                              <Plus size={12} />
+                              <Plus size={14} />
                             </button>
                           </div>
 
@@ -302,7 +304,7 @@ export default function CartDrawer({
               <button
                 onClick={handleClearCart}
                 disabled={clearing}
-                className="w-full cursor-pointer text-xs text-text-secondary hover:text-red-500 transition disabled:opacity-50 text-center block pt-1"
+                className="w-full cursor-pointer text-xs text-text-secondary hover:text-red-500 transition disabled:opacity-50 text-center block py-2 sm:pt-1 sm:pb-0"
               >
                 {clearing ? "Clearing..." : "Clear Cart"}
               </button>

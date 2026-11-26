@@ -220,18 +220,32 @@ export const trackBeginCheckout = (cartItems: any[], totalValue: number) => {
 export const trackPurchase = (order: any) => {
   if (!order || !order.items || order.items.length === 0) return;
   try {
+    // Report what the customer actually paid for the tea: the sale price
+    // (finalPrice, after any product discount) less their share of the
+    // coupon. Shipping and tax are sent separately, as GA4/Meta expect.
+    const itemsTotal = Number(order.itemsTotal) || order.items.reduce(
+      (sum: number, i: any) => sum + (Number(i.finalPrice ?? i.price) || 0) * (Number(i.quantity) || 0), 0);
+    const couponOff = Math.min(Number(order.discountAmount) || 0, itemsTotal);
+    const keep = itemsTotal > 0 ? 1 - couponOff / itemsTotal : 1;
     trackEcommerce('purchase', {
       currency: "INR",
       transaction_id: order.orderNumber || order._id,
-      tax: order.gstAmount || 0,
+      tax: order.tax?.totalGst ?? order.gstAmount ?? 0,
       shipping: order.shippingAmount || 0,
-      items: order.items.map((item: any) => ({
-        item_id: item.productId,
-        item_name: item.productName,
-        price: item.price,
-        item_brand: "Ledo Valley",
-        quantity: item.quantity,
-      }))
+      ...(order.coupon?.code ? { coupon: order.coupon.code } : {}),
+      items: order.items.map((item: any) => {
+        const listPrice = Number(item.price) || 0;
+        const paid = Math.round((Number(item.finalPrice ?? item.price) || 0) * keep * 100) / 100;
+        return {
+          item_id: item.productId,
+          item_name: item.productName,
+          item_variant: item.weight ? `${item.weight.value}${item.weight.unit}` : undefined,
+          price: paid,
+          ...(listPrice > paid ? { discount: Math.round((listPrice - paid) * 100) / 100 } : {}),
+          item_brand: "Ledo Valley",
+          quantity: item.quantity,
+        };
+      })
     });
   } catch (err) { console.error("GTM trackPurchase Error", err); }
 };

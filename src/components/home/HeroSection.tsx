@@ -78,7 +78,9 @@ export default function HeroSection({ initialBanners }: { initialBanners?: Banne
             src={b.image.url}
             alt={b.title || "Hero Banner"}
             fill
-            priority={current === 0}
+            // First banner: fetch it first and don't wait to load it.
+            fetchPriority={current === 0 ? "high" : "auto"}
+            loading={current === 0 ? "eager" : "lazy"}
             sizes="100vw"
             quality={70}
             onLoad={() => setImageLoaded(true)}

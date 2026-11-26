@@ -45,9 +45,12 @@ export default function TeaTypesSection() {
                             <div className="rounded-4xl overflow-hidden mb-4">
                                 <Image
                                     src={tea.image}
-                                    alt={tea.name}
+                                    // The name is written right under the picture, so the picture needs no separate description.
+                                    alt=""
                                     width={800}
                                     height={800}
+                                    // Shown about half the screen wide on phones, a quarter on larger screens.
+                                    sizes="(max-width: 640px) 45vw, (max-width: 1024px) 25vw, 300px"
                                     className="w-full object-cover"
                                 />
                             </div>

@@ -79,9 +79,19 @@ export default async function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
       />
       <HeroSection initialBanners={Array.isArray(heroBanners) ? heroBanners : undefined} />
-      <InfoSection />
-      <TeaTypesSection />
-      <TopSellersSection initialProducts={topSellers?.products} />
+      {/* Phones: best sellers right after the hero. Larger screens keep the
+          story and tea types first (CSS order only, nothing loads twice). */}
+      <div className="flex flex-col">
+        <div className="md:order-3">
+          <TopSellersSection initialProducts={topSellers?.products} />
+        </div>
+        <div className="md:order-1">
+          <InfoSection />
+        </div>
+        <div className="md:order-2">
+          <TeaTypesSection />
+        </div>
+      </div>
       <BannerSection />
       <TestimonialsSection initialTestimonials={Array.isArray(testimonials) ? testimonials : undefined} />
       <NewsletterSection />

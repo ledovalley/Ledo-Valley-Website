@@ -72,13 +72,14 @@
   }
 }
 
+/* Grows with transform (not width) so the browser can animate it without re-laying out the page. */
 @keyframes progress {
   from {
-    width: 0%;
+    transform: scaleX(0);
   }
 
   to {
-    width: 100%;
+    transform: scaleX(1);
   }
 }
 
@@ -92,6 +93,7 @@
 }
 
 .animate-progress {
+  transform-origin: left;
   animation: progress 4s linear forwards;
 }
 
@@ -111,4 +113,36 @@
 html,
 body {
   overflow-x: hidden;
+}
+/* ================================
+   PHONES: no zoom when tapping a form box
+   iPhone Safari zooms into any input with text smaller than 16px.
+   (Outside the Tailwind layers on purpose, so it wins over text-sm.)
+================================ */
+@media (max-width: 767px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* ================================
+   BRAND SPLASH (first visit of a session)
+   Fixed timer, no JavaScript needed: visible ~1.2s, then fades in 0.4s.
+================================ */
+#lv-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  animation: lv-splash-out 400ms ease-out 1200ms forwards;
+}
+@keyframes lv-splash-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+html.lv-seen #lv-splash {
+  display: none;
 }

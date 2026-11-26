@@ -10,22 +10,25 @@ export default function InfoSection() {
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
 
           {/* LEFT — TEXT */}
-          <div className="text-left md:text-justify z-10">
-            <h2 className="text-5xl sm:text-7xl lg:text-6xl xl:text-8xl font-semibold mb-6 lg:mb-8 font-playfair leading-tight">
+          <div className="text-left z-10">
+            <h2 className="text-4xl sm:text-7xl lg:text-6xl xl:text-8xl font-semibold mb-6 lg:mb-8 font-playfair leading-tight">
               Fresh from the Garden
             </h2>
 
-            <p className="text-text-secondary text-justify leading-relaxed mb-5 text-sm sm:text-base">
+            <p className="text-text-secondary text-left sm:text-justify leading-relaxed mb-5 text-sm sm:text-base">
               Ledo Valley Tea is rooted in the rich tea heritage of Assam, where fertile valleys, misty mornings, and generations of craftsmanship come together to create exceptional tea. Our family has been in the Assam tea trade since 1968, and for over two decades we have manufactured and packed our own teas. We are committed to delivering authentic Assam teas that reflect strength, aroma, and character in every cup.
             </p>
 
-            <p className="text-text-secondary text-justify leading-relaxed mb-5 text-sm sm:text-base">
+            <p className="hidden sm:block text-text-secondary text-left sm:text-justify leading-relaxed mb-5 text-sm sm:text-base">
               From sourcing fine tea leaves to careful processing and blending, quality remains at the heart of everything we do. Our teas are crafted to suit the everyday Indian palate while preserving the natural richness Assam tea is known for.
             </p>
 
-            <p className="text-text-secondary text-justify leading-relaxed text-sm sm:text-base">
+            <p className="hidden sm:block text-text-secondary text-left sm:text-justify leading-relaxed text-sm sm:text-base">
               Born in the heart of Assam’s tea belt, Ledo Valley Tea began with a simple vision — to bring honest, high-quality Assam tea directly to consumers and trade partners across India. What started as a manufacturing and wholesale journey has evolved into a trusted brand known for consistency, taste, and reliability.
             </p>
+            <a href="/about" className="sm:hidden inline-block text-sm font-medium underline underline-offset-4 text-brand-primary">
+              Read our story
+            </a>
           </div>
 
           {/* RIGHT SPACER (Desktop only) */}

@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import api from "@/lib/api";
 import { getCustomerToken } from "@/lib/customerAuth";
+import { useAuth } from "@/context/AuthContext";
+import { useUI } from "@/context/UIContext";
 import ProductImages from "@/components/products/ProductImages";
 import ProductInfo from "@/components/products/ProductInfo";
 import ProductReviews from "@/components/products/ProductReviews";
@@ -10,6 +12,7 @@ import { AxiosError } from "axios";
 
 import { Product } from "@/types/product-api";
 import { trackViewItem } from "@/lib/gtm";
+import DeliveryCheck from "@/components/products/DeliveryCheck";
 
 
 interface EligibleOrder {
@@ -24,6 +27,29 @@ export default function ProductPageClient({ product: initialProduct }: { product
   );
   const [eligibleOrders, setEligibleOrders] = useState<EligibleOrder[]>([]);
   const [canReview, setCanReview] = useState(false);
+  const { isLoggedIn } = useAuth();
+  const { openLogin } = useUI();
+  const [fromReviewEmail, setFromReviewEmail] = useState(false);
+
+  // Link from the "How was your tea?" email (?review=1): ask to log in if
+  // needed, then scroll to the review form.
+  useEffect(() => {
+    try {
+      if (new URLSearchParams(window.location.search).get("review") === "1") {
+        setFromReviewEmail(true);
+        if (!getCustomerToken()) openLogin();
+      }
+    } catch {
+      // ignore malformed URLs
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (fromReviewEmail && canReview) {
+      document.getElementById("reviews")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [fromReviewEmail, canReview]);
 
   // Open the pack size named in the link (?variant=…), e.g. from Google Shopping.
   useEffect(() => {
@@ -71,7 +97,8 @@ export default function ProductPageClient({ product: initialProduct }: { product
     }
     checkEligibility();
     return () => { cancelled = true; };
-  }, [initialProduct._id]);
+    // Re-check after the customer logs in on this page.
+  }, [initialProduct._id, isLoggedIn]);
 
   const handleReviewSubmit = async (
     rating: number,
@@ -125,6 +152,7 @@ export default function ProductPageClient({ product: initialProduct }: { product
             selectedVariantId={selectedVariantId}
             onVariantChange={setSelectedVariantId}
           />
+          <DeliveryCheck />
         </div>
       </div>
 

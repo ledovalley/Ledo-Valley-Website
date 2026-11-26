@@ -15,7 +15,7 @@ const FAQS = [
   },
   {
     question: "What are the return or exchange policies?",
-    answer: `If your order arrives damaged, defective or wrong, tell us within ${SITE_INFO.returnWindow} of delivery with photos, and keep the original packaging. See our Returns & Refund Policy for details.`
+    answer: `We don't accept returns or exchanges, except for quality issues. If your order arrives damaged, defective or wrong, email ${SITE_INFO.returnsEmail} within ${SITE_INFO.returnWindow} of delivery with your order number and photos, and keep the original packaging. Once we've verified it, we'll refund or replace it. See our Returns & Refund Policy for details.`
   },
   {
     question: "Who do I contact for Bulk Orders?",

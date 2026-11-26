@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Check, Copy, ExternalLink, Truck } from "lucide-react";
-import { ShipmentInfo, shipmentStatusLabel, trackingUrl } from "@/lib/tracking";
+import { ShipmentInfo, shipmentStatusLabel, shipmentTrackingUrl } from "@/lib/tracking";
 
 const formatDate = (value?: string | null) =>
   value
@@ -22,10 +22,14 @@ export default function ShipmentCard({
 }) {
   const [copied, setCopied] = useState(false);
   const awb = shipping?.awbCode || null;
-  const url = trackingUrl(awb);
+  const url = shipmentTrackingUrl(shipping);
+  const manual = !!shipping?.manual;
 
   const relevant = ["PAYMENT_SUCCESS", "READY_TO_SHIP", "SHIPPED", "DELIVERED"].includes(status);
   if (!relevant && !awb) return null;
+
+  // Sent another way (e.g. delivered by hand) may have no tracking number.
+  const showDetails = !!awb || (manual && ["SHIPPED", "DELIVERED"].includes(status));
 
   const copyAwb = async () => {
     if (!awb) return;
@@ -38,7 +42,8 @@ export default function ShipmentCard({
     }
   };
 
-  const courierStatus = shipmentStatusLabel(shipping?.status);
+  // Own-courier parcels have no live updates here; the courier's site has them.
+  const courierStatus = manual ? null : shipmentStatusLabel(shipping?.status);
 
   return (
     <section
@@ -55,7 +60,7 @@ export default function ShipmentCard({
             Delivery
           </h2>
 
-          {!awb ? (
+          {!showDetails ? (
             <p className="mt-1 text-sm text-gray-600">
               {status === "PAYMENT_SUCCESS"
                 ? "We're packing your order. You'll get an email with the tracking number as soon as it's handed to the courier."
@@ -70,20 +75,22 @@ export default function ShipmentCard({
                     <dd className="font-medium">{shipping.courierName}</dd>
                   </div>
                 )}
-                <div>
-                  <dt className="text-gray-500">Tracking number (AWB)</dt>
-                  <dd className="flex items-center gap-2 font-medium">
-                    <span className="font-mono break-all">{awb}</span>
-                    <button
-                      type="button"
-                      onClick={copyAwb}
-                      className="p-1 text-gray-500 rounded hover:text-bg-dark"
-                      aria-label={copied ? "Copied" : "Copy tracking number"}
-                    >
-                      {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                    </button>
-                  </dd>
-                </div>
+                {awb && (
+                  <div>
+                    <dt className="text-gray-500">{manual ? "Tracking number" : "Tracking number (AWB)"}</dt>
+                    <dd className="flex items-center gap-2 font-medium">
+                      <span className="font-mono break-all">{awb}</span>
+                      <button
+                        type="button"
+                        onClick={copyAwb}
+                        className="p-1 text-gray-500 rounded hover:text-bg-dark"
+                        aria-label={copied ? "Copied" : "Copy tracking number"}
+                      >
+                        {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                      </button>
+                    </dd>
+                  </div>
+                )}
                 {courierStatus && (
                   <div>
                     <dt className="text-gray-500">Latest update</dt>
@@ -105,10 +112,15 @@ export default function ShipmentCard({
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-5 py-2.5 mt-5 text-sm font-medium text-white rounded-full bg-bg-dark hover:bg-bg-dark/90"
                 >
-                  Track parcel
+                  {manual ? `Track on ${shipping?.courierName || "courier site"}` : "Track parcel"}
                   <ExternalLink className="w-4 h-4" aria-hidden="true" />
                   <span className="sr-only">(opens in a new tab)</span>
                 </a>
+              )}
+              {manual && awb && (
+                <p className="mt-3 text-xs text-gray-500">
+                  Copy the tracking number above and enter it on the courier&apos;s website to see where your parcel is.
+                </p>
               )}
             </>
           )}

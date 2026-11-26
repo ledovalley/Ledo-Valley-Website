@@ -40,6 +40,13 @@ api.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
 
+  // Only things the visitor did (add to cart, log in, place order...) count.
+  // Background loads (banners, offers, delivery checks) never cover the page
+  // with the "server is waking up" screen: the page itself is already there.
+  const userAction = String(config.method || "get").toLowerCase() !== "get";
+  (config as { _counted?: boolean })._counted = userAction;
+  if (!userAction) return config;
+
   activeRequests++;
 
   // If this is the first request in a while, start a timer to detect "Cold Starts"
@@ -61,7 +68,7 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use(
   (response) => {
-    activeRequests--;
+    if ((response.config as { _counted?: boolean })._counted) activeRequests--;
     if (activeRequests === 0) {
       clearWakeUpTimer();
       setIsServerWakingUp?.(false);
@@ -69,7 +76,7 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    activeRequests--;
+    if ((error.config as { _counted?: boolean } | undefined)?._counted) activeRequests--;
     if (activeRequests === 0) {
       clearWakeUpTimer();
       setIsServerWakingUp?.(false);

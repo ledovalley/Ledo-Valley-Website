@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { Plus, Check, Loader2 } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
-import api from "@/lib/api";
 
 interface UpsellProduct {
   _id: string;
@@ -16,71 +15,91 @@ interface UpsellProduct {
   image: string;
 }
 
+interface ApiVariant {
+  _id: string;
+  stock?: number;
+  status?: string;
+  availability?: boolean;
+  finalPrice?: number;
+  sellingPrice?: number;
+  weight?: { value: number; unit: string };
+  images?: { url: string }[];
+}
+
+interface ApiProduct {
+  _id: string;
+  name: string;
+  slug: string;
+  status?: string;
+  variants?: ApiVariant[];
+}
+
+/* Popular products, loaded once per visit (not on every cart change). */
+let popularCache: ApiProduct[] | null = null;
+let popularRequest: Promise<ApiProduct[]> | null = null;
+
+const loadPopular = () => {
+  if (popularCache) return Promise.resolve(popularCache);
+  if (!popularRequest) {
+    // Plain fetch: this card is optional, so a slow or failed request must not
+    // show the "server waking up" screen or an error toast.
+    popularRequest = fetch(`${process.env.NEXT_PUBLIC_API_URL}/customer/products?sort=popular&limit=6`)
+      .then((r) => (r.ok ? r.json() : { products: [] }))
+      .then((data) => {
+        popularCache = (data?.products as ApiProduct[]) || [];
+        return popularCache;
+      })
+      .catch(() => [] as ApiProduct[])
+      .finally(() => {
+        popularRequest = null;
+      });
+  }
+  return popularRequest;
+};
+
+/* A pack the shop actually sells right now (inactive or hidden packs can't be checked out). */
+const sellable = (v: ApiVariant) =>
+  Number(v.stock) > 0 && v.status !== "INACTIVE" && v.availability !== false && !!v.images?.[0]?.url;
+
 export default function CartDrawerUpsell() {
   const { cart, addToCart } = useCart();
-  const [recommendation, setRecommendation] = useState<UpsellProduct | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [products, setProducts] = useState<ApiProduct[]>(popularCache || []);
   const [adding, setAdding] = useState(false);
-  const [added, setAdded] = useState(false);
 
   useEffect(() => {
-    let cancelled = false;
-
-    async function loadUpsellItem() {
-      try {
-        setLoading(true);
-        const res = await api.get("/customer/products", {
-          params: { sort: "popular", limit: 6 },
-        });
-
-        const products: any[] = res.data?.products || [];
-        if (products.length === 0) return;
-
-        const cartVariantIds = new Set(cart.map((c) => c.variantId));
-
-        for (const p of products) {
-          const availableVariant = p.variants?.find(
-            (v: any) => v.stock > 0 && !cartVariantIds.has(v._id)
-          );
-
-          if (availableVariant) {
-            if (!cancelled) {
-              setRecommendation({
-                _id: p._id,
-                name: p.name,
-                slug: p.slug,
-                variantId: availableVariant._id,
-                price: availableVariant.finalPrice || availableVariant.sellingPrice,
-                weightLabel: `${availableVariant.weight.value}${availableVariant.weight.unit}`,
-                image: availableVariant.images?.[0]?.url || "/placeholder.png",
-              });
-              setAdded(false);
-            }
-            return;
-          }
-        }
-
-        if (!cancelled) {
-          setRecommendation(null);
-        }
-      } catch {
-        // Silently fail if network drops
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
-    loadUpsellItem();
-
+    let alive = true;
+    loadPopular().then((list) => {
+      if (alive) setProducts(list);
+    });
     return () => {
-      cancelled = true;
+      alive = false;
     };
-  }, [cart]);
+  }, []);
 
-  if (loading || !recommendation) return null;
+  // Suggest a different tea than the ones already in the cart.
+  const recommendation = useMemo<UpsellProduct | null>(() => {
+    const inCart = new Set(cart.map((c) => c.productId));
+    for (const p of products) {
+      if (inCart.has(p._id) || (p.status && p.status !== "ACTIVE")) continue;
+      const v = p.variants?.find(sellable);
+      if (!v) continue;
+      return {
+        _id: p._id,
+        name: p.name,
+        slug: p.slug,
+        variantId: v._id,
+        price: Number(v.finalPrice ?? v.sellingPrice ?? 0),
+        weightLabel: `${v.weight?.value ?? ""}${v.weight?.unit ?? ""}`,
+        image: v.images![0].url,
+      };
+    }
+    return null;
+  }, [products, cart]);
+
+  if (!recommendation) return null;
 
   const handleAdd = async () => {
-    if (adding || added) return;
+    if (adding) return;
     try {
       setAdding(true);
       await addToCart({
@@ -93,7 +112,6 @@ export default function CartDrawerUpsell() {
         quantity: 1,
         priceAtAdd: recommendation.price,
       });
-      setAdded(true);
     } catch {
       // handled
     } finally {
@@ -140,19 +158,12 @@ export default function CartDrawerUpsell() {
 
         <button
           onClick={handleAdd}
-          disabled={adding || added}
-          className={`h-8 px-3.5 rounded-full text-xs font-semibold cursor-pointer transition flex items-center gap-1.5 shrink-0 ${added
-            ? "bg-green-600 text-white"
-            : "bg-bg-dark text-white hover:bg-bg-dark/90 active:scale-95 disabled:opacity-50"
-            }`}
+          disabled={adding}
+          aria-label={`Add ${recommendation.name} ${recommendation.weightLabel} to cart`}
+          className="h-8 px-3.5 rounded-full text-xs font-semibold cursor-pointer transition flex items-center gap-1.5 shrink-0 bg-bg-dark text-white hover:bg-bg-dark/90 active:scale-95 disabled:opacity-50"
         >
           {adding ? (
             <Loader2 size={13} className="animate-spin" />
-          ) : added ? (
-            <>
-              <Check size={13} />
-              Added
-            </>
           ) : (
             <>
               <Plus size={13} />

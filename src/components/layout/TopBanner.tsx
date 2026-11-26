@@ -12,10 +12,10 @@ interface Banner {
   visibility: "ALL" | "LOGGED_IN" | "LOGGED_OUT";
 }
 
-export default function TopBanner() {
+export default function TopBanner({ initialBanners }: { initialBanners?: Banner[] }) {
   const { isLoggedIn } = useAuth();
 
-  const [banners, setBanners] = useState<Banner[]>([]);
+  const [banners, setBanners] = useState<Banner[]>(initialBanners ?? []);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -25,6 +25,8 @@ export default function TopBanner() {
   /* ================= FETCH ================= */
 
   useEffect(() => {
+    // Already came with the page.
+    if (initialBanners) return;
     let isMounted = true;
 
     (async () => {
@@ -39,7 +41,7 @@ export default function TopBanner() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [initialBanners]);
 
   /* ================= FILTER ================= */
 
@@ -153,7 +155,7 @@ export default function TopBanner() {
         <div className="absolute bottom-0 left-0 w-full h-0.5 bg-white/20">
           <div
             key={safeIndex}
-            className="h-full bg-bg-page/20 animate-progress"
+            className="h-full w-full bg-bg-page/20 animate-progress"
           />
         </div>
       )}

@@ -113,6 +113,10 @@ export default function useShopProducts({
           params.set("maxPrice", String(filters.maxPrice));
         }
 
+        if (filters.search) {
+          params.set("search", filters.search);
+        }
+
         const res = await api.get("/customer/products", {
           params,
         });
@@ -131,7 +135,7 @@ export default function useShopProducts({
     return () => {
       active = false;
     };
-  }, [page, limit, sort, filtersKey, filters.available, filters.teaTypes, filters.weight, filters.minPrice, filters.maxPrice]);
+  }, [page, limit, sort, filtersKey, filters.available, filters.teaTypes, filters.weight, filters.minPrice, filters.maxPrice, filters.search]);
 
   return { products, total, loading };
 }

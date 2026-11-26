@@ -17,7 +17,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { PAYU_URL } from "@/lib/constants";
-import { trackingUrl } from "@/lib/tracking";
+import { shipmentTrackingUrl } from "@/lib/tracking";
+import BuyAgainButton, { canBuyAgain } from "@/components/orders/BuyAgainButton";
 
 interface Weight {
   value: number;
@@ -25,6 +26,8 @@ interface Weight {
 }
 
 interface OrderItemPreview {
+  productId: string;
+  variantId: string;
   productName: string;
   weight?: Weight;
   quantity: number;
@@ -45,6 +48,8 @@ interface Order {
   shipping?: {
     awbCode?: string | null;
     courierName?: string | null;
+    manual?: boolean;
+    trackingUrl?: string | null;
   } | null;
 }
 
@@ -167,6 +172,12 @@ export default function OrdersPage() {
           label: "Payment Failed",
           className: "border border-rose-200 bg-rose-50 text-rose-700",
           icon: AlertCircle,
+        };
+      case "RETURNED":
+        return {
+          label: "Returned (not delivered)",
+          className: "border border-neutral-200 bg-neutral-100 text-neutral-700",
+          icon: XCircle,
         };
       case "CANCELLED":
         return {
@@ -401,9 +412,9 @@ export default function OrdersPage() {
                   )}
 
                   {["READY_TO_SHIP", "SHIPPED"].includes(order.status) &&
-                    trackingUrl(order.shipping?.awbCode) && (
+                    shipmentTrackingUrl(order.shipping) && (
                       <a
-                        href={trackingUrl(order.shipping?.awbCode) as string}
+                        href={shipmentTrackingUrl(order.shipping) as string}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center justify-center gap-2 rounded-full border border-neutral-300 bg-bg-surface px-5 py-2.5 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50"
@@ -413,6 +424,10 @@ export default function OrdersPage() {
                         <span className="sr-only">(opens in a new tab)</span>
                       </a>
                     )}
+
+                  {canBuyAgain(order.status, order.items) && (
+                    <BuyAgainButton items={order.items} variant="outline" />
+                  )}
 
                   <button
                     onClick={() => router.push(`/account/orders/${order._id}`)}

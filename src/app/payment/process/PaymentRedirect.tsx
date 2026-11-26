@@ -1,47 +1,23 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { useSearchParams } from "next/navigation";
-import { PAYU_URL } from "@/lib/constants";
+import Link from "next/link";
 
+/*
+ * Checkout now goes straight to PayU, so this page is only reached from an
+ * old link or the browser's Back button. It never re-sends a payment.
+ */
 export default function PaymentRedirect() {
-  const searchParams = useSearchParams();
-  const dataParam = searchParams.get("data");
-
-  const submittedRef = useRef(false);
-
-  useEffect(() => {
-    if (!dataParam) return;
-    if (submittedRef.current) return;
-    submittedRef.current = true;
-
-    try {
-      const data = JSON.parse(decodeURIComponent(dataParam));
-
-      const form = document.createElement("form");
-      form.method = "POST";
-      form.action = PAYU_URL; // ✅ Live/Test dynamic URL
-
-      Object.entries(data).forEach(([key, value]) => {
-        const input = document.createElement("input");
-        input.type = "hidden";
-        input.name = key;
-        input.value = String(value);
-        form.appendChild(input);
-      });
-
-      document.body.appendChild(form);
-      form.submit();
-    } catch (e) {
-      console.error("Failed to parse PayU data", e);
-    }
-  }, [dataParam]);
-
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <p className="text-lg font-medium">
-        Redirecting to secure payment...
-      </p>
+    <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="max-w-md text-center space-y-4">
+        <p className="text-lg font-medium">This payment page has expired.</p>
+        <p className="text-sm text-gray-600">
+          If you&apos;ve already paid, your order will update automatically. Otherwise you can pay for it from My Orders.
+        </p>
+        <Link href="/account/orders" className="inline-block px-6 py-2 text-white rounded-full bg-bg-dark">
+          Go to My Orders
+        </Link>
+      </div>
     </div>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useCart } from "@/context/CartContext";
 import { MinusIcon, PlusIcon } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 
 import { Product } from "@/types/product-api";
 import { trackAddToCart } from "@/lib/gtm";
@@ -23,6 +23,8 @@ function RatingStars({
     rating: number;
     reviewCount: number;
 }) {
+    // No reviews yet: nothing, rather than five empty stars and "0.0 (0)".
+    if (!reviewCount || !rating) return null;
     return (
         <div className="flex items-center gap-1">
             {[1, 2, 3, 4, 5].map((star) => {
@@ -264,8 +266,30 @@ function QuantitySection({
         }
     };
 
+    // Phones: when the Add to Cart button is off screen, show a bar at the
+    // bottom of the screen with the price and the same button.
+    const mainRef = useRef<HTMLDivElement>(null);
+    const [buttonOffScreen, setButtonOffScreen] = useState(false);
+    const [footerOnScreen, setFooterOnScreen] = useState(false);
+    useEffect(() => {
+        const el = mainRef.current;
+        if (!el || typeof IntersectionObserver === "undefined") return;
+        const io = new IntersectionObserver(([entry]) => setButtonOffScreen(!entry.isIntersecting), { threshold: 0 });
+        io.observe(el);
+        // Out of the way at the bottom of the page, so the footer stays readable.
+        const footer = document.querySelector("footer");
+        const fo = new IntersectionObserver(([entry]) => setFooterOnScreen(entry.isIntersecting), { threshold: 0 });
+        if (footer) fo.observe(footer);
+        return () => {
+            io.disconnect();
+            fo.disconnect();
+        };
+    }, []);
+    const showBar = buttonOffScreen && !footerOnScreen;
+
     return (
-        <div className="flex flex-row gap-4 w-full">
+        <>
+        <div className="flex flex-row gap-4 w-full" ref={mainRef}>
             {!isOutOfStock && (
                 <div className="
                         flex items-center justify-between
@@ -288,7 +312,7 @@ function QuantitySection({
 
                     <button
                         onClick={() =>
-                            setQuantity((q) => Math.min(stock, q + 1))
+                            setQuantity((q) => Math.min(stock, 50, q + 1))
                         }
                         disabled={adding}
                         className="p-3 rounded-r-full disabled:opacity-40 cursor-pointer hover:bg-bg-surface"
@@ -321,5 +345,30 @@ function QuantitySection({
                         : "Add to Cart"}
             </button>
         </div>
+
+        {showBar && (
+            <div className="fixed inset-x-0 bottom-0 z-40 border-t border-black/10 bg-bg-page/95 backdrop-blur px-4 py-3 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] md:hidden print:hidden">
+                <div className="flex items-center gap-3">
+                    <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold text-brand-primary">{name}</p>
+                        <p className="text-xs text-text-secondary">
+                            {weightLabel} · <span className="font-semibold text-brand-primary">₹{price.toFixed(0)}</span>
+                            {quantity > 1 ? ` × ${quantity}` : ""}
+                        </p>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={handleAdd}
+                        disabled={isOutOfStock || adding}
+                        className={`shrink-0 rounded-full px-6 py-3 text-sm font-medium transition ${
+                            isOutOfStock ? "bg-gray-300 text-gray-600" : adding ? "bg-bg-dark/70 text-white" : "bg-bg-dark text-white"
+                        }`}
+                    >
+                        {isOutOfStock ? "Out of Stock" : adding ? "Adding..." : "Add to Cart"}
+                    </button>
+                </div>
+            </div>
+        )}
+        </>
     );
 }

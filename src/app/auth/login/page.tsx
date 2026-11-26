@@ -9,6 +9,7 @@ import { Mail, Lock, Phone, User, ArrowRight } from "lucide-react";
 import { GoogleLogin } from "@react-oauth/google";
 import { toast } from "sonner";
 import { isValidPhone } from "@/lib/validatePhone";
+import GoogleProvider from "@/components/auth/GoogleProvider";
 
 type Step = 
   | "LOGIN" 
@@ -20,7 +21,7 @@ type Step =
   | "LEGACY_OTP"
   | "GOOGLE_PHONE";
 
-export default function LoginPage() {
+function LoginPageContent() {
     const router = useRouter();
     const { login } = useAuth();
 
@@ -67,6 +68,11 @@ export default function LoginPage() {
         router.push("/");
       } catch (err) {
         const error = err as AxiosError<{ message?: string; unverified?: boolean }>;
+        if (error.response?.data?.unverified) {
+          // Registered but never verified: send a fresh code and ask for it.
+          await sendVerificationCode();
+          return;
+        }
         setError(error.response?.data?.message || "Login failed");
       } finally {
         setLoading(false);
@@ -106,6 +112,21 @@ export default function LoginPage() {
         } else {
           setError(errorMsg);
         }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    /* New verification code for an account that was never verified (or whose code expired). */
+    const sendVerificationCode = async () => {
+      try {
+        setLoading(true);
+        await api.post("/auth/customer/resend-verification-otp", { email });
+        changeStep("VERIFY_EMAIL_OTP");
+        toast.success("We've emailed you a new code. Please check your inbox (and spam).");
+      } catch (err) {
+        const error = err as AxiosError<{ message?: string }>;
+        setError(error.response?.data?.message || "Couldn't send a new code. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -301,7 +322,7 @@ export default function LoginPage() {
                     </div>
 
                     <div className="flex justify-end">
-                      <button type="button" onClick={() => changeStep("FORGOT_PASSWORD")} className="text-xs text-(--color-brand-primary) hover:underline cursor-pointer">Forgot Password?</button>
+                      <button type="button" onClick={() => changeStep("FORGOT_PASSWORD")} className="inline-block py-2 text-sm sm:text-xs text-(--color-brand-primary) hover:underline cursor-pointer">Forgot Password?</button>
                     </div>
 
                     <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2 rounded-full bg-(--color-brand-primary) text-(--color-text-on-dark) py-3 text-sm font-medium hover:opacity-90 transition disabled:opacity-50 cursor-pointer">
@@ -323,8 +344,8 @@ export default function LoginPage() {
                       />
                     </div>
 
-                    <p className="text-xs pt-4 text-center">Don't have an account? <button type="button" onClick={() => changeStep("REGISTER")} className="font-semibold text-(--color-brand-primary) cursor-pointer hover:underline">Sign up</button></p>
-                    <p className="text-xs text-center"><button type="button" onClick={() => changeStep("LEGACY_PHONE")} className="text-text-secondary cursor-pointer hover:underline">Login with Phone (Existing Users)</button></p>
+                    <p className="text-sm sm:text-xs pt-4 text-center">Don't have an account? <button type="button" onClick={() => changeStep("REGISTER")} className="inline-block py-2 px-1 font-semibold text-(--color-brand-primary) cursor-pointer hover:underline">Sign up</button></p>
+                    <p className="text-sm sm:text-xs text-center"><button type="button" onClick={() => changeStep("LEGACY_PHONE")} className="inline-block py-2 text-text-secondary cursor-pointer hover:underline">Login with Phone (Existing Users)</button></p>
                   </form>
                 )}
 
@@ -471,6 +492,7 @@ export default function LoginPage() {
                     <button onClick={handleVerifyEmailOtp} disabled={loading || otp.some((d) => d === "")} className="w-full rounded-full bg-(--color-brand-primary) text-(--color-text-on-dark) py-3 text-sm font-medium hover:opacity-90 transition disabled:opacity-50 cursor-pointer">
                       {loading ? "Verifying…" : "Verify & Login"}
                     </button>
+                    <p className="text-xs text-center text-gray-500">Didn&apos;t get it? <button type="button" onClick={sendVerificationCode} disabled={loading} className="text-(--color-brand-primary) hover:underline cursor-pointer disabled:opacity-50">Send a new code</button></p>
                     <p className="text-xs text-center"><button type="button" onClick={() => changeStep("REGISTER")} className="text-(--color-brand-primary) hover:underline cursor-pointer">Back to Register</button></p>
                   </div>
                 )}
@@ -514,4 +536,13 @@ export default function LoginPage() {
             </div>
         </section>
     );
+}
+
+
+export default function LoginPage() {
+  return (
+    <GoogleProvider>
+      <LoginPageContent />
+    </GoogleProvider>
+  );
 }

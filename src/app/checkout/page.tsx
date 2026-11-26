@@ -3,6 +3,7 @@
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { PAYU_URL } from "@/lib/constants";
+import { checkDelivery, DeliveryMessage } from "@/components/products/DeliveryCheck";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import api from "@/lib/api";
@@ -38,7 +39,18 @@ interface Coupon {
   type: "PERCENT" | "FLAT";
   value: number;
   minOrderAmount: number;
+  maxDiscount?: number | null;
+  expiresAt?: string;
+  firstOrderOnly?: boolean;
+  onePerCustomer?: boolean;
+  /** A reward made for this customer (refer a friend). */
+  yours?: boolean;
 }
+
+const offerText = (c: Coupon) =>
+  c.type === "PERCENT"
+    ? `${c.value}% OFF${c.maxDiscount ? ` (up to ₹${c.maxDiscount})` : ""}`
+    : `₹${c.value} OFF`;
 
 /* ================= COMPONENT ================= */
 
@@ -49,6 +61,7 @@ export default function CheckoutPage() {
 
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
+  const [delivery, setDelivery] = useState<Awaited<ReturnType<typeof checkDelivery>> | null>(null);
 
   const [couponCode, setCouponCode] = useState("");
   const [couponPreview, setCouponPreview] = useState<CouponPreview | null>(null);
@@ -67,6 +80,7 @@ export default function CheckoutPage() {
     freeShippingThreshold: 1000,
     flatShippingCharge: 90,
     gstPercent: 5,
+    shippingGstPercent: 5,
   });
 
   /* ================= PRICE CALCULATION ================= */
@@ -79,11 +93,16 @@ export default function CheckoutPage() {
   const discount = couponPreview?.discountAmount || 0;
 
   const taxableAmount = itemsTotal - discount;
-  const gstAmount = Number(
-    (taxableAmount - taxableAmount / (1 + settings.gstPercent / 100)).toFixed(2)
-  );
   const shippingAmount =
     itemsTotal >= settings.freeShippingThreshold ? 0 : settings.flatShippingCharge;
+  // GST included in the tea prices and in the shipping charge (same rule as the invoice).
+  const shippingGstPercent = settings.shippingGstPercent ?? 5;
+  const gstAmount = Number(
+    (
+      taxableAmount - taxableAmount / (1 + settings.gstPercent / 100) +
+      (shippingAmount - shippingAmount / (1 + shippingGstPercent / 100))
+    ).toFixed(2)
+  );
   const grandTotal = Number(
     (taxableAmount + shippingAmount).toFixed(2)
   );
@@ -160,14 +179,16 @@ export default function CheckoutPage() {
     fetchCoupons();
   }, []);
 
-  const handleApplyCoupon = async () => {
-    if (!couponCode) return;
+  // Pass the code when applying from the offers list (the state isn't updated yet then).
+  const handleApplyCoupon = async (codeArg?: string) => {
+    const code = (codeArg ?? couponCode).trim();
+    if (!code) return;
 
     try {
       const res = await api.post(
         "/customer/coupons/validate",
         {
-          code: couponCode,
+          code,
           orderAmount: itemsTotal,
         }
       );
@@ -193,6 +214,7 @@ export default function CheckoutPage() {
       return;
     }
 
+    let leavingForPayU = false;
     try {
       setLoading(true);
 
@@ -224,12 +246,12 @@ export default function CheckoutPage() {
         form.appendChild(input);
       });
 
+      // Go straight to PayU. (The details used to be passed in the page
+      // address, which kept the customer's email and phone in browser
+      // history and analytics.)
       document.body.appendChild(form);
-      router.push(
-        `/payment/process?data=${encodeURIComponent(
-          JSON.stringify(data)
-        )}`
-      );
+      leavingForPayU = true;
+      form.submit();
     } catch (error: unknown) {
       const axiosError = error as AxiosError<{
         message: string;
@@ -251,9 +273,35 @@ export default function CheckoutPage() {
         await refreshCart();
       }
     } finally {
-      setLoading(false);
+      // Keep the button disabled while the browser goes to PayU (no double orders).
+      if (!leavingForPayU) setLoading(false);
     }
   };
+
+  // Delivery estimate for the chosen address.
+  const selectedPincode = addresses.find((a) => a._id === selectedAddress)?.pincode || "";
+  useEffect(() => {
+    if (!/^[1-9]\d{5}$/.test(String(selectedPincode))) {
+      setDelivery(null);
+      return;
+    }
+    let live = true;
+    checkDelivery(String(selectedPincode)).then((r) => {
+      if (live) setDelivery(r);
+    });
+    return () => {
+      live = false;
+    };
+  }, [selectedPincode]);
+
+  // Coming back from PayU with the browser's Back button: enable the button again.
+  useEffect(() => {
+    const onShow = (e: PageTransitionEvent) => {
+      if (e.persisted) setLoading(false);
+    };
+    window.addEventListener("pageshow", onShow);
+    return () => window.removeEventListener("pageshow", onShow);
+  }, []);
 
   const handleEmailVerified = () => {
     setShowEmailModal(false);
@@ -272,27 +320,27 @@ export default function CheckoutPage() {
         onCancel={() => setShowEmailModal(false)}
         onVerified={handleEmailVerified}
       />
-      <div className="container mx-auto px-6 py-36">
-        <h1 className="text-4xl font-playfair mb-10">
+      <div className="container mx-auto px-4 sm:px-6 pt-28 pb-16 sm:py-36">
+        <h1 className="text-3xl sm:text-4xl font-playfair mb-6 sm:mb-10">
           Checkout
         </h1>
 
-        <div className="grid lg:grid-cols-3 gap-10">
+        <div className="grid lg:grid-cols-3 gap-8 sm:gap-10">
 
           {/* LEFT SIDE */}
           <div className="lg:col-span-2 space-y-10">
             {/* ================= ADDRESS SECTION ================= */}
             <div className="relative">
 
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">
+              <div className="flex justify-between items-center gap-3 mb-4">
+                <h2 className="text-lg sm:text-xl font-semibold">
                   Delivery Address
                 </h2>
 
                 <div className="flex gap-4 text-sm">
                   <button
                     onClick={() => setShowAddressModal(true)}
-                    className="bg-bg-dark rounded-full px-6 cursor-pointer hover:bg-bg-dark/90 py-3 text-text-on-dark"
+                    className="bg-bg-dark rounded-full px-4 sm:px-6 cursor-pointer hover:bg-bg-dark/90 py-3 text-text-on-dark whitespace-nowrap"
                   >
                     + Add New Address
                   </button>
@@ -324,12 +372,12 @@ export default function CheckoutPage() {
 
               {/* SELECTED ADDRESS CARD */}
               {selectedAddress && (
-                <div className="border rounded-3xl p-6 bg-bg-dark text-text-on-dark shadow-sm">
+                <div className="border rounded-3xl p-5 sm:p-6 bg-bg-dark text-text-on-dark shadow-sm">
                   {addresses
                     .filter((a) => a._id === selectedAddress)
                     .map((addr) => (
-                      <div key={addr._id} className="flex gap-24 justify-between items-start">
-                        <div className="w-3/5 space-y-2">
+                      <div key={addr._id} className="flex flex-col gap-4 sm:flex-row sm:gap-8 sm:justify-between sm:items-start">
+                        <div className="sm:w-3/5 space-y-2">
                           <p className="font-semibold text-lg">
                             {addr.name}
                           </p>
@@ -350,13 +398,18 @@ export default function CheckoutPage() {
                             onClick={() =>
                               setShowAddressDropdown(!showAddressDropdown)
                             }
-                            className="h-fit text-bg-dark bg-bg-surface text-xs px-4 py-2 rounded-full cursor-pointer hover:bg-bg-surface/90"
+                            className="h-fit self-start text-bg-dark bg-bg-surface text-sm sm:text-xs px-5 py-2.5 sm:px-4 sm:py-2 rounded-full cursor-pointer hover:bg-bg-surface/90"
                           >
                             Change Address
                           </button>
                         )}
                       </div>
                     ))}
+                </div>
+              )}
+              {selectedAddress && delivery && delivery.kind !== "error" && (
+                <div className="mt-3 rounded-2xl bg-bg-surface px-4 py-3" aria-live="polite">
+                  <DeliveryMessage result={delivery} />
                 </div>
               )}
 
@@ -372,8 +425,8 @@ export default function CheckoutPage() {
                       }}
                       className="p-4 hover:bg-bg-dark/10 cursor-pointer border-b last:border-b-0 transition space-y-1"
                     >
-                      <div className="flex justify-between items-center">
-                        <div className="">
+                      <div className="flex justify-between items-center gap-3">
+                        <div className="min-w-0">
                           <p className="font-medium">{addr.name}</p>
                           <p className="text-xs text-gray-500">
                             {addr.addressLine1}
@@ -386,7 +439,7 @@ export default function CheckoutPage() {
                         </div>
 
                         <button
-                          className="h-fit text-text-on-dark bg-bg-dark text-sm px-6 py-3 rounded-full cursor-pointer"
+                          className="h-fit shrink-0 text-text-on-dark bg-bg-dark text-sm px-4 sm:px-6 py-3 rounded-full cursor-pointer"
                         >
                           Select
                         </button>
@@ -455,16 +508,24 @@ export default function CheckoutPage() {
                           className="border rounded-2xl p-5 flex justify-between items-center"
                         >
                           <div>
+                            {coupon.yours && (
+                              <span className="inline-block mb-1 px-2 py-0.5 rounded-full bg-green-100 text-green-800 text-xs font-semibold">
+                                Your reward
+                              </span>
+                            )}
                             <p className="font-semibold">
                               {coupon.code}
                             </p>
                             <p className="text-sm text-gray-500">
-                              {coupon.type === "PERCENT"
-                                ? `${coupon.value}% OFF`
-                                : `₹${coupon.value} OFF`}
+                              {offerText(coupon)}
+                              {coupon.yours && coupon.expiresAt && (
+                                <> · until {new Date(coupon.expiresAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</>
+                              )}
                             </p>
                             <p className="text-xs text-gray-400">
                               Min order ₹{coupon.minOrderAmount}
+                              {coupon.firstOrderOnly && " · First order only"}
+                              {coupon.onePerCustomer && " · Once per customer"}
                             </p>
                           </div>
 
@@ -476,7 +537,7 @@ export default function CheckoutPage() {
                             <button
                               onClick={() => {
                                 setCouponCode(coupon.code);
-                                handleApplyCoupon();
+                                handleApplyCoupon(coupon.code);
                                 setShowCouponModal(false);
                               }}
                               className="px-6 py-2 cursor-pointer bg-bg-dark text-white rounded-full"
@@ -613,7 +674,7 @@ export default function CheckoutPage() {
                   className="border px-4 py-3 rounded-full w-full"
                 />
                 <button
-                  onClick={handleApplyCoupon}
+                  onClick={() => handleApplyCoupon()}
                   className="px-6 h-fit py-3 bg-bg-dark text-white rounded-full cursor-pointer"
                 >
                   Apply
@@ -647,13 +708,14 @@ export default function CheckoutPage() {
               {availableCoupons.length > 0 && (
                 <div className="bg-bg-surface p-4 rounded-2xl flex justify-between items-center">
                   <div className="space-y-2">
+                    {availableCoupons[0].yours && (
+                      <p className="text-xs font-semibold text-green-800">Your reward</p>
+                    )}
                     <p className="font-semibold border px-3 py-2 border-dashed rounded-lg">
                       {availableCoupons[0].code}
                     </p>
                     <p className="text-sm text-gray-500">
-                      {availableCoupons[0].type === "PERCENT"
-                        ? `${availableCoupons[0].value}% OFF`
-                        : `₹${availableCoupons[0].value} OFF`}
+                      {offerText(availableCoupons[0])}
                     </p>
                   </div>
 
@@ -661,7 +723,7 @@ export default function CheckoutPage() {
                     <button
                       onClick={() => {
                         setCouponCode(availableCoupons[0].code);
-                        handleApplyCoupon();
+                        handleApplyCoupon(availableCoupons[0].code);
                       }}
                       className="text-sm bg-bg-dark text-white px-5 py-2 rounded-full cursor-pointer"
                     >
@@ -718,7 +780,7 @@ export default function CheckoutPage() {
                 </div>
 
                 <p className="text-xs text-text-secondary">
-                  Product prices are inclusive of {settings.gstPercent}% GST.
+                  Prices and shipping include GST.
                 </p>
 
                 <div className="flex justify-between">

@@ -41,6 +41,8 @@ function RatingStars({
   rating: number;
   reviewCount?: number;
 }) {
+  // No reviews yet: show nothing rather than five empty stars and "0.0 (0)".
+  if (!reviewCount || !rating) return null;
   return (
     <div className="flex items-center gap-1 text-sm">
       {[1, 2, 3, 4, 5].map((star) => {
@@ -147,7 +149,7 @@ export default function ProductCard({
             src={image}
             alt={name}
             fill
-            sizes="(max-width:768px) 100vw, 33vw"
+            sizes="(max-width: 1024px) 50vw, 33vw"
             className="object-contain transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
@@ -157,7 +159,7 @@ export default function ProductCard({
         )}
 
         {discountPercent > 0 && (
-          <span className="absolute top-3 left-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+          <span className="absolute top-3 left-3 bg-red-600 text-white text-xs px-2 py-1 rounded-full">
             {discountPercent}% OFF
           </span>
         )}
@@ -166,15 +168,17 @@ export default function ProductCard({
           disabled={stock <= 0 || adding}
           onClick={handleAddToCart}
           className={clsx(
-            "absolute bottom-4 left-1/2 -translate-x-1/2",
-            "opacity-0 group-hover:opacity-100 transition cursor-pointer",
+            "absolute bottom-2 sm:bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap",
+            // Phones have no hover: always show it there (an invisible button was
+            // still tappable and added items by surprise).
+            "opacity-100 md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100 transition cursor-pointer",
             stock <= 0
               ? "bg-gray-300 cursor-not-allowed"
               : adding
               ? "bg-bg-dark/70 text-white"
               : "bg-bg-dark text-white hover:bg-bg-dark/90",
-            "text-sm font-medium rounded-full",
-            layout === "default" ? "px-16 py-2" : "px-8 py-1.5"
+            "text-xs sm:text-sm font-medium rounded-full shadow",
+            layout === "default" ? "px-4 py-2 sm:px-16" : "px-4 py-1.5 sm:px-8"
           )}
         >
           {stock <= 0
@@ -188,15 +192,15 @@ export default function ProductCard({
       {/* CONTENT */}
       <div
         className={clsx(
-          "flex justify-between items-start",
-          layout === "default" ? "py-4 px-6" : "py-3 px-4"
+          "flex flex-col gap-1 sm:flex-row sm:justify-between sm:items-start",
+          layout === "default" ? "py-3 px-1 sm:py-4 sm:px-6" : "py-3 px-1 sm:px-4"
         )}
       >
         <div>
           <h3
             className={clsx(
               "font-semibold text-text-primary",
-              layout === "default" ? "text-lg" : "text-sm"
+              layout === "default" ? "text-sm sm:text-lg" : "text-sm"
             )}
           >
             {name}
@@ -213,7 +217,7 @@ export default function ProductCard({
           />
         </div>
 
-        <div className="text-right">
+        <div className="flex items-baseline gap-2 sm:block sm:text-right">
           <span
             className={clsx(
               "font-bold text-brand-primary",

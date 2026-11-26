@@ -23,15 +23,15 @@ export default function ShopToolbar({
   const end = Math.min(page * limit, total);
 
   return (
-    <div className="flex items-center justify-end gap-8">
+    <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-8">
 
       {/* LEFT SIDE */}
-      <div className="flex items-center justify-between w-full sm:w-auto">
+      <div className="flex items-center justify-between sm:w-auto">
 
         {/* Mobile Filter Button */}
         <button
           onClick={onOpenMobileFilters}
-          className="lg:hidden flex items-center gap-2 px-4 py-2 mr-8 lg:mr-0 rounded-full border text-sm font-medium"
+          className="lg:hidden flex items-center gap-2 px-4 py-2.5 sm:mr-8 lg:mr-0 rounded-full border text-sm font-medium"
         >
           <SlidersHorizontal size={16} />
           Filters

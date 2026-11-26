@@ -102,7 +102,9 @@ export default function ShopBanner({
           src={currentBanner.image.url}
           alt="Shop Banner"
           fill
-          priority={current === 0}
+          // First banner: fetch it first and don't wait to load it.
+          fetchPriority={current === 0 ? "high" : "auto"}
+          loading={current === 0 ? "eager" : "lazy"}
           sizes="100vw"
           quality={70}
           onLoad={() => setImageLoaded(true)}

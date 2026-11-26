@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { X } from "lucide-react";
+import { Search, X } from "lucide-react";
 
 import ShopBanner, { type ShopBannerData } from "@/components/shop/ShopBanner";
 import ShopToolbar from "@/components/shop/ShopToolbar";
@@ -20,6 +20,8 @@ export interface Filters {
   weight?: number;
   minPrice?: number;
   maxPrice?: number;
+  /** Words typed in the search box (only set when there are some). */
+  search?: string;
 }
 
 export default function ShopClient({
@@ -60,6 +62,25 @@ export default function ShopClient({
 
   const limit = 9;
 
+  /* ================= SEARCH (waits until typing pauses) ================= */
+  // ?q= or ?search= (the address Google shows for searching the site).
+  const [searchText, setSearchText] = useState(searchParams.get("q") || searchParams.get("search") || "");
+
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      const q = searchText.trim().slice(0, 60);
+      setFilters((prev) => {
+        if ((prev.search || "") === q) return prev;
+        const next = { ...prev };
+        if (q) next.search = q;
+        else delete next.search;
+        return next;
+      });
+      setPage(1);
+    }, 400);
+    return () => window.clearTimeout(id);
+  }, [searchText]);
+
   const { products, total, loading } = useShopProducts({
     page,
     limit,
@@ -76,6 +97,40 @@ export default function ShopClient({
 
         {/* ================= TOOLBAR ================= */}
         <div className="flex flex-col gap-4">
+          <form
+            role="search"
+            onSubmit={(e) => e.preventDefault()}
+            className="relative w-full sm:max-w-md"
+          >
+            <label htmlFor="shop-search" className="sr-only">Search teas</label>
+            <Search className="absolute w-4 h-4 -translate-y-1/2 pointer-events-none left-4 top-1/2 text-text-secondary" />
+            <input
+              id="shop-search"
+              type="search"
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              placeholder="Search teas, e.g. green, CTC, gift"
+              autoComplete="off"
+              className="w-full py-3 pr-10 text-sm border rounded-full outline-none pl-11 border-border-muted/40 bg-bg-surface focus:border-bg-dark"
+            />
+            {searchText && (
+              <button
+                type="button"
+                onClick={() => setSearchText("")}
+                aria-label="Clear search"
+                className="absolute p-1 -translate-y-1/2 rounded-full right-3 top-1/2 text-text-secondary hover:bg-black/5"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </form>
+          {filters.search && !loading && (
+            <p className="text-sm text-text-secondary" aria-live="polite">
+              {total === 0
+                ? <>No teas match &ldquo;{filters.search}&rdquo;. Try another word, or <button type="button" onClick={() => setSearchText("")} className="underline">see all teas</button>.</>
+                : <>{total} tea{total === 1 ? "" : "s"} for &ldquo;{filters.search}&rdquo;</>}
+            </p>
+          )}
           <ShopToolbar
             page={page}
             limit={limit}
@@ -128,15 +183,15 @@ export default function ShopClient({
           <div className="w-full max-w-sm bg-bg-surface h-full shadow-xl flex flex-col">
 
             {/* HEADER */}
-            <div className="flex justify-between items-center p-8 border-b border-border-muted/20">
+            <div className="flex justify-between items-center p-5 sm:p-8 border-b border-border-muted/20">
               <h3 className="text-lg font-semibold">Filters</h3>
-              <button onClick={() => setMobileFiltersOpen(false)}>
+              <button onClick={() => setMobileFiltersOpen(false)} aria-label="Close filters" className="p-2 -m-2">
                 <X />
               </button>
             </div>
 
             {/* FILTER CONTENT */}
-            <div className="flex-1 overflow-y-auto p-8">
+            <div className="flex-1 overflow-y-auto p-5 sm:p-8">
               <ShopFilters
                 groupId="mobile"   // 👈 IMPORTANT
                 weightOptions={facets?.weights}

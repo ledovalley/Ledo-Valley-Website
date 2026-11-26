@@ -40,7 +40,7 @@ export default function ShopProducts({
 }: Props) {
   if (loading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-6 sm:gap-8">
         {[...Array(6)].map((_, i) => (
           <ProductSkeleton key={i} />
         ))}
@@ -57,7 +57,7 @@ export default function ShopProducts({
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+    <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-6 sm:gap-8">
       {products.map((product) => {
         const variant = product.variants[0];
         if (!variant) return null;

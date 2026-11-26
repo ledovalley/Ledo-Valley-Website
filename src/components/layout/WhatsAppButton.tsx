@@ -45,7 +45,7 @@ export default function WhatsAppButton() {
       onClick={track}
       aria-label="Chat with us on WhatsApp (opens WhatsApp)"
       title="Chat with us on WhatsApp"
-      className="fixed z-30 flex items-center justify-center rounded-full shadow-lg bottom-5 right-5 w-14 h-14 bg-[#25D366] text-white transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#128C7E] print:hidden"
+      className={`fixed z-30 flex items-center justify-center rounded-full shadow-lg ${pathname.startsWith("/shop/") ? "bottom-24 md:bottom-5" : "bottom-5"} right-5 w-14 h-14 bg-[#25D366] text-white transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#128C7E] print:hidden`}
       style={{ marginBottom: "env(safe-area-inset-bottom)" }}
     >
       <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true" fill="currentColor">

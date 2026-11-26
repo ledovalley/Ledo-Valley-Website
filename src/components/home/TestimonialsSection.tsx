@@ -61,7 +61,12 @@ export default function TestimonialsSection({ initialTestimonials }: { initialTe
           What Our Customers Say
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Phones: one swipeable row (each card most of the screen wide, the
+            next one peeking in). Larger screens: the grid as before. */}
+        <div
+          className="-mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:grid md:grid-cols-3 md:gap-8 md:overflow-visible md:px-0 md:pb-0"
+          aria-label="Customer reviews"
+        >
           {testimonials.map((item) => (
             <div
               key={item._id}
@@ -71,6 +76,7 @@ export default function TestimonialsSection({ initialTestimonials }: { initialTe
                 p-6
                 flex flex-col
                 gap-4
+                w-[85%] shrink-0 snap-center md:w-auto
               "
             >
               <StarRating rating={item.rating} />
@@ -92,6 +98,9 @@ export default function TestimonialsSection({ initialTestimonials }: { initialTe
             </div>
           ))}
         </div>
+        {testimonials.length > 1 && (
+          <p className="mt-2 text-center text-xs text-(--color-text-on-dark)/70 md:hidden">Swipe for more reviews →</p>
+        )}
       </div>
     </section>
   );

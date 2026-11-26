@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { SITE_INFO } from "@/lib/siteInfo";
+import { SITE_INFO, qualityIssueMailto } from "@/lib/siteInfo";
 
 export default function ReturnsPolicyContent() {
   return (
@@ -22,6 +22,30 @@ export default function ReturnsPolicyContent() {
       {/* ================= CONTENT ================= */}
       <section className="container mx-auto px-6 mt-14 max-w-4xl">
         <div className="space-y-12 text-sm md:text-base leading-relaxed text-text-muted">
+          {/* IN SHORT */}
+          <div className="bg-muted/40 border border-border rounded-2xl p-6">
+            <h2 className="text-xl md:text-2xl font-semibold font-playfair text-text-primary">
+              In short
+            </h2>
+            <ul className="list-disc pl-6 mt-4 space-y-3">
+              <li>
+                <strong className="text-text-primary">We don&apos;t accept returns or exchanges</strong>,
+                except for quality issues: a damaged, defective or wrong product.
+              </li>
+              <li>
+                To report one, email{" "}
+                <a href={qualityIssueMailto()} className="underline underline-offset-2 text-text-primary">
+                  {SITE_INFO.returnsEmail}
+                </a>{" "}
+                within <strong>{SITE_INFO.returnWindow} of delivery</strong> with your order number and clear photos.
+              </li>
+              <li>
+                We check every report. Once verified, we refund the order or the affected items (or send a replacement),
+                and confirm by email.
+              </li>
+            </ul>
+          </div>
+
 
           {/* DAMAGED PRODUCTS */}
           <div>
@@ -31,7 +55,7 @@ export default function ReturnsPolicyContent() {
 
             <p className="mt-4">
               If you receive your package in a damaged or broken condition,
-              please notify us within <strong>{SITE_INFO.returnWindow} of delivery</strong>.
+              please email us within <strong>{SITE_INFO.returnWindow} of delivery</strong>.
             </p>
 
             <ul className="list-disc pl-6 mt-4 space-y-3">
@@ -52,8 +76,8 @@ export default function ReturnsPolicyContent() {
             </p>
 
             <p className="mt-2 font-medium text-text-primary">
-              <a href={`mailto:${SITE_INFO.email}`} className="underline underline-offset-2">
-                {SITE_INFO.email}
+              <a href={qualityIssueMailto()} className="underline underline-offset-2">
+                {SITE_INFO.returnsEmail}
               </a>
             </p>
           </div>
@@ -65,8 +89,9 @@ export default function ReturnsPolicyContent() {
             </h2>
 
             <p className="mt-4">
-              If you receive a defective product, please inform us within
-              <strong> {SITE_INFO.returnWindow} of delivery</strong> with supporting images.
+              If you receive a defective product, please email{" "}
+              <a href={qualityIssueMailto()} className="underline underline-offset-2">{SITE_INFO.returnsEmail}</a>{" "}
+              within <strong>{SITE_INFO.returnWindow} of delivery</strong> with supporting images.
             </p>
 
             <ul className="list-disc pl-6 mt-4 space-y-3">
@@ -75,9 +100,9 @@ export default function ReturnsPolicyContent() {
             </ul>
 
             <p className="mt-4">
-              Once the issue is acknowledged, we will arrange reverse pickup.
-              After receiving the product at our facility, we will verify its
-              condition and initiate the appropriate refund or replacement process.
+              Once we&apos;ve verified the issue, we will refund the order or the
+              affected items, or send a replacement. If we need the product back,
+              we will arrange a pickup first.
             </p>
           </div>
 
@@ -106,8 +131,31 @@ export default function ReturnsPolicyContent() {
 
             <p className="mt-4">
               Once a refund is approved and processed, the amount will be credited
-              within <strong>3–5 business days</strong>, depending on your payment method
+              within <strong>5–7 working days</strong>, depending on your payment method
               and banking institution.
+            </p>
+          </div>
+
+          {/* REFUSED DELIVERIES */}
+          <div>
+            <h2 className="text-xl md:text-2xl font-semibold font-playfair text-text-primary">
+              5. Orders Refused at Delivery
+            </h2>
+
+            <p className="mt-4">
+              If a parcel is refused at delivery or can&apos;t be delivered (for example, nobody
+              is available after the courier&apos;s attempts, or the address is incomplete), the
+              courier returns it to us. Once it reaches us, we refund your order.
+            </p>
+            <p className="mt-4">
+              Shipping both ways is a real cost to us, so we may deduct the shipping charges
+              from the refund. We&apos;ll tell you the amount by email when we process it.
+            </p>
+            <p className="mt-4">
+              If you refused the parcel because it arrived <strong>damaged or tampered with</strong>,
+              you get a <strong>full refund</strong>. Please email us at{" "}
+              <a href="mailto:ledovalley1@gmail.com" className="underline">ledovalley1@gmail.com</a>{" "}
+              with a photo if you can, so we know.
             </p>
           </div>
 

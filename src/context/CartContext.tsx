@@ -44,9 +44,18 @@ interface BackendCartItem {
   priceAtAdd: number;
 }
 
+/* Result of adding several items at once ("Buy again"). */
+export interface AddManyResult {
+  added: number;
+  failed: { name: string; reason: string }[];
+}
+
 interface CartContextType {
   cart: CartItem[];
   addToCart: (item: CartItem) => Promise<void>;
+  addManyToCart: (
+    items: { productId: string; variantId: string; quantity: number; name: string }[]
+  ) => Promise<AddManyResult>;
   removeFromCart: (
     productId: string,
     variantId: string
@@ -252,6 +261,40 @@ export function CartProvider({
     }
   };
 
+  /* ================= ADD SEVERAL (Buy again) =================
+     Adds each item through the server, which checks it's still on sale and
+     in stock, then reloads the cart once. No toast per item: the caller
+     shows one summary. Logged-in customers only (orders need an account). */
+  const addManyToCart = async (
+    items: { productId: string; variantId: string; quantity: number; name: string }[]
+  ): Promise<AddManyResult> => {
+    const result: AddManyResult = { added: 0, failed: [] };
+    if (!isLoggedIn || !token) {
+      result.failed = items.map((i) => ({ name: i.name, reason: "Please log in" }));
+      return result;
+    }
+
+    for (const item of items) {
+      try {
+        await api.post(
+          "/customer/cart",
+          { productId: item.productId, variantId: item.variantId, quantity: item.quantity },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        result.added += 1;
+      } catch (error) {
+        const err = error as AxiosError<{ message?: string }>;
+        result.failed.push({
+          name: item.name,
+          reason: err.response?.data?.message || "Not available",
+        });
+      }
+    }
+
+    if (result.added) await loadUserCart();
+    return result;
+  };
+
   /* ================= UPDATE ================= */
 
   const updateQuantity = async (
@@ -349,6 +392,7 @@ export function CartProvider({
       value={{
         cart,
         addToCart,
+        addManyToCart,
         removeFromCart,
         updateQuantity,
         clearCart,

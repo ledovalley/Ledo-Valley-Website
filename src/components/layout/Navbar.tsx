@@ -12,9 +12,13 @@ import {
   LogOut,
   Menu,
   X,
+  Search,
 } from "lucide-react";
 import Image from "next/image";
 import LedoLogo from "@/assets/logo/LedoLogo.svg";
+
+/* Same tea types as the home page's "Choose Your Tea Types". */
+const TEA_TYPES = ["Green Tea", "Black Tea", "Organic Tea", "Speciality Tea"];
 
 interface NavbarProps {
   onCartOpen: () => void;
@@ -24,6 +28,7 @@ export default function Navbar({ onCartOpen }: NavbarProps) {
   const [isSticky, setIsSticky] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileSearch, setMobileSearch] = useState("");
   const router = useRouter();
 
   const { isLoggedIn, customer, logout } = useAuth();
@@ -163,39 +168,86 @@ export default function Navbar({ onCartOpen }: NavbarProps) {
         {mobileOpen && (
           <div
             onClick={(e) => e.stopPropagation()}
-            className="md:hidden mt-4 bg-white/70 backdrop-blur-md rounded-2xl shadow-md p-6 space-y-4"
+            className="md:hidden mt-3 max-h-[75vh] overflow-y-auto bg-white/90 backdrop-blur-md rounded-2xl shadow-md p-4"
           >
-            <Link
-              href="/shop"
-              className="block text-sm font-medium"
-              onClick={() => setMobileOpen(false)}
+            {/* Search the shop */}
+            <form
+              role="search"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const q = mobileSearch.trim();
+                setMobileOpen(false);
+                router.push(q ? `/shop?q=${encodeURIComponent(q)}` : "/shop");
+              }}
+              className="relative"
             >
-              Shop
-            </Link>
+              <label htmlFor="menu-search" className="sr-only">Search teas</label>
+              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none" />
+              <input
+                id="menu-search"
+                type="search"
+                value={mobileSearch}
+                onChange={(e) => setMobileSearch(e.target.value)}
+                placeholder="Search teas"
+                className="w-full rounded-full border border-black/10 bg-white py-2.5 pl-10 pr-4 outline-none focus:border-bg-dark"
+              />
+            </form>
 
-            <Link
-              href="/about"
-              className="block text-sm font-medium"
-              onClick={() => setMobileOpen(false)}
-            >
-              About Us
-            </Link>
+            {/* Tea types */}
+            <div className="mt-4">
+              <Link
+                href="/shop"
+                className="flex items-center justify-between py-3 text-base font-semibold"
+                onClick={() => setMobileOpen(false)}
+              >
+                Shop all teas <span aria-hidden="true">→</span>
+              </Link>
+              <div className="grid grid-cols-2 gap-2">
+                {TEA_TYPES.map((t) => (
+                  <Link
+                    key={t}
+                    href={`/shop?teaType=${encodeURIComponent(t)}`}
+                    className="rounded-xl border border-black/10 bg-white/70 px-3 py-2.5 text-sm font-medium text-center"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    {t}
+                  </Link>
+                ))}
+              </div>
+            </div>
 
-            <Link
-              href="/contact"
-              className="block text-sm font-medium"
-              onClick={() => setMobileOpen(false)}
-            >
-              Contact
-            </Link>
-
-            <Link
-              href="/distributor"
-              className="block text-sm font-medium"
-              onClick={() => setMobileOpen(false)}
-            >
-              Become a Distributor
-            </Link>
+            <div className="mt-3 divide-y divide-black/5 border-t border-black/5">
+              {isLoggedIn ? (
+                <>
+                  <Link href="/account/orders" className="block py-3 text-base font-medium" onClick={() => setMobileOpen(false)}>
+                    My Orders
+                  </Link>
+                  <Link href="/account" className="block py-3 text-base font-medium" onClick={() => setMobileOpen(false)}>
+                    My Account
+                  </Link>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  className="block w-full py-3 text-left text-base font-medium"
+                  onClick={() => {
+                    setMobileOpen(false);
+                    openLogin();
+                  }}
+                >
+                  Login / Sign up
+                </button>
+              )}
+              {[
+                ["/about", "About Us"],
+                ["/contact", "Contact"],
+                ["/distributor", "Become a Distributor"],
+              ].map(([href, label]) => (
+                <Link key={href} href={href} className="block py-3 text-base font-medium" onClick={() => setMobileOpen(false)}>
+                  {label}
+                </Link>
+              ))}
+            </div>
           </div>
         )}
       </div>

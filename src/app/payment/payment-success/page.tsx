@@ -45,7 +45,8 @@ function PaymentSuccessContent() {
         if (res.data.length > 0) {
           const fetchedOrder = res.data[0];
           setOrder(fetchedOrder);
-          trackPurchase(fetchedOrder);
+          // Only count it as a sale once PayU has confirmed the payment.
+          if (fetchedOrder.payment?.status === "SUCCESS") trackPurchase(fetchedOrder);
         }
       } catch (err) {
         console.error("Failed to load order", err);

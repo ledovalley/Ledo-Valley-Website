@@ -20,7 +20,24 @@ export const SITE_INFO = {
   /* How long after delivery customers have to report damaged/defective items.
      Keep this in line with the backend's return window. */
   returnWindow: "24 hours",
+
+  /* Quality complaints (the only returns accepted) go to this inbox. */
+  returnsEmail: "ledovalley1@gmail.com",
 } as const;
+
+/* Pre-filled email for reporting a quality issue with an order. */
+export const qualityIssueMailto = (orderNumber?: string) => {
+  const subject = orderNumber ? `Quality issue – Order ${orderNumber}` : "Quality issue with my order";
+  const body = [
+    orderNumber ? `Order number: ${orderNumber}` : "Order number: ",
+    "",
+    "What's wrong (damaged / defective / wrong item):",
+    "",
+    "",
+    "Please attach clear photos of the product and the packaging.",
+  ].join("\n");
+  return `mailto:${SITE_INFO.returnsEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+};
 
 /* Link that opens a WhatsApp chat with us, or null if WhatsApp is switched off. */
 export const whatsappLink = (message: string = SITE_INFO.whatsappGreeting): string | null => {

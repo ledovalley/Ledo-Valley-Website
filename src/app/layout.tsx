@@ -15,10 +15,10 @@ import { SpeedInsights } from "@vercel/speed-insights/next"
 import InitialLoader from "@/components/layout/InitialLoader";
 import ServerWakingUpOverlay from "@/components/layout/ServerWakingUpOverlay";
 import Image from "next/image";
-import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Suspense } from "react";
 import RouteTracker from "@/components/layout/RouteTracker";
 import WhatsAppButton from "@/components/layout/WhatsAppButton";
+import { getPublicData } from "@/lib/serverData";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,6 +28,8 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  // Only used for a few codes (AWB, coupon codes): don't make every page wait for it.
+  preload: false,
 });
 
 const playfair = Playfair_Display({
@@ -104,13 +106,26 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Top banner messages come with the page (cached), so the bar doesn't
+  // appear late and push everything down.
+  const topBanners = await getPublicData<unknown[]>("/customer/top-banner/banner", 300);
+
   return (
-    <html lang="en-IN">
+    <html lang="en-IN" suppressHydrationWarning>
+      <head>
+        {/* Show the splash only on the first page of a visit (runs before anything is drawn). */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{var k='lv_initial_loaded';if(sessionStorage.getItem(k)){document.documentElement.classList.add('lv-seen')}else{sessionStorage.setItem(k,'1')}}catch(e){}",
+          }}
+        />
+      </head>
       <body
         className={`
           ${geistSans.variable}
@@ -135,7 +150,6 @@ export default function RootLayout({
           )}
         <SpeedInsights />
         <Analytics />
-        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
           <AuthProvider>
           <InitialLoader>
             <CartProvider>
@@ -155,7 +169,7 @@ export default function RootLayout({
                   </noscript>
                 )}
 
-                <AppShell>{children}</AppShell>
+                <AppShell topBanners={Array.isArray(topBanners) ? topBanners : undefined}>{children}</AppShell>
                 <Suspense fallback={null}>
                   <RouteTracker />
                 </Suspense>
@@ -165,7 +179,6 @@ export default function RootLayout({
             </CartProvider>
           </InitialLoader>
         </AuthProvider>
-        </GoogleOAuthProvider>
       </body>
     </html>
   );

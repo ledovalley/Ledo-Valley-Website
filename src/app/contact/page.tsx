@@ -49,11 +49,9 @@ export default function ContactUsPage() {
                 message: "",
             });
         } catch (err: unknown) {
-            if (err instanceof Error) {
-                setError(err.message);
-            } else {
-                setError("Something went wrong");
-            }
+            // Show the server's reason (e.g. "Full name required"), not "Request failed with status code 400".
+            const serverMessage = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+            setError(serverMessage || "Couldn't send your message. Please try again, or call or WhatsApp us.");
         } finally {
             setLoading(false);
         }
@@ -97,6 +95,7 @@ export default function ContactUsPage() {
                                 name="fullName"
                                 value={formData.fullName}
                                 onChange={handleChange}
+                                required
                             />
                             <Input
                                 label="Company Name"

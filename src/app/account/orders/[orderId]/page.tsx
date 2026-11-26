@@ -7,9 +7,14 @@ import Image from "next/image";
 import { toast } from "sonner";
 import { PAYU_URL } from "@/lib/constants";
 import ShipmentCard from "@/components/orders/ShipmentCard";
+import { SITE_INFO, qualityIssueMailto } from "@/lib/siteInfo";
+import BuyAgainButton, { canBuyAgain } from "@/components/orders/BuyAgainButton";
 import type { ShipmentInfo } from "@/lib/tracking";
+import DeliveryTimeline from "@/components/orders/DeliveryTimeline";
 
 interface OrderItem {
+    productId: string;
+    variantId: string;
     productName: string;
     weight?: {
         value: number;
@@ -46,6 +51,7 @@ interface Order {
     payment: {
         status: string;
         retryCount?: number;
+        paidAt?: string;
     };
     shipping?: ShipmentInfo | null;
 }
@@ -204,6 +210,7 @@ export default function OrderDetailsPage() {
             case "PAYMENT_FAILED":
                 return "bg-red-100 text-red-600";
             case "CANCELLED":
+            case "RETURNED":
                 return "bg-gray-200 text-gray-700";
             default:
                 return "bg-yellow-100 text-yellow-700";
@@ -235,7 +242,7 @@ export default function OrderDetailsPage() {
                 <span
                     className={`px-4 py-1 w-fit text-sm font-medium rounded-full ${getStatusStyle()}`}
                 >
-                    {order.status.replaceAll("_", " ")}
+                    {order.status === "RETURNED" ? "RETURNED (NOT DELIVERED)" : order.status.replaceAll("_", " ")}
                 </span>
             </div>
 
@@ -291,8 +298,39 @@ export default function OrderDetailsPage() {
                 </div>
             </div>
 
+            {order.status === "RETURNED" && (
+                <div className="p-5 text-sm text-gray-700 border bg-bg-surface/80 border-border-muted/30 rounded-3xl">
+                    This parcel wasn&apos;t accepted at delivery and has come back to us.
+                    {order.payment?.status === "REFUNDED"
+                        ? " Your refund has been sent; it usually reaches your account in 5–7 working days."
+                        : " If you have any questions, please contact us."}
+                </div>
+            )}
+
             {/* ================= DELIVERY / TRACKING ================= */}
+            <DeliveryTimeline
+                status={order.status}
+                createdAt={order.createdAt}
+                paidAt={order.payment?.paidAt}
+                shipping={order.shipping}
+            />
             <ShipmentCard status={order.status} shipping={order.shipping} />
+
+            {/* ================= QUALITY ISSUE ================= */}
+            {order.status === "DELIVERED" && (
+                <div className="flex flex-col gap-3 p-5 border sm:flex-row sm:items-center sm:justify-between bg-bg-surface/80 rounded-3xl border-border-muted/30">
+                    <p className="text-sm text-gray-600">
+                        <span className="font-medium text-text-primary">Problem with quality?</span>{" "}
+                        Email us within {SITE_INFO.returnWindow} of delivery with photos. We don&apos;t accept returns otherwise.
+                    </p>
+                    <a
+                        href={qualityIssueMailto(order.orderNumber)}
+                        className="inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium border rounded-full shrink-0 border-border hover:bg-black/5"
+                    >
+                        Email {SITE_INFO.returnsEmail}
+                    </a>
+                </div>
+            )}
 
             {/* ================= MAIN GRID ================= */}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 sm:gap-8">
@@ -410,7 +448,7 @@ export default function OrderDetailsPage() {
 
                         <div className="flex justify-between text-sm">
                             <span>GST included</span>
-                            <span>₹{order.gstAmount}</span>
+                            <span>₹{Number(order.gstAmount).toFixed(2)}</span>
                         </div>
 
                         <div className="flex justify-between text-sm">
@@ -426,6 +464,10 @@ export default function OrderDetailsPage() {
 
                     {/* ACTIONS */}
                     <div className="space-y-4">
+
+                        {canBuyAgain(order.status, order.items) && (
+                            <BuyAgainButton items={order.items} className="w-full py-3" />
+                        )}
 
                         {isRetryAllowed() && (
                             <button
@@ -445,7 +487,8 @@ export default function OrderDetailsPage() {
                             </div>
                         )}
 
-                        {!["SHIPPED", "DELIVERED", "CANCELLED"].includes(order.status)
+                        {/* Only these can be cancelled (the server refuses the rest). */}
+                        {["PLACED", "PAYMENT_PENDING", "PAYMENT_SUCCESS"].includes(order.status)
                             && (
                                 <button
                                     onClick={handleCancel}
