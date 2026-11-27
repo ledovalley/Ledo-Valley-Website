@@ -8,6 +8,7 @@ import { useUI } from "@/context/UIContext";
 import ProductImages from "@/components/products/ProductImages";
 import ProductInfo from "@/components/products/ProductInfo";
 import ProductReviews from "@/components/products/ProductReviews";
+import FrequentlyBoughtTogether from "@/components/products/FrequentlyBoughtTogether";
 import { AxiosError } from "axios";
 
 import { Product } from "@/types/product-api";
@@ -154,6 +155,14 @@ export default function ProductPageClient({ product: initialProduct }: { product
           />
           <DeliveryCheck />
         </div>
+      </div>
+
+      {/* ================= FREQUENTLY BOUGHT TOGETHER ================= */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <FrequentlyBoughtTogether
+          currentProduct={product}
+          selectedVariantId={selectedVariantId}
+        />
       </div>
 
       {/* ================= REVIEWS ================= */}

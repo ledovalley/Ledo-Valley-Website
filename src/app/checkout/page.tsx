@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { AxiosError } from "axios";
 import CheckoutAddressForm from "@/components/checkout/CheckoutAddressForm";
 import CheckoutEmailVerificationModal from "@/components/checkout/CheckoutEmailVerificationModal";
+import FreeShippingBar from "@/components/cart/FreeShippingBar";
 import Image from "next/image";
 import { Trash2Icon } from "lucide-react";
 
@@ -554,7 +555,9 @@ export default function CheckoutPage() {
             </div>
 
             {/* ================= ORDER ITEMS ================= */}
-            <div>
+            <div className="space-y-4">
+              <FreeShippingBar itemsTotal={itemsTotal} />
+
               <h2 className="text-xl font-semibold mb-4">
                 Order Items
               </h2>
