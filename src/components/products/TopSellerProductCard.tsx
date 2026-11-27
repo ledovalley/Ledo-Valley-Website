@@ -5,6 +5,7 @@ import Link from "next/link";
 import clsx from "clsx";
 import { useCart } from "@/context/CartContext";
 import { useState } from "react";
+import { trackAddToCart } from "@/lib/gtm";
 
 /* ================= TYPES ================= */
 
@@ -127,6 +128,12 @@ export default function ProductCard({
         quantity: 1,
         priceAtAdd: variant.finalPrice,
       });
+
+      trackAddToCart({
+        id: productId,
+        name,
+        price: variant.finalPrice,
+      }, 1);
     } finally {
       setAdding(false);
     }

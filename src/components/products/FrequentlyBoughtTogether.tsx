@@ -7,6 +7,7 @@ import { Plus, Check, Loader2, Sparkles, ShoppingBag } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { Product, Variant } from "@/types/product-api";
 import { toast } from "sonner";
+import { trackEcommerce } from "@/lib/gtm";
 
 interface FBTItem {
   productId: string;
@@ -203,6 +204,28 @@ export default function FrequentlyBoughtTogether({
       const { added, failed } = await addManyToCart(itemsToAdd);
 
       if (added > 0) {
+        // Fire GA4 / GTM add_to_cart ecommerce event for all added bundle items
+        const failedIds = new Set(failed.map((f) => f.name));
+        const successfullyAdded = selectedItems.filter(
+          (item) => !failedIds.has(`${item.name} (${item.weightLabel})`)
+        );
+
+        if (successfullyAdded.length > 0) {
+          trackEcommerce("add_to_cart", {
+            currency: "INR",
+            value: successfullyAdded.reduce((sum, item) => sum + item.price, 0),
+            items: successfullyAdded.map((item) => ({
+              item_id: item.productId,
+              item_name: item.name,
+              price: item.price,
+              item_variant: item.weightLabel,
+              item_brand: "Ledo Valley",
+              item_category: "Tea",
+              quantity: 1,
+            })),
+          });
+        }
+
         toast.success(
           `Added ${added} item${added > 1 ? "s" : ""} to your cart!`
         );

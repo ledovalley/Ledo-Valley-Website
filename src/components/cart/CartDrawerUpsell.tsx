@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { Plus, Loader2 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { trackAddToCart } from "@/lib/gtm";
 
 interface UpsellProduct {
   _id: string;
@@ -112,6 +113,12 @@ export default function CartDrawerUpsell() {
         quantity: 1,
         priceAtAdd: recommendation.price,
       });
+
+      trackAddToCart({
+        id: recommendation._id,
+        name: recommendation.name,
+        price: recommendation.price,
+      }, 1);
     } catch {
       // handled
     } finally {
