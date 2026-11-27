@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getCustomerToken, logoutCustomer } from "./customerAuth";
+import { getCustomerToken, endCustomerSession } from "./customerAuth";
 import { toast } from "sonner";
 
 // Since we need to access UI state, we'll store a reference to the setter
@@ -82,8 +82,12 @@ api.interceptors.response.use(
       setIsServerWakingUp?.(false);
     }
 
-    if (error.response?.status === 401) {
-      logoutCustomer();
+    // A request made with a login was refused: the login has expired.
+    // (Not for wrong passwords or codes on the login screens themselves.)
+    const sentLogin = !!error.config?.headers?.Authorization;
+    const loginScreen = /\/auth\//.test(String(error.config?.url || ""));
+    if (error.response?.status === 401 && sentLogin && !loginScreen) {
+      endCustomerSession();
     }
 
     // Global Error Toasts

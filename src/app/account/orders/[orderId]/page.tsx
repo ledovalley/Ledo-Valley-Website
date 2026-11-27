@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { customerStatusClass, customerStatusLabel } from "@/lib/orderStatus";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import api from "@/lib/api";
@@ -64,6 +66,8 @@ export default function OrderDetailsPage() {
     const [loading, setLoading] = useState(true);
     const [retryLoading, setRetryLoading] = useState(false);
     const [cancelLoading, setCancelLoading] = useState(false);
+    const [confirmCancel, setConfirmCancel] = useState(false);
+    const [invoiceLoading, setInvoiceLoading] = useState(false);
 
     useEffect(() => {
         const fetchOrder = async () => {
@@ -86,18 +90,19 @@ export default function OrderDetailsPage() {
         if (!order || cancelLoading) return;
         try {
             setCancelLoading(true);
-            await api.patch(`/customer/orders/${order._id}/cancel`);
-            setOrder({ 
-                ...order, 
-                status: "CANCELLED",
-                payment: {
-                    ...order.payment,
-                    status: order.payment.status === "PENDING" ? "FAILED" : order.payment.status
-                }
-            });
-            toast.success("Order cancelled successfully");
+            const res = await api.patch(`/customer/orders/${order._id}/cancel`);
+            // Reload: the refund (paid orders) changes the payment status too.
+            try {
+                const fresh = await api.get<Order>(`/customer/orders/${order._id}`);
+                setOrder(fresh.data);
+            } catch {
+                setOrder({ ...order, status: "CANCELLED" });
+            }
+            setConfirmCancel(false);
+            toast.success(res.data?.message || "Order cancelled.", { duration: 8000 });
         } catch (error: any) {
             toast.error(error.response?.data?.message || error.message || "Failed to cancel order");
+            setConfirmCancel(false);
         } finally {
             setCancelLoading(false);
         }
@@ -162,9 +167,10 @@ export default function OrderDetailsPage() {
     };
 
     const handleDownloadInvoice = async () => {
-        if (!order) return;
+        if (!order || invoiceLoading) return;
 
         try {
+            setInvoiceLoading(true);
             const res = await api.get(
                 `/customer/orders/${order._id}/invoice`,
                 { responseType: "blob" }
@@ -180,6 +186,8 @@ export default function OrderDetailsPage() {
             window.URL.revokeObjectURL(url);
         } catch {
             toast.error("Failed to download invoice");
+        } finally {
+            setInvoiceLoading(false);
         }
     };
 
@@ -201,21 +209,7 @@ export default function OrderDetailsPage() {
 
     /* ================= STATUS COLORS ================= */
 
-    const getStatusStyle = () => {
-        switch (order.status) {
-            case "DELIVERED":
-                return "bg-green-100 text-green-700";
-            case "SHIPPED":
-                return "bg-blue-100 text-blue-700";
-            case "PAYMENT_FAILED":
-                return "bg-red-100 text-red-600";
-            case "CANCELLED":
-            case "RETURNED":
-                return "bg-gray-200 text-gray-700";
-            default:
-                return "bg-yellow-100 text-yellow-700";
-        }
-    };
+    const getStatusStyle = () => customerStatusClass(order.status);
 
     return (
         <div className="pt-3 space-y-6">
@@ -242,7 +236,7 @@ export default function OrderDetailsPage() {
                 <span
                     className={`px-4 py-1 w-fit text-sm font-medium rounded-full ${getStatusStyle()}`}
                 >
-                    {order.status === "RETURNED" ? "RETURNED (NOT DELIVERED)" : order.status.replaceAll("_", " ")}
+                    {customerStatusLabel(order.status)}
                 </span>
             </div>
 
@@ -481,9 +475,11 @@ export default function OrderDetailsPage() {
 
                         {order.status === "PAYMENT_FAILED" && !isRetryAllowed() && (
                             <div className="text-sm text-center text-red-500">
-                                { (order.payment?.retryCount || 0) >= 3 
-                                    ? "Maximum retry attempts reached (3)" 
-                                    : "Retry window expired (3 days)" }
+                                {(order.payment?.retryCount || 0) >= 1
+                                    ? "This order can't be paid again (one retry is allowed). "
+                                    : "The 3 days to pay for this order have passed. "}
+                                Your teas are still in your cart:{" "}
+                                <Link href="/checkout" className="underline">place a new order</Link>.
                             </div>
                         )}
 
@@ -491,11 +487,10 @@ export default function OrderDetailsPage() {
                         {["PLACED", "PAYMENT_PENDING", "PAYMENT_SUCCESS"].includes(order.status)
                             && (
                                 <button
-                                    onClick={handleCancel}
+                                    onClick={() => setConfirmCancel(true)}
                                     disabled={cancelLoading}
                                     className="flex items-center justify-center w-full gap-2 py-3 rounded-full cursor-pointer bg-bg-dark text-text-on-dark disabled:opacity-50"
                                 >
-                                    {cancelLoading && <div className="w-4 h-4 border-2 border-white rounded-full animate-spin border-t-transparent"></div>}
                                     Cancel Order
                                 </button>
                             )}
@@ -503,14 +498,58 @@ export default function OrderDetailsPage() {
                         {order.payment.status === "SUCCESS" && (
                             <button
                                 onClick={handleDownloadInvoice}
-                                className="w-full py-3 text-center border rounded-full"
+                                disabled={invoiceLoading}
+                                className="flex items-center justify-center w-full gap-2 py-3 text-center border rounded-full cursor-pointer disabled:cursor-wait disabled:opacity-70"
                             >
-                                Download Invoice
+                                {invoiceLoading && <div className="w-4 h-4 border-2 rounded-full animate-spin border-bg-dark border-t-transparent"></div>}
+                                {invoiceLoading ? "Preparing invoice…" : "Download Invoice"}
                             </button>
                         )}
                     </div>
                 </div>
-            </div>
+                        </div>
+
+            {/* ================= CANCEL CONFIRMATION ================= */}
+            {confirmCancel && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40"
+                    onClick={() => !cancelLoading && setConfirmCancel(false)}
+                >
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="cancel-title"
+                        onClick={(e) => e.stopPropagation()}
+                        className="w-full max-w-md p-6 bg-white shadow-xl rounded-3xl"
+                    >
+                        <h2 id="cancel-title" className="text-lg font-semibold text-text-primary">
+                            Cancel order #{order.orderNumber}?
+                        </h2>
+                        <p className="mt-2 text-sm text-gray-600">
+                            {order.payment.status === "SUCCESS"
+                                ? `You'll get a full refund of ₹${Number(order.grandTotal).toFixed(2)} to your original payment method, automatically. It usually reaches your account in 5–7 working days.`
+                                : "Your order will be cancelled. This can't be undone."}
+                        </p>
+                        <div className="flex flex-col-reverse gap-2 mt-6 sm:flex-row sm:justify-end">
+                            <button
+                                onClick={() => setConfirmCancel(false)}
+                                disabled={cancelLoading}
+                                className="px-5 py-2.5 text-sm font-medium border rounded-full cursor-pointer disabled:opacity-50"
+                            >
+                                Keep my order
+                            </button>
+                            <button
+                                onClick={handleCancel}
+                                disabled={cancelLoading}
+                                className="flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-red-600 rounded-full cursor-pointer hover:bg-red-700 disabled:opacity-60"
+                            >
+                                {cancelLoading && <div className="w-4 h-4 border-2 border-white rounded-full animate-spin border-t-transparent"></div>}
+                                {cancelLoading ? "Cancelling…" : "Yes, cancel order"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

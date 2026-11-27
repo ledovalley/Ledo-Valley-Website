@@ -199,6 +199,12 @@ export default function FrequentlyBoughtTogether({
         variantId: item.variantId,
         quantity: 1,
         name: `${item.name} (${item.weightLabel})`,
+        // Needed to add to the cart of a visitor who isn't logged in.
+        cartName: item.name,
+        slug: item.slug,
+        image: item.image,
+        weightLabel: item.weightLabel,
+        priceAtAdd: item.price,
       }));
 
       const { added, failed } = await addManyToCart(itemsToAdd);

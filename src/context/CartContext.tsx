@@ -50,12 +50,24 @@ export interface AddManyResult {
   failed: { name: string; reason: string }[];
 }
 
+/* For several teas at once. The display details (slug, image, pack, price) are
+   needed when the visitor isn't logged in, as their cart lives in this browser. */
+type AddManyItem = {
+  productId: string;
+  variantId: string;
+  quantity: number;
+  name: string; // for messages, e.g. "Green Tea (100g)"
+  cartName?: string; // as shown in the cart, e.g. "Green Tea" (defaults to name)
+  slug?: string;
+  image?: string;
+  weightLabel?: string;
+  priceAtAdd?: number;
+};
+
 interface CartContextType {
   cart: CartItem[];
   addToCart: (item: CartItem) => Promise<void>;
-  addManyToCart: (
-    items: { productId: string; variantId: string; quantity: number; name: string }[]
-  ) => Promise<AddManyResult>;
+  addManyToCart: (items: AddManyItem[]) => Promise<AddManyResult>;
   removeFromCart: (
     productId: string,
     variantId: string
@@ -117,6 +129,9 @@ export function CartProvider({
   };
 
   /* ================= LOAD USER CART ================= */
+
+  /* Pending quantity saves (logged in), one per cart line; see updateQuantity. */
+  const qtyTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   const loadUserCart = useCallback(async () => {
     if (!token) return;
@@ -264,13 +279,37 @@ export function CartProvider({
   /* ================= ADD SEVERAL (Buy again) =================
      Adds each item through the server, which checks it's still on sale and
      in stock, then reloads the cart once. No toast per item: the caller
-     shows one summary. Logged-in customers only (orders need an account). */
-  const addManyToCart = async (
-    items: { productId: string; variantId: string; quantity: number; name: string }[]
-  ): Promise<AddManyResult> => {
+     shows one summary. Visitors who aren't logged in: added to the cart kept
+     in this browser (checked against stock when they log in at checkout),
+     as long as the caller gave the display details. */
+  const addManyToCart = async (items: AddManyItem[]): Promise<AddManyResult> => {
     const result: AddManyResult = { added: 0, failed: [] };
     if (!isLoggedIn || !token) {
-      result.failed = items.map((i) => ({ name: i.name, reason: "Please log in" }));
+      let next = readGuestCart();
+      for (const i of items) {
+        if (!i.slug || i.priceAtAdd === undefined) {
+          result.failed.push({ name: i.name, reason: "Please log in" });
+          continue;
+        }
+        const existing = next.find((c) => c.productId === i.productId && c.variantId === i.variantId);
+        next = existing
+          ? next.map((c) => (c === existing ? { ...c, quantity: Math.min(50, c.quantity + i.quantity) } : c))
+          : [
+              ...next,
+              {
+                productId: i.productId,
+                variantId: i.variantId,
+                name: i.cartName || i.name,
+                slug: i.slug,
+                image: i.image || "",
+                weightLabel: i.weightLabel || "",
+                quantity: i.quantity,
+                priceAtAdd: i.priceAtAdd,
+              },
+            ];
+        result.added += 1;
+      }
+      if (result.added) setGuestCart(next);
       return result;
     }
 
@@ -318,17 +357,32 @@ export function CartProvider({
       return;
     }
 
-    try {
-      await api.put(
-        `/customer/cart/${productId}/${variantId}`,
-        { quantity },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      await loadUserCart();
-    } catch (error) {
-      console.error("Failed to update quantity", error);
-    }
+    // Logged in: change the number on screen straight away, and save it to
+    // the server once the customer stops tapping (0.4 s), so + / − feel as
+    // quick as before logging in. If the server refuses (e.g. not enough
+    // stock), the cart is reloaded from the server and the reason shown.
+    setCart((prev) =>
+      prev.map((c) =>
+        c.productId === productId && c.variantId === variantId ? { ...c, quantity } : c
+      )
+    );
+    const key = `${productId}:${variantId}`;
+    clearTimeout(qtyTimers.current[key]);
+    qtyTimers.current[key] = setTimeout(async () => {
+      delete qtyTimers.current[key];
+      try {
+        await api.put(
+          `/customer/cart/${productId}/${variantId}`,
+          { quantity },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      } catch (error) {
+        console.error("Failed to update quantity", error);
+        const msg = (error as AxiosError<{ message?: string }>)?.response?.data?.message;
+        toast.error(msg === "Insufficient stock" ? "Not enough stock for that many." : msg || "Couldn't update the cart. Please try again.");
+        await loadUserCart();
+      }
+    }, 400);
   };
 
   /* ================= REMOVE ================= */
@@ -346,15 +400,20 @@ export function CartProvider({
       return;
     }
 
+    // Remove from the screen straight away; put it back if the server refuses.
+    const key = `${productId}:${variantId}`;
+    clearTimeout(qtyTimers.current[key]);
+    delete qtyTimers.current[key];
+    setCart((prev) => prev.filter((c) => !(c.productId === productId && c.variantId === variantId)));
     try {
       await api.delete(
         `/customer/cart/${productId}/${variantId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      await loadUserCart();
     } catch (error) {
       console.error("Failed to remove item", error);
+      toast.error("Couldn't remove it. Please try again.");
+      await loadUserCart();
     }
   };
 

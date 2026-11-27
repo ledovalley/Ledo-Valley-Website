@@ -6,7 +6,10 @@ import {
   useState,
   useCallback,
   useEffect,
+  useRef,
 } from "react";
+import { toast } from "sonner";
+import { SESSION_EXPIRED_EVENT, tokenExpired } from "@/lib/customerAuth";
 
 /* ================= TYPES ================= */
 
@@ -66,12 +69,34 @@ export function AuthProvider({
 
   useEffect(() => {
     try {
-      setToken(getStoredToken());
-      setCustomer(getStoredCustomer());
+      const saved = getStoredToken();
+      if (tokenExpired(saved)) {
+        // An old login from a previous visit: start logged out.
+        localStorage.removeItem("customerToken");
+        localStorage.removeItem("customer");
+      } else {
+        setToken(saved);
+        setCustomer(getStoredCustomer());
+      }
     } catch {
       // storage unavailable: treat as logged out
     }
     setAuthReady(true);
+  }, []);
+
+  /* The server refused the login (expired): show the visitor as logged out. */
+  const tokenRef = useRef<string | null>(null);
+  tokenRef.current = token;
+  useEffect(() => {
+    const onExpired = () => {
+      if (!tokenRef.current) return; // already logged out (several requests can fail at once)
+      tokenRef.current = null;
+      setToken(null);
+      setCustomer(null);
+      toast.info("Your login has expired. Please log in again.");
+    };
+    window.addEventListener(SESSION_EXPIRED_EVENT, onExpired);
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, onExpired);
   }, []);
 
   const isLoggedIn = !!token;

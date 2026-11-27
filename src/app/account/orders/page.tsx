@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { PAYU_URL } from "@/lib/constants";
 import { shipmentTrackingUrl } from "@/lib/tracking";
 import BuyAgainButton, { canBuyAgain } from "@/components/orders/BuyAgainButton";
+import { customerStatusClass, customerStatusLabel } from "@/lib/orderStatus";
 
 interface Weight {
   value: number;
@@ -182,14 +183,13 @@ export default function OrdersPage() {
       case "CANCELLED":
         return {
           label: "Cancelled",
-          className: "border border-neutral-200 bg-neutral-100 text-neutral-700",
+          className: customerStatusClass(status),
           icon: XCircle,
         };
       default:
         return {
-          label: status.replaceAll("_", " "),
-          className:
-            "border border-amber-200 bg-amber-50 text-amber-700",
+          label: customerStatusLabel(status),
+          className: customerStatusClass(status),
           icon: Clock3,
         };
     }

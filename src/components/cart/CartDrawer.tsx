@@ -1,11 +1,11 @@
 "use client";
 
-import { X, Trash2, Minus, Plus } from "lucide-react";
+import { X, Trash2, Minus, Plus, Loader2 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { useUI } from "@/context/UIContext";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import clsx from "clsx";
@@ -45,6 +45,23 @@ export default function CartDrawer({
     }
   }, [open]);
 
+  // Load the checkout page in the background as soon as the cart opens, so
+  // "Proceed to Checkout" opens it without a wait.
+  useEffect(() => {
+    if (open && isLoggedIn && cart.length > 0) router.prefetch("/checkout");
+  }, [open, isLoggedIn, cart.length, router]);
+
+  // After "Proceed to Checkout": the button shows "Opening checkout…" and the
+  // cart stays open until the checkout page is actually on screen.
+  const pathname = usePathname();
+  const [goingToCheckout, setGoingToCheckout] = useState(false);
+  useEffect(() => {
+    if (goingToCheckout && pathname?.startsWith("/checkout")) {
+      setGoingToCheckout(false);
+      onClose();
+    }
+  }, [pathname, goingToCheckout, onClose]);
+
   if (!open) return null;
 
   /* ================= CHECKOUT ================= */
@@ -60,7 +77,11 @@ export default function CartDrawer({
       return;
     }
 
-    onClose();
+    if (pathname?.startsWith("/checkout")) {
+      onClose();
+      return;
+    }
+    setGoingToCheckout(true);
     router.push("/checkout");
   };
 
@@ -294,11 +315,15 @@ export default function CartDrawer({
 
               <button
                 onClick={handleCheckout}
-                className="w-full py-3.5 cursor-pointer rounded-full bg-bg-dark text-white font-medium hover:bg-bg-dark/90 active:scale-98 transition shadow-sm text-sm"
+                disabled={goingToCheckout}
+                className="w-full py-3.5 cursor-pointer rounded-full bg-bg-dark text-white font-medium hover:bg-bg-dark/90 active:scale-98 transition shadow-sm text-sm inline-flex items-center justify-center gap-2 disabled:cursor-wait disabled:opacity-80"
               >
-                {isLoggedIn
-                  ? "Proceed to Checkout"
-                  : "Login to Checkout"}
+                {goingToCheckout && <Loader2 className="h-4 w-4 animate-spin" />}
+                {goingToCheckout
+                  ? "Opening checkout…"
+                  : isLoggedIn
+                    ? "Proceed to Checkout"
+                    : "Login to Checkout"}
               </button>
 
               <button

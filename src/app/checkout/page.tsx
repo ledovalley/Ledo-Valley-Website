@@ -524,7 +524,7 @@ export default function CheckoutPage() {
                               )}
                             </p>
                             <p className="text-xs text-gray-400">
-                              Min order ₹{coupon.minOrderAmount}
+                              {coupon.minOrderAmount > 0 ? `Item total ₹${coupon.minOrderAmount} or more` : "No minimum"}
                               {coupon.firstOrderOnly && " · First order only"}
                               {coupon.onePerCustomer && " · Once per customer"}
                             </p>
@@ -816,6 +816,10 @@ export default function CheckoutPage() {
                   "Place Order"
                 )}
               </button>
+              <p className="mt-3 text-xs text-center text-gray-500">
+                You can cancel from My Orders until your order is booked with the courier
+                (usually within one working day). Paid orders are refunded in full, automatically.
+              </p>
             </div>
           </div>
         </div>

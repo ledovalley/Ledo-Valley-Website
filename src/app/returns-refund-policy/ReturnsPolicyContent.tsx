@@ -159,6 +159,23 @@ export default function ReturnsPolicyContent() {
             </p>
           </div>
 
+          {/* CANCELLATIONS */}
+          <div>
+            <h2 className="text-xl md:text-2xl font-semibold font-playfair text-text-primary">
+              6. Cancelling an Order
+            </h2>
+
+            <p className="mt-4">
+              You can cancel an order yourself from <strong>My Orders</strong> until it has been
+              booked with the courier (usually within one working day of ordering). Once the
+              courier has been booked, the order can&apos;t be cancelled.
+            </p>
+            <p className="mt-4">
+              If you have already paid, you get a <strong>full refund automatically</strong> to your
+              original payment method. It usually reaches your account within 5–7 working days.
+            </p>
+          </div>
+
           {/* IMPORTANT NOTE */}
           <div className="bg-muted/40 border border-border rounded-2xl p-6">
             <p className="text-sm md:text-base">

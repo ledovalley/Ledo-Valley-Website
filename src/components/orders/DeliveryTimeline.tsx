@@ -53,9 +53,11 @@ export default function DeliveryTimeline({ status, createdAt, paidAt, shipping }
   const steps = [
     { label: "Order placed", at: createdAt, done: true },
     { label: "Payment confirmed", at: paidAt || null, done: true },
+    // Paid: being packed. Pickup booked (Shiprocket): packed, waiting for the courier.
+    { label: "Being packed", at: null, done: status !== "PAYMENT_SUCCESS" },
     ...(manual
       ? []
-      : [{ label: "Packed, waiting for the courier", at: shipping?.pickupScheduledAt || null, done: status !== "PAYMENT_SUCCESS" }]),
+      : [{ label: "Packed, waiting for the courier", at: shipping?.pickupScheduledAt || null, done: shipped }]),
     {
       label: shipping?.courierName ? `Shipped with ${shipping.courierName}` : "Shipped",
       at: shipping?.shippedAt || findEvent("PICKED_UP", "SHIPPED", "IN_TRANSIT"),
